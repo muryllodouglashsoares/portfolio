@@ -1,0 +1,20 @@
+[
+  {
+    "id": "software-freedom-day",
+    "title": "Software Freedom Day 2025",
+    "issuer": "IFPB Campus Itaporanga",
+    "date": "20/09/2025",
+    "hours": "7 horas",
+    "description": "Participação no Dia Internacional da Liberdade de Software, evento realizado em Itaporanga-PB.",
+    "image": "assets/images/certificates/software-freedom-day.jpg"
+  },
+  {
+    "id": "obi-2025",
+    "title": "XXVII Olimpíada Brasileira de Informática (OBI 2025)",
+    "issuer": "Sociedade Brasileira de Computação (SBC)",
+    "date": "2025",
+    "hours": "",
+    "description": "Participação na OBI 2025, modalidade Programação, Nível 1.",
+    "image": "assets/images/certificates/obi-2025.jpg"
+  }
+]
