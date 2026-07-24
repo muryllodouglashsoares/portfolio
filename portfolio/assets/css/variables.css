@@ -1,0 +1,65 @@
+:root {
+  /* Surfaces */
+  --bg: #070a14;
+  --bg-alt: #0b0f1e;
+  --panel: #10162a;
+  --panel-alt: #141b34;
+  --panel-hover: #182042;
+  --border: rgba(148, 163, 255, 0.12);
+  --border-strong: rgba(148, 163, 255, 0.24);
+
+  /* Text */
+  --text: #eef1fb;
+  --text-muted: #97a0c3;
+  --text-dim: #616a8c;
+
+  /* Accents */
+  --blue: #4f7dfd;
+  --blue-bright: #7aa2ff;
+  --blue-soft: rgba(79, 125, 253, 0.14);
+  --purple: #9b6bff;
+  --purple-bright: #b794ff;
+  --purple-soft: rgba(155, 107, 255, 0.14);
+  --cyan: #52e8c8;
+  --cyan-soft: rgba(82, 232, 200, 0.14);
+
+  /* Gradients */
+  --grad-primary: linear-gradient(135deg, var(--blue) 0%, var(--purple) 100%);
+  --grad-trace: linear-gradient(90deg, transparent, var(--blue), var(--purple), transparent);
+
+  /* Typography */
+  --font-display: "Space Grotesk", "Segoe UI", sans-serif;
+  --font-body: "Inter", "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", "Courier New", monospace;
+
+  --fs-hero: clamp(2.6rem, 6vw, 5rem);
+  --fs-h1: clamp(2rem, 4vw, 3rem);
+  --fs-h2: clamp(1.5rem, 3vw, 2rem);
+  --fs-h3: 1.15rem;
+  --fs-body: 1rem;
+  --fs-small: 0.875rem;
+  --fs-mono: 0.8rem;
+
+  /* Spacing */
+  --space-xs: 0.5rem;
+  --space-sm: 1rem;
+  --space-md: 2rem;
+  --space-lg: 4rem;
+  --space-xl: 7rem;
+
+  /* Layout */
+  --max-width: 1180px;
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 22px;
+
+  /* Motion */
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-fast: 0.2s;
+  --dur-med: 0.5s;
+  --dur-slow: 0.9s;
+}
+
+@media (prefers-color-scheme: light) {
+  /* Site is intentionally dark-only per design brief; kept for future toggle */
+}
