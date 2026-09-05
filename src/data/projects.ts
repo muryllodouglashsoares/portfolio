@@ -1,10 +1,8 @@
+import miniOlimpiadaRobotica from "@/assets/mini-olimpiada-robotica.jpg";
+
 export type ProjectStatus = "in-progress" | "completed" | "experimental";
 
-export type ProjectCategory =
-  | "Web"
-  | "Plataformas"
-  | "Robótica"
-  | "Acadêmicos";
+export type ProjectCategory = "Web" | "Plataformas" | "Robótica" | "Acadêmicos";
 
 export interface ProjectSection {
   heading: string;
@@ -142,13 +140,7 @@ export const projects: Project[] = [
       "Sistema de badges e conquistas",
       "Cargos (aluno, professor, administrador) com permissões distintas e painel de moderação",
     ],
-    technologies: [
-      "JavaScript",
-      "HTML",
-      "CSS",
-      "Firebase Auth",
-      "Realtime Database",
-    ],
+    technologies: ["JavaScript", "HTML", "CSS", "Firebase Auth", "Realtime Database"],
     categories: ["Plataformas", "Web", "Acadêmicos"],
     githubUrl: "https://github.com/muryllodouglashsoares/IFConnect",
     image: raw("IFConnect", "screenshots/Captura%20de%20Tela%20(206).png"),
@@ -208,8 +200,7 @@ export const projects: Project[] = [
     ],
     categories: ["Web"],
     githubUrl: "https://github.com/muryllodouglashsoares/savora-landing-page",
-    demoUrl:
-      "https://savora-landing-page.muryllodouglash-soares.workers.dev/",
+    demoUrl: "https://savora-landing-page.muryllodouglash-soares.workers.dev/",
     image: raw("savora-landing-page", "screenshots/Pagina_principal.png"),
     screenshots: [
       {
@@ -343,9 +334,8 @@ export const projects: Project[] = [
     ],
     technologies: ["LEGO Spike Prime", "Python", "Programação em blocos"],
     categories: ["Robótica", "Acadêmicos"],
-    githubUrl:
-      "https://github.com/muryllodouglashsoares/mini-robotics-competition",
-    image: raw("mini-robotics-competition", "images/Registro_Teste_2.jpeg"),
+    githubUrl: "https://github.com/muryllodouglashsoares/mini-robotics-competition",
+    image: miniOlimpiadaRobotica,
     screenshots: [
       {
         src: raw("mini-robotics-competition", "images/Registro_Iniciacao.jpeg"),
@@ -356,10 +346,7 @@ export const projects: Project[] = [
         caption: "Teste",
       },
       {
-        src: raw(
-          "mini-robotics-competition",
-          "images/Registro_de_Conclus%C3%A3o_da_Prova.jpeg",
-        ),
+        src: raw("mini-robotics-competition", "images/Registro_de_Conclus%C3%A3o_da_Prova.jpeg"),
         caption: "Conclusão da prova",
       },
     ],
@@ -370,26 +357,6 @@ export const projects: Project[] = [
         body: "Programação em blocos e em Python, lógica computacional, robótica educacional, montagem mecânica, uso de sensores, resolução de problemas e trabalho em equipe.",
       },
     ],
-  },
-  {
-    id: "portfolio-vanilla",
-    title: "Portfólio (HTML, CSS e JS)",
-    description:
-      "Primeira versão do meu portfólio, escrita em HTML, CSS e JavaScript puro, sem frameworks nem build step.",
-    longDescription:
-      "Portfólio desenvolvido em HTML5, CSS3 e JavaScript puro para apresentar minha trajetória, meus projetos e minha evolução técnica. Sem bibliotecas e sem etapa de build — todo o comportamento foi escrito à mão.",
-    features: [
-      "Navbar fixa com destaque de seção ativa e menu responsivo",
-      "Projetos e timeline carregados de arquivos JSON, com filtro por categoria",
-      "Scroll reveal e efeito de digitação na hero",
-      "Formulário de contato que abre o cliente de e-mail com a mensagem pronta",
-      "Acessibilidade: HTML semântico, :focus-visible, ARIA e prefers-reduced-motion respeitado",
-      "Deploy automático via GitHub Actions para o GitHub Pages",
-    ],
-    technologies: ["HTML5", "CSS3", "JavaScript", "GitHub Actions"],
-    categories: ["Web"],
-    githubUrl: "https://github.com/muryllodouglashsoares/portfolio",
-    status: "completed",
   },
 ];
 

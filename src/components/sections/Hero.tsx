@@ -1,15 +1,12 @@
 import { ArrowDown, ArrowUpRight } from "lucide-react";
-import heroPhoto from "@/assets/muryllo-hero.jpg.asset.json";
+import heroPhoto from "@/assets/muryllo-hero-photo.jpg";
 import { GITHUB_URL } from "@/data/projects";
 
 const markers = ["IFPB", "DEVELOPMENT", "PROJECTS", "TECHNOLOGY"];
 
 export function Hero() {
   return (
-    <section
-      id="inicio"
-      className="relative overflow-hidden pt-28 pb-16 md:pt-36 md:pb-24"
-    >
+    <section id="inicio" className="relative overflow-hidden pt-28 pb-16 md:pt-36 md:pb-24">
       <div
         aria-hidden="true"
         className="grid-backdrop pointer-events-none absolute inset-0 opacity-60 [mask-image:radial-gradient(75%_60%_at_50%_0%,black,transparent)]"
@@ -21,7 +18,9 @@ export function Hero() {
             <p className="eyebrow flex flex-wrap items-center gap-2">
               <span aria-hidden="true" className="size-1.5 rounded-full bg-primary" />
               Estudante de Informática
-              <span aria-hidden="true" className="text-border-strong">•</span>
+              <span aria-hidden="true" className="text-border-strong">
+                •
+              </span>
               Developer in progress
             </p>
 
@@ -32,17 +31,13 @@ export function Hero() {
               <br />
               <span className="relative inline-block">
                 projetos reais
-                <span
-                  aria-hidden="true"
-                  className="absolute inset-x-0 -bottom-1 h-px bg-primary"
-                />
+                <span aria-hidden="true" className="absolute inset-x-0 -bottom-1 h-px bg-primary" />
               </span>
             </h1>
 
             <p className="mt-7 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-              Sou estudante de Informática e desenvolvedor em formação. Exploro
-              tecnologias, construo projetos e transformo aprendizado em
-              experiência prática.
+              Sou estudante de Informática e desenvolvedor em formação. Exploro tecnologias,
+              construo projetos e transformo aprendizado em experiência prática.
             </p>
 
             <div className="mt-9 flex flex-wrap items-center gap-3">
@@ -87,18 +82,15 @@ export function Hero() {
             </span>
 
             <div className="relative">
-              <div
-                aria-hidden="true"
-                className="absolute -inset-3 border border-border"
-              />
+              <div aria-hidden="true" className="absolute -inset-3 border border-border" />
               <div className="relative aspect-4/5 overflow-hidden bg-surface">
                 <img
-                  src={heroPhoto.url}
+                  src={heroPhoto}
                   alt="Muryllo Douglas"
-                  width={1000}
-                  height={1250}
+                  width={614}
+                  height={768}
                   fetchPriority="high"
-                  className="photo-editorial size-full object-cover object-top"
+                  className="size-full object-cover object-top"
                 />
                 <div
                   aria-hidden="true"
