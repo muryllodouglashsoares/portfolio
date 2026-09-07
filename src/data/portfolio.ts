@@ -10,7 +10,7 @@ export const site = {
   fullName: "Muryllo Douglas",
   role: "Estudante · Desenvolvedor",
   email: "muryllo@email.com",
-  github: "https://github.com/muryllodouglas",
+  github: "https://github.com/muryllodouglashsoares",
   linkedin: "https://linkedin.com/in/muryllodouglas",
   footer: "© 2026 Muryllo Douglas · Estudante, desenvolvedor, construtor.",
 };
