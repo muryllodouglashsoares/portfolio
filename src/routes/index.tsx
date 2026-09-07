@@ -1,21 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { Navbar } from "@/components/Navbar";
-import { Footer } from "@/components/Footer";
-import { Hero } from "@/components/sections/Hero";
-import { About } from "@/components/sections/About";
-import { Building } from "@/components/sections/Building";
-import { Journey } from "@/components/sections/Journey";
-import { FeaturedProject } from "@/components/sections/FeaturedProject";
-import { Projects } from "@/components/sections/Projects";
-import { Technologies } from "@/components/sections/Technologies";
-import { BeyondCode } from "@/components/sections/BeyondCode";
-import { GitHubSection } from "@/components/sections/GitHubSection";
-import { Contact } from "@/components/sections/Contact";
+import { Navbar } from "@/components/portfolio/Navbar";
+import { Hero } from "@/components/portfolio/Hero";
+import { About } from "@/components/portfolio/About";
+import { Stack } from "@/components/portfolio/Stack";
+import { Projects } from "@/components/portfolio/Projects";
+import { Timeline } from "@/components/portfolio/Timeline";
+import { GithubCta } from "@/components/portfolio/GithubCta";
+import { Contact } from "@/components/portfolio/Contact";
+import { Footer } from "@/components/portfolio/Footer";
 
-const title = "Muryllo Douglas — Desenvolvedor em formação | Portfólio";
+const title = "Muryllo Douglas — Estudante e Desenvolvedor Web";
 const description =
-  "Portfólio de Muryllo Douglas, estudante de Informática no IFPB. Projetos reais em React, TypeScript e Firebase: Tekidu, IFConnect, Savora e mais.";
+  "Portfólio de Muryllo Douglas, estudante de Informática no IFPB e desenvolvedor em formação: projetos em React, TypeScript, Firebase, automação e robótica.";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -33,10 +30,10 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   return (
-    <div className="min-h-screen bg-background">
+    <>
       <a
         href="#conteudo"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-100 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:text-primary-foreground"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[60] focus:rounded-lg focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground"
       >
         Pular para o conteúdo
       </a>
@@ -44,16 +41,13 @@ function Index() {
       <main id="conteudo">
         <Hero />
         <About />
-        <Building />
-        <Journey />
-        <FeaturedProject />
+        <Stack />
         <Projects />
-        <Technologies />
-        <BeyondCode />
-        <GitHubSection />
+        <Timeline />
+        <GithubCta />
         <Contact />
       </main>
       <Footer />
-    </div>
+    </>
   );
 }

@@ -61,7 +61,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
             Try again
           </button>
           <a
-            href={import.meta.env.BASE_URL}
+            href="/"
             className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
           >
             Go home
@@ -77,14 +77,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Muryllo Douglas — Desenvolvedor em formação" },
+      { title: "Muryllo Douglas — Estudante e Desenvolvedor" },
       {
         name: "description",
         content:
-          "Portfólio de Muryllo Douglas, estudante de Informática no IFPB: projetos reais em React, TypeScript e Firebase.",
+          "Portfólio de Muryllo Douglas, estudante de Informática no IFPB e desenvolvedor em formação.",
       },
-      { name: "author", content: "Muryllo Douglas Henrique Soares" },
-      { property: "og:site_name", content: "Muryllo Douglas" },
+      { name: "author", content: "Muryllo Douglas" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -94,38 +93,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: appCss,
       },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      {
-        rel: "preconnect",
-        href: "https://fonts.gstatic.com",
-        crossOrigin: "anonymous",
-      },
+      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap",
       },
-      { rel: "icon", href: `${import.meta.env.BASE_URL}favicon.ico`, sizes: "48x48" },
-      {
-        rel: "icon",
-        href: `${import.meta.env.BASE_URL}favicon.svg`,
-        type: "image/svg+xml",
-      },
-      {
-        rel: "icon",
-        href: `${import.meta.env.BASE_URL}favicon-16x16.png`,
-        sizes: "16x16",
-        type: "image/png",
-      },
-      {
-        rel: "icon",
-        href: `${import.meta.env.BASE_URL}favicon-32x32.png`,
-        sizes: "32x32",
-        type: "image/png",
-      },
-      {
-        rel: "apple-touch-icon",
-        href: `${import.meta.env.BASE_URL}apple-touch-icon.png`,
-        sizes: "180x180",
-      },
+      { rel: "icon", href: "/favicon.ico", sizes: "48x48" },
+      { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
+      { rel: "icon", href: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { rel: "icon", href: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { rel: "icon", href: "/favicon-192x192.png", sizes: "192x192", type: "image/png" },
+      { rel: "apple-touch-icon", href: "/apple-touch-icon.png", sizes: "180x180" },
     ],
   }),
 
@@ -137,7 +115,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="pt-BR">
       <head>
         <HeadContent />
       </head>

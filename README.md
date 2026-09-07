@@ -1,88 +1,24 @@
-# Portfólio — Muryllo Douglas Henrique Soares
+# Visual Portfolio Engine
 
-Portfólio profissional desenvolvido em **HTML5, CSS3 e JavaScript puro** (sem frameworks), criado para apresentar minha trajetória como estudante de Ensino Médio Integrado ao Técnico em Informática, meus projetos e minha evolução técnica.
+Implemente um novo portfólio pessoal/profissional usando https://goblin-pluck-79974610.figma.site/ como fonte de verdade visual. Antes, analise integralmente o Figma e siga fielmente suas seções, composição, tipografia, cores, espaçamentos, elementos e responsividade, sem redesenhar com estética genérica. Estruture o site em componentes e centralize conteúdo editável em dados; não invente experiências, projetos, clientes ou links. Prepare o Hero para receber facilmente um asset final de retrato editorial gerado externamente: homem com jaqueta, imagem em primeiro plano e símbolo/halo roxo atrás. Por enquanto use placeholder claro, não gere imagem. Implemente todas as interações, navegação, responsividade, animações sutis com reduced motion, acessibilidade e SEO básico. Faça revisão visual comparativa final. Use as fotos anexadas apenas como referência de aparência para a futura imagem do Hero, não como imagem final do site.
 
-🔗 **Live:** publique via GitHub Pages (veja abaixo) e cole o link aqui.
+This project was built with [Lovable](https://lovable.dev).
 
-## Objetivo
+## Build with Lovable
 
-Apresentar projetos, habilidades técnicas e evolução de forma organizada, servindo como currículo online e ponto de contato para recrutadores, professores e futuros clientes.
+Continue developing this project in the [Lovable editor](https://lovable.dev/projects/e12adb25-a003-4a1f-bc32-b9ea6ffe982f).
 
-## Tecnologias
+- **Ship faster**: describe what you want to build and Lovable handles the code.
+- **Stay in sync**: every change made in Lovable is committed straight to this repository.
+- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
 
-- HTML5 semântico
-- CSS3 (variáveis nativas, grid, flexbox, animações)
-- JavaScript vanilla (ES6+, sem bibliotecas ou build step)
+## Development
 
-## Funcionalidades
+Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
 
-- Navbar fixa com destaque de seção ativa e menu responsivo
-- Efeito de digitação no hero
-- Scroll reveal e contadores animados
-- Projetos carregados de `data/projects.json`, com filtro por categoria
-- Linha do tempo carregada de `data/timeline.json`
-- Seção de certificados preparada para receber itens futuros
-- Formulário de contato (abre o cliente de e-mail com a mensagem pronta)
-- Totalmente responsivo (desktop, tablet, celular)
-- Acessível: HTML semântico, `:focus-visible`, ARIA nos controles interativos, `prefers-reduced-motion` respeitado
-
-## Estrutura de pastas
-
+```sh
+git clone <this-repository-url>
+cd <repository-name>
+npm i
+npm run dev
 ```
-portfolio/
-├── index.html
-├── README.md
-├── LICENSE
-├── sitemap.xml
-├── robots.txt
-├── assets/
-│   ├── css/        variables.css, style.css, animations.css, responsive.css
-│   ├── js/         navbar.js, animations.js, typing.js, projects.js, theme.js, main.js
-│   ├── images/      profile/, projects/, backgrounds/, icons/
-│   ├── fonts/
-│   └── downloads/   currículo em PDF
-├── data/
-│   ├── projects.json
-│   ├── certificates.json
-│   └── timeline.json
-├── docs/            screenshots, wireframes
-└── .github/workflows/deploy.yml
-```
-
-## Como executar localmente
-
-Os dados dos projetos e da timeline são carregados via `fetch()` de arquivos JSON. Isso **não funciona** abrindo o `index.html` direto no navegador (protocolo `file://`) — nesse caso, o site usa automaticamente uma cópia de segurança embutida no JavaScript, então tudo continua funcionando, mas para editar os dados normalmente é melhor rodar um servidor local:
-
-```bash
-# Python
-python3 -m http.server 8080
-
-# ou Node
-npx serve .
-```
-
-Depois acesse `http://localhost:8080`.
-
-## Como publicar no GitHub Pages
-
-1. Suba este repositório para o GitHub (branch `main`).
-2. Em **Settings → Pages**, selecione a origem **GitHub Actions** (o workflow em `.github/workflows/deploy.yml` já está pronto).
-3. A cada push na `main`, o site é publicado automaticamente.
-4. Atualize a URL em `sitemap.xml`, `robots.txt` e na tag `<link rel="canonical">` do `index.html` para o endereço real do seu Pages.
-
-## Atualizando o conteúdo
-
-- **Projetos:** edite `data/projects.json` (e a cópia `FALLBACK_PROJECTS` no topo de `assets/js/projects.js`, para manter consistência offline).
-- **Timeline:** edite `data/timeline.json` (mesma lógica de fallback em `assets/js/main.js`).
-- **Certificados:** adicione itens em `data/certificates.json` conforme forem concluídos.
-- **Currículo:** substitua o arquivo em `assets/downloads/curriculo-muryllo-douglas.pdf`.
-
-## Licença
-
-Distribuído sob a licença MIT — veja [LICENSE](LICENSE).
-
-## Contato
-
-- GitHub: [github.com/muryllodouglashsoares](https://github.com/muryllodouglashsoares)
-- LinkedIn: [Muryllo Douglas Henrique Soares](https://www.linkedin.com/in/muryllo-douglas-henrique-soares-7a8416416/)
-- E-mail: muryllodouglash.soares@gmail.com
