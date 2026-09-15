@@ -145,41 +145,42 @@ export function Hero() {
 
           <div className="relative aspect-[4/5]">
             {hero.portraitSrc ? (
-              <img
-                src={hero.portraitSrc}
-                alt={hero.portraitAlt}
-                className="size-full object-cover object-top"
-                style={{
-                  filter: "contrast(0.82) brightness(0.92) saturate(0.88)",
-                  maskImage:
-                    "linear-gradient(to right, transparent 0%, black 22%, black 78%, transparent 100%), linear-gradient(to bottom, transparent 0%, black 16%, black 68%, transparent 100%)",
-                  WebkitMaskImage:
-                    "linear-gradient(to right, transparent 0%, black 22%, black 78%, transparent 100%), linear-gradient(to bottom, transparent 0%, black 16%, black 68%, transparent 100%)",
-                  maskComposite: "intersect",
-                  WebkitMaskComposite: "source-in, source-over",
-                }}
-                width={1024}
-                height={1280}
-                loading="eager"
-                fetchPriority="high"
-                decoding="async"
-              />
-              <div
-                aria-hidden="true"
-                className="pointer-events-none absolute inset-0"
-                style={{
-                  mixBlendMode: "soft-light",
-                  background:
-                    "linear-gradient(to bottom, #4B3168 0%, #6B3B72 35%, #5A2F58 65%, #241729 100%)",
-                  maskImage:
-                    "linear-gradient(to right, transparent 0%, black 22%, black 78%, transparent 100%), linear-gradient(to bottom, transparent 0%, black 16%, black 68%, transparent 100%)",
-                  WebkitMaskImage:
-                    "linear-gradient(to right, transparent 0%, black 22%, black 78%, transparent 100%), linear-gradient(to bottom, transparent 0%, black 16%, black 68%, transparent 100%)",
-                  maskComposite: "intersect",
-                  WebkitMaskComposite: "source-in, source-over",
-                }}
-              />
-
+              <>
+                <img
+                  src={hero.portraitSrc}
+                  alt={hero.portraitAlt}
+                  className="size-full object-cover object-top"
+                  style={{
+                    filter: "contrast(0.82) brightness(0.92) saturate(0.88)",
+                    maskImage:
+                      "linear-gradient(to right, transparent 0%, black 22%, black 78%, transparent 100%), linear-gradient(to bottom, transparent 0%, black 16%, black 68%, transparent 100%)",
+                    WebkitMaskImage:
+                      "linear-gradient(to right, transparent 0%, black 22%, black 78%, transparent 100%), linear-gradient(to bottom, transparent 0%, black 16%, black 68%, transparent 100%)",
+                    maskComposite: "intersect",
+                    WebkitMaskComposite: "source-in, source-over",
+                  }}
+                  width={1024}
+                  height={1280}
+                  loading="eager"
+                  fetchPriority="high"
+                  decoding="async"
+                />
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-0"
+                  style={{
+                    mixBlendMode: "soft-light",
+                    background:
+                      "linear-gradient(to bottom, #4B3168 0%, #6B3B72 35%, #5A2F58 65%, #241729 100%)",
+                    maskImage:
+                      "linear-gradient(to right, transparent 0%, black 22%, black 78%, transparent 100%), linear-gradient(to bottom, transparent 0%, black 16%, black 68%, transparent 100%)",
+                    WebkitMaskImage:
+                      "linear-gradient(to right, transparent 0%, black 22%, black 78%, transparent 100%), linear-gradient(to bottom, transparent 0%, black 16%, black 68%, transparent 100%)",
+                    maskComposite: "intersect",
+                    WebkitMaskComposite: "source-in, source-over",
+                  }}
+                />
+              </>
             ) : (
               <div className="flex size-full flex-col items-center justify-center gap-3 rounded-3xl border border-border-strong bg-surface p-8 text-center">
                 <span className="mono-label text-primary-soft">retrato editorial</span>
