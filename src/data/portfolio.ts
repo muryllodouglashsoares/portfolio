@@ -1,5 +1,5 @@
 // Conteúdo editável do portfólio. Edite apenas este arquivo para atualizar textos.
-import heroPortrait from "@/assets/hero-portrait.png";
+import heroPortrait from "@/assets/hero-sunset-portrait.jpg";
 import aboutIllustration from "@/assets/about-illustration.png";
 
 
@@ -37,7 +37,7 @@ export const hero = {
   codeChip: 'const dev = "muryllo"',
   statusChip: "open to opportunities",
   portraitSrc: heroPortrait as string | null,
-  portraitAlt: "Retrato editorial de Muryllo Douglas com halo roxo ao fundo",
+  portraitAlt: "Retrato editorial de Muryllo Douglas ao entardecer, com sol estilizado ao fundo",
 
 };
 

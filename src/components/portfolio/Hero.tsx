@@ -4,10 +4,36 @@ import { Reveal } from "./Reveal";
 export function Hero() {
   return (
     <section id="top" className="relative overflow-hidden pt-32 pb-20 sm:pt-40 lg:pt-48 lg:pb-32">
-      {/* halo ambiente */}
+      {/* céu do pôr do sol da foto, esticado como fundo de toda a tela inicial */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -top-40 right-[-10%] h-[42rem] w-[42rem] rounded-full opacity-40 blur-[120px]"
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            "linear-gradient(to bottom, #34254E 0%, #4B3168 20%, #6B3B72 40%, #5A2F58 58%, #241729 78%, var(--background) 100%)",
+        }}
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 opacity-70"
+        style={{
+          background:
+            "radial-gradient(ellipse 60% 55% at 78% 34%, #F9B35D, transparent 60%), radial-gradient(ellipse 70% 60% at 78% 30%, #C6598F, transparent 70%)",
+        }}
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 opacity-80"
+        style={{
+          background:
+            "linear-gradient(to bottom, transparent 0%, transparent 55%, var(--background) 92%)",
+        }}
+      />
+
+      {/* halo ambiente — reforço extra próximo dos elementos gráficos */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -top-40 right-[-10%] h-[42rem] w-[42rem] rounded-full opacity-30 blur-[120px]"
         style={{
           background:
             "radial-gradient(circle, color-mix(in oklab, var(--primary) 55%, transparent), transparent 70%)",
@@ -15,7 +41,19 @@ export function Hero() {
       />
 
       <div className="relative mx-auto grid max-w-6xl grid-cols-1 items-center gap-14 px-5 sm:px-8 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
-        <div>
+        <div className="relative">
+          {/* painel com blur atrás do bloco de texto, para manter a leitura sobre o céu colorido */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -inset-x-8 -inset-y-14 -z-10 backdrop-blur-2xl"
+            style={{
+              WebkitMaskImage:
+                "radial-gradient(ellipse 78% 82% at 38% 50%, black 45%, transparent 100%)",
+              maskImage:
+                "radial-gradient(ellipse 78% 82% at 38% 50%, black 45%, transparent 100%)",
+              background: "color-mix(in oklab, var(--background) 38%, transparent)",
+            }}
+          />
           <Reveal>
             <span className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5">
               <span className="size-1.5 rounded-full bg-primary-soft" aria-hidden="true" />
@@ -80,31 +118,70 @@ export function Hero() {
         </div>
 
         <Reveal delay={180} className="relative mx-auto w-full max-w-md lg:max-w-none">
-          {/* símbolo/halo roxo atrás do retrato */}
+          {/* halo do pôr do sol atrás do retrato — cada camada reproduz a tonalidade
+              da região correspondente na própria foto (índigo no topo, magenta no
+              meio, dourado onde fica o sol), como se o céu vazasse para fora do quadro */}
           <div
             aria-hidden="true"
-            className="absolute inset-6 rounded-full opacity-70 blur-3xl"
+            className="absolute -inset-10 rounded-[3rem] opacity-60 blur-3xl"
             style={{
-              background:
-                "radial-gradient(circle at 50% 45%, color-mix(in oklab, var(--primary-bright) 60%, transparent), transparent 68%)",
+              background: "radial-gradient(ellipse at 50% 18%, #4B3374, transparent 62%)",
+            }}
+          />
+          <div
+            aria-hidden="true"
+            className="absolute -inset-8 rounded-[3rem] opacity-70 blur-3xl"
+            style={{
+              background: "radial-gradient(circle at 50% 32%, #F9B35D, transparent 55%)",
+            }}
+          />
+          <div
+            aria-hidden="true"
+            className="absolute -inset-10 rounded-[3rem] opacity-55 blur-3xl"
+            style={{
+              background: "radial-gradient(ellipse at 50% 68%, #8B3F80, transparent 65%)",
             }}
           />
 
-          <div className="relative aspect-[4/5] overflow-hidden rounded-3xl border border-border-strong bg-surface">
+          <div className="relative aspect-[4/5]">
             {hero.portraitSrc ? (
               <img
                 src={hero.portraitSrc}
                 alt={hero.portraitAlt}
                 className="size-full object-cover object-top"
+                style={{
+                  filter: "contrast(0.82) brightness(0.92) saturate(0.88)",
+                  maskImage:
+                    "linear-gradient(to right, transparent 0%, black 22%, black 78%, transparent 100%), linear-gradient(to bottom, transparent 0%, black 16%, black 68%, transparent 100%)",
+                  WebkitMaskImage:
+                    "linear-gradient(to right, transparent 0%, black 22%, black 78%, transparent 100%), linear-gradient(to bottom, transparent 0%, black 16%, black 68%, transparent 100%)",
+                  maskComposite: "intersect",
+                  WebkitMaskComposite: "source-in, source-over",
+                }}
                 width={1024}
                 height={1280}
                 loading="eager"
                 fetchPriority="high"
                 decoding="async"
               />
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0"
+                style={{
+                  mixBlendMode: "soft-light",
+                  background:
+                    "linear-gradient(to bottom, #4B3168 0%, #6B3B72 35%, #5A2F58 65%, #241729 100%)",
+                  maskImage:
+                    "linear-gradient(to right, transparent 0%, black 22%, black 78%, transparent 100%), linear-gradient(to bottom, transparent 0%, black 16%, black 68%, transparent 100%)",
+                  WebkitMaskImage:
+                    "linear-gradient(to right, transparent 0%, black 22%, black 78%, transparent 100%), linear-gradient(to bottom, transparent 0%, black 16%, black 68%, transparent 100%)",
+                  maskComposite: "intersect",
+                  WebkitMaskComposite: "source-in, source-over",
+                }}
+              />
 
             ) : (
-              <div className="flex size-full flex-col items-center justify-center gap-3 p-8 text-center">
+              <div className="flex size-full flex-col items-center justify-center gap-3 rounded-3xl border border-border-strong bg-surface p-8 text-center">
                 <span className="mono-label text-primary-soft">retrato editorial</span>
                 <p className="max-w-[16rem] text-sm text-muted-foreground">
                   Placeholder do Hero. Substitua definindo{" "}
