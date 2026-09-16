@@ -6,9 +6,11 @@ import { featuredProject, otherProjects, statusLabel } from "@/data/projects";
 import { Reveal } from "./Reveal";
 import { SectionLabel } from "./SectionLabel";
 import { Tag } from "./Tag";
+import { useSpotlight } from "@/hooks/use-motion";
 
 export function Projects() {
   const f = featuredProject;
+  const spotlightRef = useSpotlight<HTMLElement>();
 
   return (
     <section id="projetos" className="scroll-mt-24 py-24 lg:py-32">
@@ -24,8 +26,11 @@ export function Projects() {
         </Reveal>
 
         {/* Projeto em destaque */}
-        <Reveal delay={100}>
-          <article className="mt-14 grid grid-cols-1 gap-10 rounded-3xl border border-border bg-surface p-7 sm:p-10 lg:grid-cols-2 lg:gap-14">
+        <Reveal delay={100} variant="scale">
+          <article
+            ref={spotlightRef}
+            className="spotlight mt-14 grid grid-cols-1 gap-10 rounded-3xl border border-border bg-surface p-7 transition-colors duration-300 sm:p-10 lg:grid-cols-2 lg:gap-14"
+          >
             <div>
               <div className="flex flex-wrap items-center gap-3">
                 <span className="font-mono text-sm text-muted-foreground">01</span>
@@ -51,16 +56,19 @@ export function Projects() {
                 <Link
                   to="/projects/$slug"
                   params={{ slug: f.id }}
-                  className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary-bright"
+                  className="btn-press shine-sweep group inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary-bright"
                 >
                   Ver detalhes técnicos
-                  <ArrowRight className="size-4" aria-hidden="true" />
+                  <ArrowRight
+                    className="size-4 transition-transform group-hover:translate-x-0.5"
+                    aria-hidden="true"
+                  />
                 </Link>
                 <a
                   href={f.githubUrl}
                   target="_blank"
                   rel="noreferrer noopener"
-                  className="inline-flex items-center gap-2 rounded-xl border border-border-strong bg-surface-raised px-5 py-3 text-sm font-medium transition-colors hover:bg-accent"
+                  className="btn-press inline-flex items-center gap-2 rounded-xl border border-border-strong bg-surface-raised px-5 py-3 text-sm font-medium transition-colors hover:bg-accent"
                 >
                   <Github className="size-4" aria-hidden="true" />
                   Repositório
@@ -70,7 +78,7 @@ export function Projects() {
                     href={f.demoUrl}
                     target="_blank"
                     rel="noreferrer noopener"
-                    className="inline-flex items-center gap-2 rounded-xl border border-border-strong bg-surface-raised px-5 py-3 text-sm font-medium transition-colors hover:bg-accent"
+                    className="btn-press inline-flex items-center gap-2 rounded-xl border border-border-strong bg-surface-raised px-5 py-3 text-sm font-medium transition-colors hover:bg-accent"
                   >
                     Abrir aplicação
                     <ArrowUpRight className="size-4" aria-hidden="true" />
@@ -116,7 +124,7 @@ export function Projects() {
               <Link
                 to="/projects/$slug"
                 params={{ slug: p.id }}
-                className="group flex h-full flex-col rounded-2xl border border-border bg-surface p-7 transition-colors hover:border-primary/40"
+                className="card-hover-lift group flex h-full flex-col rounded-2xl border border-border bg-surface p-7"
               >
                 <div className="flex items-start justify-between gap-3">
                   <span className="font-mono text-sm text-muted-foreground">

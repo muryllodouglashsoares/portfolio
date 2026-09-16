@@ -25,7 +25,7 @@ export function Engineering() {
         <div className="mt-14 grid grid-cols-1 gap-5 sm:grid-cols-2">
           {engineering.groups.map((group, i) => (
             <Reveal key={group.title} delay={i * 80}>
-              <div className="h-full rounded-2xl border border-border bg-surface p-6 sm:p-7">
+              <div className="card-hover-lift h-full rounded-2xl border border-border bg-surface p-6 sm:p-7">
                 <h3 className="mono-label text-primary-soft">{group.title}</h3>
                 <ul className="mt-5 space-y-3.5">
                   {group.items.map((item) => (

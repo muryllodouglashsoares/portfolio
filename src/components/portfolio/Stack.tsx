@@ -21,11 +21,11 @@ export function Stack() {
         <div className="mt-14 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {stack.groups.map((group, i) => (
             <Reveal key={group.title} delay={i * 80}>
-              <div className="h-full rounded-2xl border border-border bg-surface p-6">
+              <div className="card-hover-lift h-full rounded-2xl border border-border bg-surface p-6">
                 <h3 className="mono-label text-primary-soft">{group.title}</h3>
                 <ul className="mt-5 space-y-4">
                   {group.items.map((item) => (
-                    <li key={item.name}>
+                    <li key={item.name} className="tech-tile -mx-2 rounded-lg px-2 py-1">
                       <p className="text-sm font-medium">{item.name}</p>
                       {item.note && (
                         <p className="mt-0.5 font-mono text-xs text-muted-foreground">

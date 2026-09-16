@@ -1,14 +1,24 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
+type RevealVariant = "fade-up" | "fade-left" | "fade-right" | "scale" | "mask";
+
 type RevealProps = {
   children: ReactNode;
   className?: string;
   delay?: number;
-  as?: "div" | "li" | "section" | "article";
+  as?: "div" | "li" | "article";
+  /** Estilo de entrada. Padrão "fade-up" — o mesmo comportamento de sempre. */
+  variant?: RevealVariant;
 };
 
-export function Reveal({ children, className, delay = 0, as = "div" }: RevealProps) {
+export function Reveal({
+  children,
+  className,
+  delay = 0,
+  as = "div",
+  variant = "fade-up",
+}: RevealProps) {
   const ref = useRef<HTMLElement | null>(null);
   const [visible, setVisible] = useState(false);
 
@@ -41,6 +51,7 @@ export function Reveal({ children, className, delay = 0, as = "div" }: RevealPro
       ref={ref as React.RefObject<HTMLDivElement>}
       className={cn("reveal", className)}
       data-visible={visible ? "true" : "false"}
+      data-animation={variant}
       style={{ transitionDelay: `${delay}ms` }}
     >
       {children}

@@ -2,6 +2,7 @@ import { about } from "@/data/portfolio";
 import { Reveal } from "./Reveal";
 import { SectionLabel } from "./SectionLabel";
 import { Tag } from "./Tag";
+import { AnimatedStat } from "./AnimatedStat";
 
 export function About() {
   return (
@@ -69,9 +70,9 @@ export function About() {
 
             <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2">
               {about.stats.map((s, i) => (
-                <Reveal as="li" key={s.label} delay={i * 80}>
-                  <div className="h-full rounded-2xl border border-border bg-surface p-7">
-                    <p className="font-display text-4xl font-bold text-primary-soft">{s.value}</p>
+                <Reveal as="li" key={s.label} delay={i * 80} variant="scale">
+                  <div className="card-hover-lift h-full rounded-2xl border border-border bg-surface p-7">
+                    <AnimatedStat value={s.value} />
                     <p className="mt-2 text-sm text-muted-foreground">{s.label}</p>
                   </div>
                 </Reveal>

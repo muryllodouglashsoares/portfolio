@@ -1,8 +1,11 @@
 import { contact } from "@/data/portfolio";
 import { Reveal } from "./Reveal";
 import { SectionLabel } from "./SectionLabel";
+import { useMagnetic } from "@/hooks/use-motion";
 
 export function Contact() {
+  const magneticRef = useMagnetic<HTMLAnchorElement>();
+
   return (
     <section id="contato" className="relative scroll-mt-24 py-24 lg:py-32">
       <div
@@ -38,14 +41,15 @@ export function Contact() {
               {contact.actions.map((a) => (
                 <a
                   key={a.label}
+                  ref={a.primary ? magneticRef : undefined}
                   href={a.href}
                   {...(a.href.startsWith("http")
                     ? { target: "_blank", rel: "noreferrer noopener" }
                     : {})}
                   className={
                     a.primary
-                      ? "rounded-xl bg-primary px-6 py-3.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary-bright"
-                      : "rounded-xl border border-border-strong bg-surface px-6 py-3.5 text-sm font-medium transition-colors hover:bg-surface-raised"
+                      ? "magnetic btn-press shine-sweep rounded-xl bg-primary px-6 py-3.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary-bright"
+                      : "btn-press rounded-xl border border-border-strong bg-surface px-6 py-3.5 text-sm font-medium transition-colors hover:bg-surface-raised"
                   }
                 >
                   {a.label}

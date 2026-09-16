@@ -83,6 +83,13 @@
   --input: oklch(1 0 0 / 12%);
   --ring: oklch(0.606 0.219 292.7);
   --online: oklch(0.792 0.209 151.7);
+
+  /* Design tokens de motion — uma única "linguagem de movimento" para o site inteiro. */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-quad: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --duration-fast: 180ms;
+  --duration-base: 700ms;
+  --duration-slow: 900ms;
 }
 
 @layer base {
@@ -145,12 +152,223 @@
   opacity: 0;
   transform: translateY(24px);
   transition:
-    opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
-    transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    opacity var(--duration-base) var(--ease-out-expo),
+    transform var(--duration-base) var(--ease-out-expo),
+    clip-path var(--duration-slow) var(--ease-out-expo);
 
   &[data-visible="true"] {
     opacity: 1;
     transform: none;
+  }
+
+  /* Variantes — mesma física, direção/forma diferente. Ver Reveal.tsx `variant`. */
+  &[data-animation="fade-left"] {
+    transform: translateX(30px);
+  }
+  &[data-animation="fade-right"] {
+    transform: translateX(-30px);
+  }
+  &[data-animation="scale"] {
+    transform: scale(0.94);
+  }
+  &[data-animation="mask"] {
+    opacity: 1;
+    transform: none;
+    clip-path: inset(0 0 100% 0);
+  }
+  &[data-animation="mask"][data-visible="true"] {
+    clip-path: inset(0 0 0% 0);
+  }
+}
+
+/* Feedback de "botão físico" ao clicar — aplicar em qualquer CTA. */
+@utility btn-press {
+  transition:
+    transform var(--duration-fast) var(--ease-out-quad),
+    background-color var(--duration-fast) ease,
+    border-color var(--duration-fast) ease;
+
+  &:active {
+    transform: scale(0.96);
+  }
+}
+
+/* Brilho que percorre o botão no hover — reservar para os CTAs principais. */
+@utility shine-sweep {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      115deg,
+      transparent 30%,
+      color-mix(in oklab, white 30%, transparent) 50%,
+      transparent 70%
+    );
+    transform: translateX(-130%);
+    transition: transform 650ms var(--ease-out-expo);
+    pointer-events: none;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover::after {
+      transform: translateX(130%);
+    }
+  }
+}
+
+/* Elevação sutil de cards (projetos, stack, métricas). */
+@utility card-hover-lift {
+  transition:
+    transform 220ms var(--ease-out-quad),
+    border-color 220ms ease,
+    box-shadow 220ms ease;
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      transform: translateY(-4px);
+      border-color: color-mix(in oklab, var(--primary) 40%, var(--border-strong));
+      box-shadow: 0 22px 44px -24px color-mix(in oklab, var(--primary) 45%, transparent);
+    }
+  }
+}
+
+/* Microinteração das tiles de tecnologia. */
+@utility tech-tile {
+  transition:
+    transform 180ms var(--ease-out-quad),
+    border-color 180ms ease,
+    background-color 180ms ease;
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      transform: translateY(-2px) scale(1.015);
+      border-color: color-mix(in oklab, var(--primary) 45%, var(--border-strong));
+      background-color: var(--surface-raised);
+    }
+  }
+}
+
+/* Link de navegação com sublinhado que "cresce" a partir da esquerda. */
+@utility nav-link {
+  position: relative;
+
+  &::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 100%;
+    bottom: -6px;
+    height: 1px;
+    background: var(--primary-soft);
+    transition: right var(--duration-fast) var(--ease-out-expo);
+  }
+
+  &[data-active="true"]::after {
+    right: 0;
+  }
+
+  &:hover::after {
+    right: 0;
+  }
+}
+
+/* Efeito magnético — a transição fica só no "solto"; o hook cuida do "puxado". */
+@utility magnetic {
+  transition: transform 260ms var(--ease-out-quad);
+}
+
+/* Spotlight que acompanha o cursor (usado no projeto em destaque). */
+@utility spotlight {
+  position: relative;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    opacity: 0;
+    pointer-events: none;
+    background: radial-gradient(
+      circle 380px at var(--spot-x, 50%) var(--spot-y, 50%),
+      color-mix(in oklab, var(--primary) 16%, transparent),
+      transparent 70%
+    );
+    transition: opacity 400ms ease;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover::before {
+      opacity: 1;
+    }
+  }
+}
+
+/* Barra de progresso de leitura, fixa no topo da página. */
+@utility scroll-progress-track {
+  position: fixed;
+  top: 0;
+  inset-inline: 0;
+  height: 2px;
+  z-index: 60;
+  pointer-events: none;
+}
+
+@utility scroll-progress-bar {
+  height: 100%;
+  transform-origin: 0 50%;
+  background: linear-gradient(90deg, var(--primary), var(--primary-bright));
+  will-change: transform;
+}
+
+/* Indicador de scroll do Hero — linha vertical com "pulso" contínuo e discreto. */
+@utility scroll-indicator-line {
+  position: relative;
+  width: 1px;
+  height: 2.5rem;
+  overflow: hidden;
+  background: color-mix(in oklab, var(--foreground) 16%, transparent);
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    top: -40%;
+    height: 40%;
+    background: var(--primary-soft);
+    animation: scroll-indicator-drop 2.1s var(--ease-out-quad) infinite;
+  }
+}
+
+@keyframes scroll-indicator-drop {
+  0% {
+    transform: translateY(-20%);
+  }
+  60% {
+    transform: translateY(220%);
+  }
+  100% {
+    transform: translateY(220%);
+    opacity: 0;
+  }
+}
+
+/* Flutuação ambiente extremamente sutil — para o retrato do Hero. */
+@utility portrait-float {
+  animation: portrait-float 9s ease-in-out infinite;
+}
+
+@keyframes portrait-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
   }
 }
 
@@ -170,5 +388,11 @@
   .reveal {
     opacity: 1 !important;
     transform: none !important;
+    clip-path: none !important;
+  }
+
+  .scroll-indicator-line::after {
+    animation: none !important;
+    display: none;
   }
 }
