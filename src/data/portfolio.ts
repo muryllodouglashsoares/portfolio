@@ -2,8 +2,6 @@
 import heroPortrait from "@/assets/hero-sunset-portrait.jpg";
 import aboutIllustration from "@/assets/about-illustration.png";
 
-
-
 export const site = {
   name: "Muryllo",
   logo: "muryllo",
@@ -16,11 +14,12 @@ export const site = {
 };
 
 export const nav = [
-  { label: "Sobre", href: "#sobre" },
-  { label: "Skills", href: "#stack" },
-  { label: "Projetos", href: "#projetos" },
-  { label: "Trajetória", href: "#trajetoria" },
-  { label: "Contato", href: "#contato" },
+  { label: "Sobre", href: "/#sobre" },
+  { label: "Skills", href: "/#stack" },
+  { label: "Engenharia", href: "/#engenharia" },
+  { label: "Projetos", href: "/#projetos" },
+  { label: "Trajetória", href: "/#trajetoria" },
+  { label: "Contato", href: "/#contato" },
 ];
 
 export const hero = {
@@ -30,15 +29,14 @@ export const hero = {
   subtitle: ["Eu construo experiências", "para a web."],
   description:
     "Sou estudante de Informática no IFPB e desenvolvedor em formação. Gosto de transformar ideias em projetos reais, explorando desenvolvimento web, software e novas tecnologias.",
-  primaryCta: { label: "Ver projetos", href: "#projetos" },
-  secondaryCta: { label: "Conhecer mais", href: "#sobre" },
+  primaryCta: { label: "Ver projetos", href: "/#projetos" },
+  secondaryCta: { label: "Conhecer mais", href: "/#sobre" },
   techLabel: "Tecnologias que utilizo",
   tech: ["TypeScript", "React", "Python", "Git", "HTML", "CSS"],
   codeChip: 'const dev = "muryllo"',
   statusChip: "open to opportunities",
   portraitSrc: heroPortrait as string | null,
   portraitAlt: "Retrato editorial de Muryllo Douglas ao entardecer, com sol estilizado ao fundo",
-
 };
 
 export const about = {
@@ -63,118 +61,98 @@ export const about = {
 export const stack = {
   label: "stack",
   title: "Tecnologias que utilizo",
+  subtitle: "Onde cada tecnologia foi usada, e para quê.",
   groups: [
     {
       title: "Front-end",
       items: [
-        { name: "HTML", note: null },
-        { name: "CSS", note: null },
-        { name: "JavaScript", note: "Tekidu · Savora · FORJA" },
-        { name: "TypeScript", note: "Tekidu · projetos pessoais" },
-        { name: "React", note: "Tekidu · IFConnect" },
-        { name: "Tailwind CSS", note: "Tekidu · IFConnect" },
-        { name: "Vite", note: "Tekidu · IFConnect" },
+        { name: "HTML / CSS", note: "Base de todos os projetos web" },
+        { name: "JavaScript", note: "IFConnect, OdontoPrime — interatividade sem framework" },
+        {
+          name: "TypeScript",
+          note: "Tekidu, Savora, FORJA, OdontoPrime — tipagem de dados e componentes",
+        },
+        { name: "React", note: "Tekidu, Savora, FORJA, OdontoPrime — construção de interfaces" },
+        { name: "Tailwind CSS", note: "Tekidu, OdontoPrime — estilização utilitária" },
+        { name: "TanStack Start", note: "Savora, FORJA, OdontoPrime — SSR e roteamento" },
       ],
     },
     {
       title: "Back-end / Dados",
       items: [
-        { name: "Firebase", note: "Tekidu" },
-        { name: "Firestore", note: "Tekidu" },
-        { name: "Firebase Auth", note: "Tekidu" },
-        { name: "Cloudflare Workers", note: "Tekidu" },
+        { name: "Firebase Auth", note: "Tekidu, IFConnect — autenticação de usuários" },
+        { name: "Cloud Firestore", note: "Tekidu — dados acadêmicos e regras de acesso" },
+        { name: "Realtime Database", note: "IFConnect — feed, chat e notificações" },
+        { name: "Vitest + Firebase Emulator", note: "Tekidu — testes das regras de segurança" },
       ],
     },
     {
-      title: "Ferramentas",
+      title: "Deploy / Automação",
       items: [
-        { name: "Git", note: "todos os projetos" },
-        { name: "GitHub", note: "todos os projetos" },
-        { name: "GitHub Actions", note: "Tekidu · IFConnect" },
-        { name: "Make (n8n-like)", note: "automações" },
+        { name: "Git / GitHub", note: "Todos os projetos — versionamento e histórico" },
+        { name: "Cloudflare", note: "Tekidu, Savora, FORJA, OdontoPrime — deploy e hospedagem" },
+        { name: "Make", note: "Savora, FORJA, OdontoPrime — automação de formulários" },
+        { name: "Zod", note: "FORJA — validação de formulário no cliente e no servidor" },
       ],
     },
     {
-      title: "Outros",
+      title: "Robótica",
       items: [
-        { name: "Python", note: "automações · scripts" },
-        { name: "LEGO Spike Prime", note: "Mini Olimpíada de Robótica" },
-        { name: "Robótica", note: "Mini Olimpíada" },
+        { name: "Python", note: "Mini Olimpíada — leitura de sensor e lógica do robô" },
+        { name: "LEGO Spike Prime", note: "Mini Olimpíada — montagem e programação em blocos" },
       ],
     },
   ],
 };
 
+export const engineering = {
+  label: "engenharia",
+  title: "Como eu penso o desenvolvimento",
+  description:
+    "Tecnologia é meio, não fim. Estas são as competências que aplico de projeto em projeto — só o que já apareceu em código real.",
+  groups: [
+    {
+      title: "Front-end",
+      items: [
+        "Componentização de interfaces em React, reaproveitando UI entre telas",
+        "TypeScript para tipar dados, formulários e o contrato entre camadas",
+        "Design responsivo mobile-first, com dark mode via tokens de design",
+      ],
+    },
+    {
+      title: "Dados e autorização",
+      items: [
+        "Modelagem de dados acadêmicos e sociais no Firestore / Realtime Database",
+        "Autenticação com Firebase Auth (e-mail/senha, Google, verificação de e-mail)",
+        "Autorização por perfil validada no banco via Security Rules — não só escondida na UI",
+      ],
+    },
+    {
+      title: "Qualidade",
+      items: [
+        "Testes de regras de segurança com Firebase Emulator e Vitest",
+        "Validação de formulário em duas camadas: cliente (Zod) e servidor",
+        "Code splitting por perfil de usuário para reduzir o que cada um carrega",
+      ],
+    },
+    {
+      title: "Deploy e automação",
+      items: [
+        "Versionamento com Git, histórico organizado por commit no GitHub",
+        "Deploy contínuo em Cloudflare Pages / Workers",
+        "Integração de formulários com automações reais (Make → Google Sheets)",
+      ],
+    },
+  ],
+};
+
+// Textos da seção de projetos. Os dados de cada projeto (descrição, stack,
+// problema/solução, arquitetura etc.) vivem em `@/data/projects` — fonte
+// única de verdade, reaproveitada tanto no card da home quanto na página
+// de detalhes de cada projeto.
 export const projects = {
   label: "projetos",
   title: "O que venho construindo",
-  featured: {
-    index: "01",
-    badge: "Featured Project",
-    name: "Tekidu",
-    tagline: "Visualizando a evolução acadêmica.",
-    description:
-      "Sistema web completo para visualização e acompanhamento do desempenho acadêmico. Do problema à solução: autenticação, banco de dados em tempo real, dashboards de dados e deploy automatizado.",
-    tags: ["TypeScript", "React", "Firebase", "Tailwind CSS", "Vite"],
-    primaryCta: { label: "Ver projeto →", href: site.github },
-    secondaryCta: { label: "GitHub", href: site.github },
-    problem: "Estudantes não tinham forma visual e centralizada de acompanhar sua evolução.",
-    solution:
-      "Aplicação full-stack com autenticação, persistência de dados e painéis interativos.",
-    highlights: [
-      "Autenticação completa",
-      "Dados em tempo real",
-      "Dashboard interativo",
-      "Deploy automatizado",
-    ],
-  },
-  items: [
-    {
-      index: "02",
-      kind: "Plataforma",
-      name: "IFConnect",
-      tagline: "Conectando a comunidade do IFPB.",
-      description:
-        "Plataforma de conexão entre estudantes e professores do IFPB. Recursos de comunicação e compartilhamento de conteúdo acadêmico.",
-      tags: ["React", "TypeScript", "Tailwind CSS"],
-    },
-    {
-      index: "03",
-      kind: "Landing Page",
-      name: "Savora",
-      tagline: "Sabor com identidade digital.",
-      description:
-        "Landing page moderna para restaurante com cardápio digital integrado e identidade visual completa.",
-      tags: ["JavaScript", "CSS", "HTML"],
-    },
-    {
-      index: "04",
-      kind: "Site Institucional",
-      name: "FORJA Training Studio",
-      tagline: "Treino com propósito.",
-      description:
-        "Site institucional para academia de treinamento funcional. Design forte, hierarquia visual clara e conversão.",
-      tags: ["JavaScript", "CSS", "HTML"],
-    },
-    {
-      index: "05",
-      kind: "Site Institucional",
-      name: "OdontoPrime",
-      tagline: "Presença digital para clínica odontológica.",
-      description:
-        "Site profissional para clínica odontológica com agendamento e apresentação dos serviços.",
-      tags: ["HTML", "CSS", "JavaScript"],
-    },
-    {
-      index: "06",
-      kind: "Robótica",
-      name: "Mini Olimpíada de Robótica",
-      tagline: "Tecnologia na prática, desde cedo.",
-      description:
-        "Projeto de robótica educacional utilizando LEGO Spike Prime. Competição organizada para jovens estudantes.",
-      tags: ["Python", "LEGO Spike Prime", "Robótica"],
-    },
-  ],
 };
 
 export const timeline = {
@@ -203,13 +181,20 @@ export const timeline = {
       index: "04",
       title: "Publicação",
       description:
-        "Projetos entram em produção. Deploy, domínio próprio, GitHub Actions. O código chega ao mundo.",
+        "Projetos entram em produção: deploy na Cloudflare, domínio próprio. O código chega ao mundo.",
     },
     {
       index: "05",
       title: "Evolução",
       description:
-        "Sistemas mais complexos, stacks mais robustas, soluções mais bem pensadas. O processo continua.",
+        "Sistemas mais complexos: autenticação, banco de dados, regras de segurança e testes automatizados.",
+    },
+    {
+      index: "06",
+      title: "Próximo passo",
+      description:
+        "Estruturas de dados e algoritmos, arquitetura de software e automação/robótica autônoma — o que estou estudando agora, para sistemas mais completos.",
+      current: true,
     },
   ],
 };

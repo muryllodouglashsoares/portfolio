@@ -49,8 +49,7 @@ export function Hero() {
             style={{
               WebkitMaskImage:
                 "radial-gradient(ellipse 78% 82% at 38% 50%, black 45%, transparent 100%)",
-              maskImage:
-                "radial-gradient(ellipse 78% 82% at 38% 50%, black 45%, transparent 100%)",
+              maskImage: "radial-gradient(ellipse 78% 82% at 38% 50%, black 45%, transparent 100%)",
               background: "color-mix(in oklab, var(--background) 38%, transparent)",
             }}
           />

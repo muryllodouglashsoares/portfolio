@@ -1,8 +1,8 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { ArrowLeft, ArrowUpRight, Github } from "lucide-react";
 
-import { Navbar } from "@/components/Navbar";
-import { Footer } from "@/components/Footer";
+import { Navbar } from "@/components/portfolio/Navbar";
+import { Footer } from "@/components/portfolio/Footer";
 import { getProject, statusLabel } from "@/data/projects";
 
 export const Route = createFileRoute("/projects/$slug")({
@@ -22,7 +22,9 @@ export const Route = createFileRoute("/projects/$slug")({
     }
     const { project } = loaderData;
     const title = `${project.title} — Projeto de Muryllo Douglas`;
+    const canonical = `https://muryllodouglashsoares.github.io/portfolio/projects/${project.id}`;
     return {
+      links: [{ rel: "canonical", href: canonical }],
       meta: [
         { title },
         { name: "description", content: project.description },
@@ -66,9 +68,7 @@ function ProjectDetail() {
               <span aria-hidden="true">·</span>
               {project.categories.join(" / ")}
             </p>
-            <h1 className="mt-4 text-4xl font-semibold sm:text-5xl">
-              {project.title}
-            </h1>
+            <h1 className="mt-4 text-4xl font-semibold sm:text-5xl">{project.title}</h1>
             <p className="mt-5 text-base leading-relaxed text-muted-foreground">
               {project.longDescription}
             </p>
@@ -112,18 +112,40 @@ function ProjectDetail() {
               {project.problem ? (
                 <section>
                   <h2 className="text-2xl font-semibold">O problema</h2>
-                  <p className="mt-3 leading-relaxed text-muted-foreground">
-                    {project.problem}
-                  </p>
+                  <p className="mt-3 leading-relaxed text-muted-foreground">{project.problem}</p>
                 </section>
               ) : null}
 
               {project.solution ? (
                 <section>
                   <h2 className="text-2xl font-semibold">A solução</h2>
-                  <p className="mt-3 leading-relaxed text-muted-foreground">
-                    {project.solution}
-                  </p>
+                  <p className="mt-3 leading-relaxed text-muted-foreground">{project.solution}</p>
+                </section>
+              ) : null}
+
+              {project.architecture?.length ? (
+                <section>
+                  <h2 className="text-2xl font-semibold">Arquitetura</h2>
+                  <ol className="mt-4 space-y-0">
+                    {project.architecture.map((stage, i) => (
+                      <li key={stage} className="relative flex gap-4 pb-6 last:pb-0">
+                        <div className="flex flex-col items-center">
+                          <span className="grid size-7 shrink-0 place-items-center rounded-full border border-primary/40 bg-surface font-mono text-[0.6875rem] text-primary-soft">
+                            {i + 1}
+                          </span>
+                          {i < project.architecture!.length - 1 ? (
+                            <span
+                              aria-hidden="true"
+                              className="mt-1 w-px flex-1 bg-gradient-to-b from-primary/40 to-transparent"
+                            />
+                          ) : null}
+                        </div>
+                        <p className="pt-0.5 text-sm leading-relaxed text-muted-foreground">
+                          {stage}
+                        </p>
+                      </li>
+                    ))}
+                  </ol>
                 </section>
               ) : null}
 
@@ -145,14 +167,38 @@ function ProjectDetail() {
                 </ul>
               </section>
 
-              {project.notes?.length ? (
+              {project.challenges?.length ? (
                 <section className="space-y-6">
-                  <h2 className="text-2xl font-semibold">Decisões e aprendizados</h2>
-                  {project.notes.map((note) => (
+                  <h2 className="text-2xl font-semibold">Desafios técnicos</h2>
+                  {project.challenges.map((challenge) => (
                     <div
-                      key={note.heading}
+                      key={challenge.problem}
                       className="rounded-lg border border-border bg-card p-6"
                     >
+                      <dl className="space-y-3 text-sm leading-relaxed">
+                        <div>
+                          <dt className="mono-label text-primary-soft">Problema</dt>
+                          <dd className="mt-1 text-muted-foreground">{challenge.problem}</dd>
+                        </div>
+                        <div>
+                          <dt className="mono-label text-primary-soft">Investigação</dt>
+                          <dd className="mt-1 text-muted-foreground">{challenge.investigation}</dd>
+                        </div>
+                        <div>
+                          <dt className="mono-label text-primary-soft">Solução</dt>
+                          <dd className="mt-1 text-muted-foreground">{challenge.solution}</dd>
+                        </div>
+                      </dl>
+                    </div>
+                  ))}
+                </section>
+              ) : null}
+
+              {project.notes?.length ? (
+                <section className="space-y-6">
+                  <h2 className="text-2xl font-semibold">Decisões técnicas</h2>
+                  {project.notes.map((note) => (
+                    <div key={note.heading} className="rounded-lg border border-border bg-card p-6">
                       <h3 className="font-display text-base font-semibold tracking-tight">
                         {note.heading}
                       </h3>
@@ -163,10 +209,17 @@ function ProjectDetail() {
                   ))}
                 </section>
               ) : null}
+
+              {project.learned ? (
+                <section className="rounded-lg border border-primary/25 bg-primary/5 p-6">
+                  <h2 className="mono-label text-primary-soft">O que este projeto me ensinou</h2>
+                  <p className="mt-3 leading-relaxed text-muted-foreground">{project.learned}</p>
+                </section>
+              ) : null}
             </div>
 
             <aside className="rounded-lg border border-border bg-surface p-6 lg:sticky lg:top-28">
-              <h2 className="eyebrow">Tecnologias</h2>
+              <h2 className="mono-label text-primary-soft">Tecnologias</h2>
               <ul className="mt-4 flex flex-wrap gap-1.5">
                 {project.technologies.map((tech) => (
                   <li

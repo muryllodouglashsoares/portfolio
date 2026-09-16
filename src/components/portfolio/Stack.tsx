@@ -14,6 +14,10 @@ export function Stack() {
           <h2 className="mt-10 font-display text-4xl font-bold sm:text-5xl">{stack.title}</h2>
         </Reveal>
 
+        <Reveal delay={100}>
+          <p className="mt-4 max-w-xl leading-relaxed text-muted-foreground">{stack.subtitle}</p>
+        </Reveal>
+
         <div className="mt-14 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {stack.groups.map((group, i) => (
             <Reveal key={group.title} delay={i * 80}>

@@ -9,6 +9,12 @@ export interface ProjectSection {
   body: string;
 }
 
+export interface ProjectChallenge {
+  problem: string;
+  investigation: string;
+  solution: string;
+}
+
 export interface Project {
   /** URL slug — used for /projects/$slug */
   id: string;
@@ -35,6 +41,12 @@ export interface Project {
   status: ProjectStatus;
   /** Extra notes about the build process, only when confirmed */
   notes?: ProjectSection[];
+  /** High-level data/request flow, only when it maps directly to confirmed technologies */
+  architecture?: string[];
+  /** Concrete technical problems faced during the build, only when confirmed */
+  challenges?: ProjectChallenge[];
+  /** Short, honest takeaway — what this project added to the developer's skillset */
+  learned?: string;
 }
 
 const raw = (repo: string, path: string) =>
@@ -100,24 +112,40 @@ export const projects: Project[] = [
     ],
     featured: true,
     status: "in-progress",
+    architecture: [
+      "React + TypeScript (Vite) — três experiências de UI (admin, professor, estudante) sobre a mesma base de componentes",
+      "Firebase Authentication — login, primeiro acesso e recuperação de senha",
+      "Cloud Firestore — dados acadêmicos: estudantes, turmas, notas, frequência, avisos",
+      "Firestore Security Rules — autorização por perfil aplicada no banco, não só na UI",
+      "Camada de serviços por domínio (students, grades, attendance, reports, audit, email) isolando o acesso a dados dos componentes",
+      "Deploy em Cloudflare Pages",
+    ],
+    challenges: [
+      {
+        problem:
+          "Esconder botões e rotas na interface não impede que um usuário autenticado leia ou escreva dados de outro perfil diretamente na API do Firestore.",
+        investigation:
+          "Revisão de quais coleções cada perfil (admin, professor, estudante) realmente precisa ler ou escrever, e quais campos podem ser alterados por cada um.",
+        solution:
+          "Regras de autorização escritas diretamente nas Firestore Security Rules, com suíte de testes própria usando Vitest, Firebase Emulator e @firebase/rules-unit-testing cobrindo cenários de acesso permitido e negado.",
+      },
+      {
+        problem:
+          "Um estudante abrindo a plataforma não deveria baixar o código do portal administrativo só para ver seu próprio boletim.",
+        investigation:
+          "Mapeamento das rotas por perfil de usuário para identificar quais telas nunca são acessadas juntas na mesma sessão.",
+        solution:
+          "Praticamente todas as páginas carregadas sob demanda com React.lazy, agrupadas por Suspense conforme o perfil — cada usuário baixa só o código da sua própria experiência.",
+      },
+    ],
     notes: [
-      {
-        heading: "Segurança no banco, não só na interface",
-        body: "As permissões por perfil (admin, teacher, student) são validadas diretamente nas Firestore Security Rules — quem pode ler e escrever cada coleção, validação de payload e acesso restrito aos próprios dados. Esconder um botão na UI não é tratado como controle de acesso.",
-      },
-      {
-        heading: "Testes automatizados em duas frentes",
-        body: "As regras de segurança têm suíte própria com Vitest, Firebase Emulator e @firebase/rules-unit-testing, cobrindo cenários de acesso permitido e negado. Há também testes de unidade para regras de negócio, como cálculo de médias e frequência.",
-      },
-      {
-        heading: "Code splitting granular",
-        body: "Praticamente todas as páginas são carregadas sob demanda com React.lazy, agrupadas por Suspense conforme o perfil do usuário — um estudante nunca baixa o código do portal administrativo.",
-      },
       {
         heading: "Camada de serviços por domínio",
         body: "O acesso ao Firestore fica isolado em serviços (students, grades, attendance, reports, audit, email), mantendo os componentes de UI livres de lógica de dados. Alterações sensíveis, como edição de notas, geram log de auditoria assíncrono.",
       },
     ],
+    learned:
+      "A Tekidu marcou a transição de construir interfaces isoladas para uma aplicação com autenticação, persistência de dados, autorização por perfil e regras de segurança validadas no banco — não só escondidas na tela.",
   },
   {
     id: "ifconnect",
@@ -163,12 +191,20 @@ export const projects: Project[] = [
       },
     ],
     status: "completed",
+    architecture: [
+      "JavaScript (sem framework de front-end) — feed, chat e painel administrativo",
+      "Firebase Authentication — cadastro, login com Google e verificação de e-mail",
+      "Firebase Realtime Database — posts, seguidores, chat e notificações em tempo real",
+      "Cargos (aluno, professor, administrador) controlando o que cada perfil pode ver e moderar",
+    ],
     notes: [
       {
         heading: "Tudo em JavaScript puro",
         body: "A aplicação foi construída sem framework de front-end, com integração direta ao Firebase Authentication e ao Realtime Database — um exercício de organizar uma base grande de JavaScript por conta própria.",
       },
     ],
+    learned:
+      "O IFConnect veio antes da Tekidu: foi onde a autenticação, o tempo real e o controle de acesso por cargo apareceram pela primeira vez, sem o apoio de um framework para organizar o crescimento do código.",
   },
   {
     id: "savora",

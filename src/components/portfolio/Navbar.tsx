@@ -22,7 +22,7 @@ export function Navbar() {
       )}
     >
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-5 sm:px-8">
-        <a href="#top" className="shrink-0 font-display text-base font-bold tracking-tight">
+        <a href="/#top" className="shrink-0 font-display text-base font-bold tracking-tight">
           {site.logo}
           <span className="text-primary-soft">.</span>
         </a>
@@ -52,7 +52,7 @@ export function Navbar() {
             GitHub
           </a>
           <a
-            href="#contato"
+            href="/#contato"
             className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary-bright"
           >
             Contato
@@ -96,7 +96,7 @@ export function Navbar() {
                 GitHub
               </a>
               <a
-                href="#contato"
+                href="/#contato"
                 onClick={() => setOpen(false)}
                 className="flex-1 rounded-lg bg-primary px-4 py-3 text-center text-sm font-medium text-primary-foreground"
               >

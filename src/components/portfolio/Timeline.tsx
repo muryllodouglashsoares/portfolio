@@ -21,10 +21,23 @@ export function Timeline() {
           />
           {timeline.steps.map((step, i) => (
             <Reveal as="li" key={step.index} delay={i * 70} className="relative pl-16">
-              <span className="absolute top-0 left-0 grid size-8 place-items-center rounded-full border border-primary/50 bg-background font-mono text-xs text-primary-soft">
+              <span
+                className={
+                  step.current
+                    ? "absolute top-0 left-0 grid size-8 animate-pulse place-items-center rounded-full border border-dashed border-primary/60 bg-background font-mono text-xs text-primary-soft"
+                    : "absolute top-0 left-0 grid size-8 place-items-center rounded-full border border-primary/50 bg-background font-mono text-xs text-primary-soft"
+                }
+              >
                 {i + 1}
               </span>
-              <p className="font-mono text-xs text-primary-soft">{step.index}</p>
+              <p className="flex items-center gap-2 font-mono text-xs text-primary-soft">
+                {step.index}
+                {step.current ? (
+                  <span className="rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-[0.625rem] tracking-wide text-primary-soft">
+                    em andamento
+                  </span>
+                ) : null}
+              </p>
               <h3 className="mt-1.5 font-display text-xl font-semibold">{step.title}</h3>
               <p className="mt-2 max-w-2xl leading-relaxed text-muted-foreground">
                 {step.description}

@@ -84,7 +84,8 @@ writeFileSync(`${OUT_DIR}/.nojekyll`, "");
 const { statSync, readdirSync } = await import("node:fs");
 const projectFiles = existsSync(`${OUT_DIR}/projects`) ? readdirSync(`${OUT_DIR}/projects`) : [];
 const problems = [];
-if (statSync(`${OUT_DIR}/index.html`, { throwIfNoEntry: false })?.size === 0) problems.push("index.html vazio");
+if (statSync(`${OUT_DIR}/index.html`, { throwIfNoEntry: false })?.size === 0)
+  problems.push("index.html vazio");
 if (!existsSync(`${OUT_DIR}/404.html`)) problems.push("404.html ausente");
 if (projectFiles.length === 0) problems.push("nenhuma página de projeto foi gerada em /projects");
 for (const f of projectFiles) {

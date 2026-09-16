@@ -11,6 +11,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import heroPortrait from "../assets/hero-sunset-portrait.jpg";
 
 function NotFoundComponent() {
   return (
@@ -85,7 +86,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { name: "author", content: "Muryllo Douglas" },
       { property: "og:type", content: "website" },
+      { property: "og:image", content: heroPortrait },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:image", content: heroPortrait },
     ],
     links: [
       {

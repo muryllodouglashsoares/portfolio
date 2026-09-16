@@ -4,6 +4,7 @@ import { Navbar } from "@/components/portfolio/Navbar";
 import { Hero } from "@/components/portfolio/Hero";
 import { About } from "@/components/portfolio/About";
 import { Stack } from "@/components/portfolio/Stack";
+import { Engineering } from "@/components/portfolio/Engineering";
 import { Projects } from "@/components/portfolio/Projects";
 import { Timeline } from "@/components/portfolio/Timeline";
 import { GithubCta } from "@/components/portfolio/GithubCta";
@@ -24,6 +25,7 @@ export const Route = createFileRoute("/")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
+    links: [{ rel: "canonical", href: "https://muryllodouglashsoares.github.io/portfolio/" }],
   }),
   component: Index,
 });
@@ -42,6 +44,7 @@ function Index() {
         <Hero />
         <About />
         <Stack />
+        <Engineering />
         <Projects />
         <Timeline />
         <GithubCta />

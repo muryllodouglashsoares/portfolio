@@ -1,20 +1,26 @@
-import { projects } from "@/data/portfolio";
+import { Link } from "@tanstack/react-router";
+import { ArrowRight, ArrowUpRight, Github } from "lucide-react";
+
+import { projects as projectsCopy } from "@/data/portfolio";
+import { featuredProject, otherProjects, statusLabel } from "@/data/projects";
 import { Reveal } from "./Reveal";
 import { SectionLabel } from "./SectionLabel";
 import { Tag } from "./Tag";
 
 export function Projects() {
-  const f = projects.featured;
+  const f = featuredProject;
 
   return (
     <section id="projetos" className="scroll-mt-24 py-24 lg:py-32">
       <div className="mx-auto max-w-6xl px-5 sm:px-8">
         <Reveal>
-          <SectionLabel>{projects.label}</SectionLabel>
+          <SectionLabel>{projectsCopy.label}</SectionLabel>
         </Reveal>
 
         <Reveal delay={60}>
-          <h2 className="mt-10 font-display text-4xl font-bold sm:text-5xl">{projects.title}</h2>
+          <h2 className="mt-10 font-display text-4xl font-bold sm:text-5xl">
+            {projectsCopy.title}
+          </h2>
         </Reveal>
 
         {/* Projeto em destaque */}
@@ -22,19 +28,19 @@ export function Projects() {
           <article className="mt-14 grid grid-cols-1 gap-10 rounded-3xl border border-border bg-surface p-7 sm:p-10 lg:grid-cols-2 lg:gap-14">
             <div>
               <div className="flex flex-wrap items-center gap-3">
-                <span className="font-mono text-sm text-muted-foreground">{f.index}</span>
+                <span className="font-mono text-sm text-muted-foreground">01</span>
                 <span className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1">
                   <span className="size-1.5 rounded-full bg-primary-soft" aria-hidden="true" />
-                  <span className="mono-label text-primary-soft">{f.badge}</span>
+                  <span className="mono-label text-primary-soft">Featured Project</span>
                 </span>
               </div>
 
-              <h3 className="mt-5 font-display text-4xl font-bold">{f.name}</h3>
-              <p className="mt-3 text-lg text-primary-soft">{f.tagline}</p>
-              <p className="mt-5 leading-relaxed text-muted-foreground">{f.description}</p>
+              <h3 className="mt-5 font-display text-4xl font-bold">{f.title}</h3>
+              <p className="mt-3 text-lg text-primary-soft">{f.description}</p>
+              <p className="mt-5 leading-relaxed text-muted-foreground">{f.longDescription}</p>
 
               <ul className="mt-6 flex flex-wrap gap-2.5">
-                {f.tags.map((t) => (
+                {f.technologies.map((t) => (
                   <li key={t}>
                     <Tag>{t}</Tag>
                   </li>
@@ -42,38 +48,54 @@ export function Projects() {
               </ul>
 
               <div className="mt-8 flex flex-wrap gap-3">
+                <Link
+                  to="/projects/$slug"
+                  params={{ slug: f.id }}
+                  className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary-bright"
+                >
+                  Ver detalhes técnicos
+                  <ArrowRight className="size-4" aria-hidden="true" />
+                </Link>
                 <a
-                  href={f.primaryCta.href}
+                  href={f.githubUrl}
                   target="_blank"
                   rel="noreferrer noopener"
-                  className="rounded-xl bg-primary px-5 py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary-bright"
+                  className="inline-flex items-center gap-2 rounded-xl border border-border-strong bg-surface-raised px-5 py-3 text-sm font-medium transition-colors hover:bg-accent"
                 >
-                  {f.primaryCta.label}
+                  <Github className="size-4" aria-hidden="true" />
+                  Repositório
                 </a>
-                <a
-                  href={f.secondaryCta.href}
-                  target="_blank"
-                  rel="noreferrer noopener"
-                  className="rounded-xl border border-border-strong bg-surface-raised px-5 py-3 text-sm font-medium transition-colors hover:bg-accent"
-                >
-                  {f.secondaryCta.label}
-                </a>
+                {f.demoUrl ? (
+                  <a
+                    href={f.demoUrl}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    className="inline-flex items-center gap-2 rounded-xl border border-border-strong bg-surface-raised px-5 py-3 text-sm font-medium transition-colors hover:bg-accent"
+                  >
+                    Abrir aplicação
+                    <ArrowUpRight className="size-4" aria-hidden="true" />
+                  </a>
+                ) : null}
               </div>
             </div>
 
             <div className="space-y-5">
-              <div className="rounded-2xl border border-border bg-surface-raised/60 p-6">
-                <h4 className="mono-label text-primary-soft">Problema</h4>
-                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{f.problem}</p>
-              </div>
-              <div className="rounded-2xl border border-border bg-surface-raised/60 p-6">
-                <h4 className="mono-label text-primary-soft">Solução</h4>
-                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{f.solution}</p>
-              </div>
+              {f.problem ? (
+                <div className="rounded-2xl border border-border bg-surface-raised/60 p-6">
+                  <h4 className="mono-label text-primary-soft">Problema</h4>
+                  <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{f.problem}</p>
+                </div>
+              ) : null}
+              {f.solution ? (
+                <div className="rounded-2xl border border-border bg-surface-raised/60 p-6">
+                  <h4 className="mono-label text-primary-soft">Solução</h4>
+                  <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{f.solution}</p>
+                </div>
+              ) : null}
               <div className="rounded-2xl border border-border bg-surface-raised/60 p-6">
                 <h4 className="mono-label text-primary-soft">Destaques</h4>
                 <ul className="mt-3 space-y-2">
-                  {f.highlights.map((h) => (
+                  {f.features.slice(0, 4).map((h) => (
                     <li key={h} className="flex gap-3 text-sm text-muted-foreground">
                       <span className="text-primary-soft" aria-hidden="true">
                         →
@@ -89,26 +111,41 @@ export function Projects() {
 
         {/* Demais projetos */}
         <ul className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {projects.items.map((p, i) => (
-            <Reveal as="li" key={p.name} delay={(i % 3) * 80}>
-              <article className="flex h-full flex-col rounded-2xl border border-border bg-surface p-7 transition-colors hover:border-primary/40">
+          {otherProjects.map((p, i) => (
+            <Reveal as="li" key={p.id} delay={(i % 3) * 80}>
+              <Link
+                to="/projects/$slug"
+                params={{ slug: p.id }}
+                className="group flex h-full flex-col rounded-2xl border border-border bg-surface p-7 transition-colors hover:border-primary/40"
+              >
                 <div className="flex items-start justify-between gap-3">
-                  <span className="font-mono text-sm text-muted-foreground">{p.index}</span>
-                  <Tag>{p.kind}</Tag>
+                  <span className="font-mono text-sm text-muted-foreground">
+                    {String(i + 2).padStart(2, "0")}
+                  </span>
+                  <Tag>{`${p.categories[0]}`}</Tag>
                 </div>
-                <h3 className="mt-5 font-display text-xl font-semibold">{p.name}</h3>
-                <p className="mt-2 text-sm text-primary-soft">{p.tagline}</p>
+                <h3 className="mt-5 font-display text-xl font-semibold">{p.title}</h3>
+                <p className="mt-2 font-mono text-xs uppercase tracking-[0.1em] text-muted-foreground">
+                  {statusLabel[p.status]}
+                </p>
                 <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
                   {p.description}
                 </p>
                 <ul className="mt-auto flex flex-wrap gap-2 pt-6">
-                  {p.tags.map((t) => (
+                  {p.technologies.slice(0, 5).map((t) => (
                     <li key={t}>
                       <Tag>{t}</Tag>
                     </li>
                   ))}
                 </ul>
-              </article>
+                <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-primary-soft">
+                  Ver detalhes técnicos
+                  <ArrowRight
+                    className="size-3.5 transition-transform group-hover:translate-x-0.5"
+                    aria-hidden="true"
+                  />
+                </span>
+              </Link>
             </Reveal>
           ))}
         </ul>
