@@ -2,7 +2,7 @@
 
 Estudante de Informática (Ensino Médio Integrado ao Técnico) no **IFPB Campus Itaporanga** e desenvolvedor em formação. Este repositório é o código-fonte do meu portfólio pessoal — e também um retrato de como venho evoluindo de landing pages para sistemas com autenticação, banco de dados e regras de autorização reais.
 
-**[Ver portfólio ao vivo →](https://muryllodouglashsoares.github.io/portfolio/)**
+**[Ver portfólio ao vivo →](https://portfolio-c1u.pages.dev)**
 
 ---
 
