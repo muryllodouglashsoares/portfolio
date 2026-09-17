@@ -197,6 +197,43 @@ export function useMagnetic<T extends HTMLElement>(strength = 0.28, maxOffset = 
   return ref;
 }
 
+/**
+ * Badge que segue o cursor dentro de um card (ex.: "Visualizar" nos projetos).
+ * Retorna a posição local do ponteiro e se o card está em hover — só em desktop
+ * com ponteiro fino e sem reduced motion; em touch/reduced motion fica sempre inativo,
+ * então quem consome o hook cai de volta no link normal do card.
+ */
+export function usePointerChip<T extends HTMLElement>() {
+  const ref = useRef<T | null>(null);
+  const [pos, setPos] = useState({ x: 0, y: 0 });
+  const [hovering, setHovering] = useState(false);
+  const fine = useFinePointer();
+  const reduced = useReducedMotion();
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || !fine || reduced) return;
+
+    const onMove = (e: PointerEvent) => {
+      const rect = el.getBoundingClientRect();
+      setPos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+    };
+    const onEnter = () => setHovering(true);
+    const onLeave = () => setHovering(false);
+
+    el.addEventListener("pointermove", onMove);
+    el.addEventListener("pointerenter", onEnter);
+    el.addEventListener("pointerleave", onLeave);
+    return () => {
+      el.removeEventListener("pointermove", onMove);
+      el.removeEventListener("pointerenter", onEnter);
+      el.removeEventListener("pointerleave", onLeave);
+    };
+  }, [fine, reduced]);
+
+  return { ref, pos, active: hovering && fine && !reduced };
+}
+
 /** Spotlight que segue o cursor dentro de um card (ex.: projeto em destaque). Desktop apenas. */
 export function useSpotlight<T extends HTMLElement>() {
   const ref = useRef<T | null>(null);
