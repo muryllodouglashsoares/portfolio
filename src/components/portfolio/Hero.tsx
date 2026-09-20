@@ -6,7 +6,10 @@ export function Hero() {
   const magneticRef = useMagnetic<HTMLAnchorElement>();
 
   return (
-    <section id="top" className="relative overflow-hidden pt-32 pb-20 sm:pt-40 lg:pt-48 lg:pb-32">
+    <section
+      id="top"
+      className="relative overflow-hidden pt-24 pb-16 sm:pt-32 sm:pb-20 short:max-lg:pt-24 short:max-lg:pb-12 lg:pt-48 lg:pb-32"
+    >
       {/* céu do pôr do sol da foto, esticado como fundo de toda a tela inicial */}
       <div
         aria-hidden="true"
@@ -16,12 +19,22 @@ export function Hero() {
             "linear-gradient(to bottom, #34254E 0%, #4B3168 20%, #6B3B72 40%, #5A2F58 58%, #241729 78%, var(--background) 100%)",
         }}
       />
+      {/* brilho do sol: no desktop fica atrás do retrato (coluna direita); no mobile o retrato
+          desce para o meio da seção, então o brilho acompanha — e sai de trás do texto */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 opacity-70"
+        className="pointer-events-none absolute inset-0 hidden opacity-70 lg:block"
         style={{
           background:
             "radial-gradient(ellipse 60% 55% at 78% 34%, #F9B35D, transparent 60%), radial-gradient(ellipse 70% 60% at 78% 30%, #C6598F, transparent 70%)",
+        }}
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 opacity-70 lg:hidden"
+        style={{
+          background:
+            "radial-gradient(ellipse 80% 15% at 50% 57%, #F9B35D, transparent 60%), radial-gradient(ellipse 100% 20% at 50% 55%, #C6598F, transparent 70%)",
         }}
       />
       <div
@@ -36,19 +49,19 @@ export function Hero() {
       {/* halo ambiente — reforço extra próximo dos elementos gráficos */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -top-40 right-[-10%] h-[42rem] w-[42rem] rounded-full opacity-30 blur-[120px]"
+        className="pointer-events-none absolute -top-24 right-[-25%] size-[24rem] rounded-full opacity-30 blur-[80px] sm:-top-40 sm:right-[-10%] sm:size-[42rem] sm:blur-[120px]"
         style={{
           background:
             "radial-gradient(circle, color-mix(in oklab, var(--primary) 55%, transparent), transparent 70%)",
         }}
       />
 
-      <div className="relative mx-auto grid max-w-6xl grid-cols-1 items-center gap-14 px-5 sm:px-8 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
-        <div className="relative">
+      <div className="container-page relative grid grid-cols-1 items-center gap-y-10 sm:gap-y-14 lg:grid-cols-[1.05fr_0.95fr] lg:grid-rows-[1fr_auto_auto_1fr] lg:gap-x-16 lg:gap-y-0">
+        <div className="relative lg:col-start-1 lg:row-start-2">
           {/* painel com blur atrás do bloco de texto, para manter a leitura sobre o céu colorido */}
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute -inset-x-8 -inset-y-14 -z-10 backdrop-blur-2xl"
+            className="pointer-events-none absolute -inset-x-8 -inset-y-14 -z-10 hidden backdrop-blur-2xl lg:block"
             style={{
               WebkitMaskImage:
                 "radial-gradient(ellipse 78% 82% at 38% 50%, black 45%, transparent 100%)",
@@ -64,7 +77,7 @@ export function Hero() {
           </Reveal>
 
           <Reveal delay={90} variant="mask">
-            <h1 className="mt-8 font-display text-[2.75rem] leading-[1.05] font-bold sm:text-6xl">
+            <h1 className="mt-6 font-display text-hero-title leading-[1.05] font-bold sm:mt-8">
               {hero.greeting}
               <br />
               <span className="text-primary-soft">{hero.name}</span>
@@ -72,7 +85,7 @@ export function Hero() {
           </Reveal>
 
           <Reveal delay={220} variant="mask">
-            <p className="mt-5 font-display text-2xl leading-tight font-semibold text-muted-foreground sm:text-[2rem]">
+            <p className="mt-4 font-display text-hero-subtitle leading-tight font-semibold text-muted-foreground sm:mt-5">
               {hero.subtitle[0]}
               <br />
               <span className="text-foreground">{hero.subtitle[1]}</span>
@@ -80,66 +93,55 @@ export function Hero() {
           </Reveal>
 
           <Reveal delay={380}>
-            <p className="mt-7 max-w-lg leading-relaxed text-muted-foreground">
+            <p className="mt-5 max-w-lg leading-relaxed text-muted-foreground sm:mt-7">
               {hero.description}
             </p>
           </Reveal>
 
           <Reveal delay={520}>
-            <div className="mt-9 flex flex-wrap gap-4">
+            <div className="mt-7 flex flex-col gap-3 sm:mt-9 sm:flex-row sm:flex-wrap sm:gap-4">
               <a
                 ref={magneticRef}
                 href={hero.primaryCta.href}
-                className="magnetic btn-press shine-sweep rounded-xl bg-primary px-6 py-3.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary-bright"
+                className="magnetic btn-press shine-sweep inline-flex min-h-12 items-center justify-center rounded-xl bg-primary px-6 py-3.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary-bright"
               >
                 {hero.primaryCta.label}
               </a>
               <a
                 href={hero.secondaryCta.href}
-                className="btn-press rounded-xl border border-border-strong bg-surface px-6 py-3.5 text-sm font-medium transition-colors hover:bg-surface-raised"
+                className="btn-press inline-flex min-h-12 items-center justify-center rounded-xl border border-border-strong bg-surface px-6 py-3.5 text-sm font-medium transition-colors hover:bg-surface-raised"
               >
                 {hero.secondaryCta.label}
               </a>
             </div>
           </Reveal>
-
-          <Reveal delay={620}>
-            <div className="mt-14">
-              <p className="mono-label text-muted-foreground">{hero.techLabel}</p>
-              <ul className="mt-4 flex flex-wrap gap-2.5">
-                {hero.tech.map((t, i) => (
-                  <Reveal as="li" key={t} delay={40 + i * 40}>
-                    <span className="tech-tile block rounded-lg border border-border-strong bg-surface px-3 py-1.5 font-mono text-xs text-muted-foreground">
-                      {t}
-                    </span>
-                  </Reveal>
-                ))}
-              </ul>
-            </div>
-          </Reveal>
         </div>
 
-        <Reveal delay={260} variant="scale" className="relative mx-auto w-full max-w-md lg:max-w-none">
+        <Reveal
+          delay={260}
+          variant="scale"
+          className="relative mx-auto w-full max-w-[20rem] sm:max-w-md lg:col-start-2 lg:row-span-4 lg:row-start-1 lg:max-w-none"
+        >
           {/* halo do pôr do sol atrás do retrato — cada camada reproduz a tonalidade
               da região correspondente na própria foto (índigo no topo, magenta no
               meio, dourado onde fica o sol), como se o céu vazasse para fora do quadro */}
           <div
             aria-hidden="true"
-            className="absolute -inset-10 rounded-[3rem] opacity-60 blur-3xl"
+            className="absolute -inset-6 rounded-[3rem] opacity-60 blur-3xl sm:-inset-10"
             style={{
               background: "radial-gradient(ellipse at 50% 18%, #4B3374, transparent 62%)",
             }}
           />
           <div
             aria-hidden="true"
-            className="absolute -inset-8 rounded-[3rem] opacity-70 blur-3xl"
+            className="absolute -inset-5 rounded-[3rem] opacity-70 blur-3xl sm:-inset-8"
             style={{
               background: "radial-gradient(circle at 50% 32%, #F9B35D, transparent 55%)",
             }}
           />
           <div
             aria-hidden="true"
-            className="absolute -inset-10 rounded-[3rem] opacity-55 blur-3xl"
+            className="absolute -inset-6 rounded-[3rem] opacity-55 blur-3xl sm:-inset-10"
             style={{
               background: "radial-gradient(ellipse at 50% 68%, #8B3F80, transparent 65%)",
             }}
@@ -197,25 +199,38 @@ export function Hero() {
               )}
             </div>
 
-            <div className="absolute top-[14%] -left-3 rounded-lg border border-border-strong bg-background/90 px-3 py-2 font-mono text-xs backdrop-blur sm:-left-6">
+            <div className="absolute top-[12%] -left-2 rounded-lg border border-border-strong bg-background/90 px-2.5 py-1.5 font-mono text-[0.6875rem] backdrop-blur sm:top-[14%] sm:-left-6 sm:px-3 sm:py-2 sm:text-xs">
               <span className="text-primary-soft">const </span>
               <span>dev</span>
               <span className="text-muted-foreground"> = </span>
               <span className="text-primary-soft">&quot;muryllo&quot;</span>
             </div>
 
-            <div className="absolute right-0 bottom-[10%] flex items-center gap-2 rounded-lg border border-border-strong bg-background/90 px-3 py-2 font-mono text-xs backdrop-blur sm:-right-6">
+            <div className="absolute right-0 bottom-[10%] flex items-center gap-2 rounded-lg border border-border-strong bg-background/90 px-2.5 py-1.5 font-mono text-[0.6875rem] backdrop-blur sm:-right-6 sm:px-3 sm:py-2 sm:text-xs">
               <span className="size-1.5 rounded-full bg-online" aria-hidden="true" />
               {hero.statusChip}
             </div>
           </div>
         </Reveal>
+
+        <Reveal delay={620} className="lg:col-start-1 lg:row-start-3 lg:mt-14 max-lg:delay-0!">
+          <p className="mono-label text-muted-foreground">{hero.techLabel}</p>
+          <ul className="mt-4 flex flex-wrap gap-2 sm:gap-2.5">
+            {hero.tech.map((t, i) => (
+              <Reveal as="li" key={t} delay={40 + i * 40}>
+                <span className="tech-tile block rounded-lg border border-border-strong bg-surface px-3 py-1.5 font-mono text-xs text-muted-foreground">
+                  {t}
+                </span>
+              </Reveal>
+            ))}
+          </ul>
+        </Reveal>
       </div>
 
-      {/* indicador de scroll — sugere que há mais conteúdo abaixo */}
+      {/* indicador de scroll — sugere que há mais conteúdo abaixo (só no layout desktop) */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 bottom-6 hidden justify-center sm:flex"
+        className="pointer-events-none absolute inset-x-0 bottom-6 hidden justify-center lg:flex"
       >
         <div className="flex flex-col items-center gap-3 opacity-70">
           <span className="mono-label text-muted-foreground">scroll</span>

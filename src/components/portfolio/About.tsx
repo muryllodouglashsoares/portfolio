@@ -6,16 +6,16 @@ import { AnimatedStat } from "./AnimatedStat";
 
 export function About() {
   return (
-    <section id="sobre" className="scroll-mt-24 py-24 lg:py-32">
-      <div className="mx-auto max-w-6xl px-5 sm:px-8">
+    <section id="sobre" className="scroll-mt-24 py-16 sm:py-24 lg:py-32">
+      <div className="container-page">
         <Reveal>
           <SectionLabel>{about.label}</SectionLabel>
         </Reveal>
 
-        <div className="mt-12 grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-16">
+        <div className="mt-10 grid grid-cols-1 gap-10 sm:mt-12 sm:gap-12 lg:grid-cols-2 lg:gap-16">
           <div>
             <Reveal>
-              <h2 className="font-display text-4xl leading-[1.1] font-bold sm:text-5xl">
+              <h2 className="font-display text-3xl leading-[1.1] font-bold sm:text-4xl lg:text-5xl">
                 {about.title[0]}
                 <br />
                 {about.title[1]}
@@ -24,7 +24,7 @@ export function About() {
               </h2>
             </Reveal>
 
-            <div className="mt-8 space-y-5 text-muted-foreground">
+            <div className="mt-6 space-y-4 text-muted-foreground sm:mt-8 sm:space-y-5">
               {about.paragraphs.map((p, i) => (
                 <Reveal key={p} delay={i * 70}>
                   <p className="leading-relaxed">{p}</p>
@@ -33,7 +33,7 @@ export function About() {
             </div>
 
             <Reveal delay={120}>
-              <ul className="mt-9 flex flex-wrap gap-2.5">
+              <ul className="mt-7 flex flex-wrap gap-2 sm:mt-9 sm:gap-2.5">
                 {about.tags.map((t) => (
                   <li key={t}>
                     <Tag>{t}</Tag>
@@ -43,7 +43,7 @@ export function About() {
             </Reveal>
           </div>
 
-          <div className="flex flex-col gap-10 self-start">
+          <div className="flex flex-col gap-8 self-start sm:gap-10">
             <Reveal
               delay={60}
               className="relative mx-auto w-full max-w-[220px] sm:max-w-[260px] lg:mx-0 lg:ml-auto"
@@ -68,10 +68,10 @@ export function About() {
               />
             </Reveal>
 
-            <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <ul className="grid grid-cols-2 gap-3 sm:gap-5">
               {about.stats.map((s, i) => (
                 <Reveal as="li" key={s.label} delay={i * 80} variant="scale">
-                  <div className="card-hover-lift h-full rounded-2xl border border-border bg-surface p-7">
+                  <div className="card-hover-lift h-full rounded-2xl border border-border bg-surface p-4 sm:p-7">
                     <AnimatedStat value={s.value} />
                     <p className="mt-2 text-sm text-muted-foreground">{s.label}</p>
                   </div>

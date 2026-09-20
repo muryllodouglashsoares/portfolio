@@ -50,35 +50,35 @@ function ProjectDetail() {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="pt-28 pb-20 md:pt-36 md:pb-28">
+      <main className="pt-24 pb-16 sm:pt-28 md:pt-36 md:pb-28">
         <article className="container-page">
           <Link
             to="/"
             hash="projetos"
-            className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-foreground"
+            className="inline-flex min-h-11 items-center gap-2 font-mono text-xs uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-foreground"
           >
             <ArrowLeft className="size-3.5" aria-hidden="true" />
             Voltar aos projetos
           </Link>
 
-          <header className="mt-8 max-w-3xl">
-            <p className="flex items-center gap-2 font-mono text-[0.625rem] uppercase tracking-[0.14em] text-muted-foreground">
+          <header className="mt-4 max-w-3xl sm:mt-6">
+            <p className="flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-xs uppercase tracking-[0.1em] text-muted-foreground sm:tracking-[0.14em]">
               <span aria-hidden="true" className="size-1.5 rounded-full bg-primary" />
               {statusLabel[project.status]}
               <span aria-hidden="true">·</span>
               {project.categories.join(" / ")}
             </p>
-            <h1 className="mt-4 text-4xl font-semibold sm:text-5xl">{project.title}</h1>
+            <h1 className="mt-4 text-3xl font-semibold sm:text-4xl lg:text-5xl">{project.title}</h1>
             <p className="mt-5 text-base leading-relaxed text-muted-foreground">
               {project.longDescription}
             </p>
 
-            <div className="mt-8 flex flex-wrap items-center gap-3">
+            <div className="mt-7 flex flex-col gap-3 sm:mt-8 sm:flex-row sm:flex-wrap sm:items-center">
               <a
                 href={project.githubUrl}
                 target="_blank"
                 rel="noreferrer noopener"
-                className="inline-flex items-center gap-2 rounded-md border border-border-strong px-4 py-2.5 text-sm font-medium transition-colors hover:bg-card"
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-md border border-border-strong px-4 py-2.5 text-sm font-medium transition-colors hover:bg-card sm:min-h-11"
               >
                 <Github className="size-4" aria-hidden="true" />
                 Repositório
@@ -88,7 +88,7 @@ function ProjectDetail() {
                   href={project.demoUrl}
                   target="_blank"
                   rel="noreferrer noopener"
-                  className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 sm:min-h-11"
                 >
                   Acessar demo
                   <ArrowUpRight className="size-4" aria-hidden="true" />
@@ -98,17 +98,18 @@ function ProjectDetail() {
           </header>
 
           {project.image ? (
-            <div className="mt-12 overflow-hidden rounded-lg border border-border bg-surface">
+            <div className="mt-10 overflow-hidden rounded-lg border border-border bg-surface sm:mt-12">
               <img
                 src={project.image}
                 alt={`Tela principal do projeto ${project.title}`}
                 className="w-full object-cover object-top"
+                decoding="async"
               />
             </div>
           ) : null}
 
-          <div className="mt-14 grid gap-12 lg:grid-cols-[1.5fr_1fr] lg:items-start">
-            <div className="space-y-10">
+          <div className="mt-10 grid gap-10 sm:mt-14 sm:gap-12 lg:grid-cols-[1.5fr_1fr] lg:items-start">
+            <div className="min-w-0 space-y-10">
               {project.problem ? (
                 <section>
                   <h2 className="text-2xl font-semibold">O problema</h2>
@@ -173,7 +174,7 @@ function ProjectDetail() {
                   {project.challenges.map((challenge) => (
                     <div
                       key={challenge.problem}
-                      className="rounded-lg border border-border bg-card p-6"
+                      className="rounded-lg border border-border bg-card p-5 sm:p-6"
                     >
                       <dl className="space-y-3 text-sm leading-relaxed">
                         <div>
@@ -198,7 +199,10 @@ function ProjectDetail() {
                 <section className="space-y-6">
                   <h2 className="text-2xl font-semibold">Decisões técnicas</h2>
                   {project.notes.map((note) => (
-                    <div key={note.heading} className="rounded-lg border border-border bg-card p-6">
+                    <div
+                      key={note.heading}
+                      className="rounded-lg border border-border bg-card p-5 sm:p-6"
+                    >
                       <h3 className="font-display text-base font-semibold tracking-tight">
                         {note.heading}
                       </h3>
@@ -211,14 +215,14 @@ function ProjectDetail() {
               ) : null}
 
               {project.learned ? (
-                <section className="rounded-lg border border-primary/25 bg-primary/5 p-6">
+                <section className="rounded-lg border border-primary/25 bg-primary/5 p-5 sm:p-6">
                   <h2 className="mono-label text-primary-soft">O que este projeto me ensinou</h2>
                   <p className="mt-3 leading-relaxed text-muted-foreground">{project.learned}</p>
                 </section>
               ) : null}
             </div>
 
-            <aside className="rounded-lg border border-border bg-surface p-6 lg:sticky lg:top-28">
+            <aside className="order-first min-w-0 rounded-lg border border-border bg-surface p-5 sm:p-6 lg:sticky lg:top-28 lg:order-none">
               <h2 className="mono-label text-primary-soft">Tecnologias</h2>
               <ul className="mt-4 flex flex-wrap gap-1.5">
                 {project.technologies.map((tech) => (
@@ -234,9 +238,9 @@ function ProjectDetail() {
           </div>
 
           {project.screenshots?.length ? (
-            <section className="mt-16">
+            <section className="mt-12 sm:mt-16">
               <h2 className="text-2xl font-semibold">Telas do projeto</h2>
-              <div className="mt-6 grid gap-6 sm:grid-cols-2">
+              <div className="mt-6 grid gap-4 sm:grid-cols-2 sm:gap-6">
                 {project.screenshots.map((shot) => (
                   <figure
                     key={shot.src}
@@ -247,6 +251,7 @@ function ProjectDetail() {
                       alt={`${project.title} — ${shot.caption}`}
                       loading="lazy"
                       className="w-full object-cover object-top"
+                      decoding="async"
                     />
                     <figcaption className="border-t border-border px-4 py-2.5 font-mono text-[0.6875rem] uppercase tracking-[0.14em] text-muted-foreground">
                       {shot.caption}

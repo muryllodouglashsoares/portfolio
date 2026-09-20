@@ -4,14 +4,14 @@ import { SectionLabel } from "./SectionLabel";
 
 export function Engineering() {
   return (
-    <section id="engenharia" className="scroll-mt-24 py-24 lg:py-32">
-      <div className="mx-auto max-w-6xl px-5 sm:px-8">
+    <section id="engenharia" className="scroll-mt-24 py-16 sm:py-24 lg:py-32">
+      <div className="container-page">
         <Reveal>
           <SectionLabel>{engineering.label}</SectionLabel>
         </Reveal>
 
         <Reveal delay={60}>
-          <h2 className="mt-10 max-w-2xl font-display text-4xl font-bold sm:text-5xl">
+          <h2 className="mt-8 max-w-2xl font-display text-3xl font-bold sm:text-4xl lg:text-5xl sm:mt-10">
             {engineering.title}
           </h2>
         </Reveal>
@@ -22,12 +22,12 @@ export function Engineering() {
           </p>
         </Reveal>
 
-        <div className="mt-14 grid grid-cols-1 gap-5 sm:grid-cols-2">
+        <div className="mt-10 grid grid-cols-1 gap-4 sm:mt-14 sm:grid-cols-2 sm:gap-5">
           {engineering.groups.map((group, i) => (
             <Reveal key={group.title} delay={i * 80}>
-              <div className="card-hover-lift h-full rounded-2xl border border-border bg-surface p-6 sm:p-7">
+              <div className="card-hover-lift h-full rounded-2xl border border-border bg-surface p-5 sm:p-7">
                 <h3 className="mono-label text-primary-soft">{group.title}</h3>
-                <ul className="mt-5 space-y-3.5">
+                <ul className="mt-4 space-y-3 sm:mt-5 sm:space-y-3.5">
                   {group.items.map((item) => (
                     <li key={item} className="flex gap-3 text-sm leading-relaxed">
                       <span

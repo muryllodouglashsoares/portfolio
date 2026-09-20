@@ -14,14 +14,14 @@ export function Projects() {
   const spotlightRef = useSpotlight<HTMLElement>();
 
   return (
-    <section id="projetos" className="scroll-mt-24 py-24 lg:py-32">
-      <div className="mx-auto max-w-6xl px-5 sm:px-8">
+    <section id="projetos" className="scroll-mt-24 py-16 sm:py-24 lg:py-32">
+      <div className="container-page">
         <Reveal>
           <SectionLabel>{projectsCopy.label}</SectionLabel>
         </Reveal>
 
         <Reveal delay={60}>
-          <h2 className="mt-10 font-display text-4xl font-bold sm:text-5xl">
+          <h2 className="mt-8 font-display text-3xl font-bold sm:mt-10 sm:text-4xl lg:text-5xl">
             {projectsCopy.title}
           </h2>
         </Reveal>
@@ -30,7 +30,7 @@ export function Projects() {
         <Reveal delay={100} variant="scale">
           <article
             ref={spotlightRef}
-            className="spotlight mt-14 grid grid-cols-1 gap-10 rounded-3xl border border-border bg-surface p-7 transition-colors duration-300 sm:p-10 lg:grid-cols-2 lg:gap-14"
+            className="spotlight mt-10 grid grid-cols-1 gap-8 rounded-3xl border border-border bg-surface p-5 transition-colors duration-300 sm:mt-14 sm:gap-10 sm:p-8 lg:grid-cols-2 lg:gap-14 lg:p-10"
           >
             <div>
               <div className="flex flex-wrap items-center gap-3">
@@ -41,11 +41,15 @@ export function Projects() {
                 </span>
               </div>
 
-              <h3 className="mt-5 font-display text-4xl font-bold">{f.title}</h3>
-              <p className="mt-3 text-lg text-primary-soft">{f.description}</p>
-              <p className="mt-5 leading-relaxed text-muted-foreground">{f.longDescription}</p>
+              <h3 className="mt-4 font-display text-3xl font-bold sm:mt-5 sm:text-4xl">
+                {f.title}
+              </h3>
+              <p className="mt-3 text-base text-primary-soft sm:text-lg">{f.description}</p>
+              <p className="mt-4 leading-relaxed text-muted-foreground sm:mt-5">
+                {f.longDescription}
+              </p>
 
-              <ul className="mt-6 flex flex-wrap gap-2.5">
+              <ul className="mt-5 flex flex-wrap gap-2 sm:mt-6 sm:gap-2.5">
                 {f.technologies.map((t) => (
                   <li key={t}>
                     <Tag>{t}</Tag>
@@ -53,11 +57,11 @@ export function Projects() {
                 ))}
               </ul>
 
-              <div className="mt-8 flex flex-wrap gap-3">
+              <div className="mt-7 flex flex-col gap-3 sm:mt-8 sm:flex-row sm:flex-wrap">
                 <Link
                   to="/projects/$slug"
                   params={{ slug: f.id }}
-                  className="btn-press shine-sweep group inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary-bright"
+                  className="btn-press shine-sweep group inline-flex min-h-12 items-center justify-center gap-2 sm:min-h-11 rounded-xl bg-primary px-5 py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary-bright"
                 >
                   Ver detalhes técnicos
                   <ArrowRight
@@ -69,7 +73,7 @@ export function Projects() {
                   href={f.githubUrl}
                   target="_blank"
                   rel="noreferrer noopener"
-                  className="btn-press inline-flex items-center gap-2 rounded-xl border border-border-strong bg-surface-raised px-5 py-3 text-sm font-medium transition-colors hover:bg-accent"
+                  className="btn-press inline-flex min-h-12 items-center justify-center gap-2 sm:min-h-11 rounded-xl border border-border-strong bg-surface-raised px-5 py-3 text-sm font-medium transition-colors hover:bg-accent"
                 >
                   <Github className="size-4" aria-hidden="true" />
                   Repositório
@@ -79,7 +83,7 @@ export function Projects() {
                     href={f.demoUrl}
                     target="_blank"
                     rel="noreferrer noopener"
-                    className="btn-press inline-flex items-center gap-2 rounded-xl border border-border-strong bg-surface-raised px-5 py-3 text-sm font-medium transition-colors hover:bg-accent"
+                    className="btn-press inline-flex min-h-12 items-center justify-center gap-2 sm:min-h-11 rounded-xl border border-border-strong bg-surface-raised px-5 py-3 text-sm font-medium transition-colors hover:bg-accent"
                   >
                     Abrir aplicação
                     <ArrowUpRight className="size-4" aria-hidden="true" />
@@ -88,20 +92,20 @@ export function Projects() {
               </div>
             </div>
 
-            <div className="space-y-5">
+            <div className="space-y-4 sm:space-y-5">
               {f.problem ? (
-                <div className="rounded-2xl border border-border bg-surface-raised/60 p-6">
+                <div className="rounded-2xl border border-border bg-surface-raised/60 p-5 sm:p-6">
                   <h4 className="mono-label text-primary-soft">Problema</h4>
                   <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{f.problem}</p>
                 </div>
               ) : null}
               {f.solution ? (
-                <div className="rounded-2xl border border-border bg-surface-raised/60 p-6">
+                <div className="rounded-2xl border border-border bg-surface-raised/60 p-5 sm:p-6">
                   <h4 className="mono-label text-primary-soft">Solução</h4>
                   <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{f.solution}</p>
                 </div>
               ) : null}
-              <div className="rounded-2xl border border-border bg-surface-raised/60 p-6">
+              <div className="rounded-2xl border border-border bg-surface-raised/60 p-5 sm:p-6">
                 <h4 className="mono-label text-primary-soft">Destaques</h4>
                 <ul className="mt-3 space-y-2">
                   {f.features.slice(0, 4).map((h) => (
@@ -119,7 +123,7 @@ export function Projects() {
         </Reveal>
 
         {/* Demais projetos */}
-        <ul className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <ul className="mt-4 grid grid-cols-1 gap-4 sm:mt-6 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
           {otherProjects.map((p, i) => (
             <Reveal as="li" key={p.id} delay={(i % 3) * 80}>
               <ProjectListCard project={p} index={i} />
@@ -149,7 +153,7 @@ function ProjectListCard({ project: p, index: i }: { project: Project; index: nu
       <Link
         to="/projects/$slug"
         params={{ slug: p.id }}
-        className="card-hover-lift group flex h-full flex-col rounded-2xl border border-border bg-surface p-7"
+        className="card-hover-lift group flex h-full flex-col rounded-2xl border border-border bg-surface p-5 sm:p-7"
       >
         <div className="flex items-start justify-between gap-3">
           <span className="font-mono text-sm text-muted-foreground">
@@ -157,7 +161,7 @@ function ProjectListCard({ project: p, index: i }: { project: Project; index: nu
           </span>
           <Tag>{`${p.categories[0]}`}</Tag>
         </div>
-        <h3 className="mt-5 font-display text-xl font-semibold">{p.title}</h3>
+        <h3 className="mt-4 font-display text-xl font-semibold sm:mt-5">{p.title}</h3>
         <p className="mt-2 font-mono text-xs uppercase tracking-[0.1em] text-muted-foreground">
           {statusLabel[p.status]}
         </p>

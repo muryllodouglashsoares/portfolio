@@ -38,7 +38,7 @@ export function AnimatedStat({ value }: { value: string }) {
   const count = useCountUp(target, active);
 
   return (
-    <p ref={ref} className="font-display text-4xl font-bold text-primary-soft">
+    <p ref={ref} className="font-display text-3xl font-bold text-primary-soft sm:text-4xl">
       {match ? `${count}${suffix}` : value}
     </p>
   );
