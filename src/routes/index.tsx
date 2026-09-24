@@ -10,6 +10,7 @@ import { Timeline } from "@/components/portfolio/Timeline";
 import { GithubCta } from "@/components/portfolio/GithubCta";
 import { Contact } from "@/components/portfolio/Contact";
 import { Footer } from "@/components/portfolio/Footer";
+import { ScrollRobot } from "@/components/robot/ScrollRobot";
 
 const title = "Muryllo Douglas — Estudante e Desenvolvedor Web";
 const description =
@@ -51,6 +52,7 @@ function Index() {
         <Contact />
       </main>
       <Footer />
+      <ScrollRobot />
     </>
   );
 }

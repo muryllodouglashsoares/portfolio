@@ -4,7 +4,7 @@ import { SectionLabel } from "./SectionLabel";
 
 export function GithubCta() {
   return (
-    <section className="py-8 sm:py-12 lg:py-20">
+    <section id="github" className="py-8 sm:py-12 lg:py-20">
       <div className="container-page">
         <Reveal>
           <div className="card-hover-lift relative overflow-hidden rounded-3xl border border-border bg-surface p-6 sm:p-12">
