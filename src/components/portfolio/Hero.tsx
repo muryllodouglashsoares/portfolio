@@ -2,6 +2,34 @@ import { hero } from "@/data/portfolio";
 import { Reveal } from "./Reveal";
 import { useMagnetic } from "@/hooks/use-motion";
 
+/*
+ * Céu da foto (hero-sunset-portrait.jpg): as bordas esquerda/direita são um degradê vertical
+ * limpo, então basta reproduzi-lo em CSS para prolongar a foto para fora do quadro. Cada ponto
+ * é a cor média das bordas naquela altura (% da altura da foto). Ao trocar a foto, amostre de
+ * novo — o fundo do Hero é derivado dela, e não o contrário.
+ */
+const PORTRAIT_SKY = [
+  "#3C2C5F 0%",
+  "#442F65 8%",
+  "#4C3168 16%",
+  "#52346C 24%",
+  "#5C376E 32%",
+  "#68396F 40%",
+  "#713D6E 48%",
+  "#7B4070 55%",
+  "#7B3F69 60%",
+  "#793F63 64%",
+  "#402640 68%",
+  "#1C1320 72%",
+  "#0C0A0D 76%",
+  "var(--background) 100%",
+].join(", ");
+
+// Esmaece a extensão do céu, dos dois lados, de forma gradual (várias paradas ≈ curva suave),
+// para que ela se dissolva no fundo da seção sem deixar uma borda perceptível.
+const SKY_FEATHER =
+  "linear-gradient(to right, transparent 4%, rgb(0 0 0 / 0.08) 12%, rgb(0 0 0 / 0.3) 20%, rgb(0 0 0 / 0.65) 28%, rgb(0 0 0 / 0.92) 34%, black 40%, black 60%, rgb(0 0 0 / 0.92) 66%, rgb(0 0 0 / 0.65) 72%, rgb(0 0 0 / 0.3) 80%, rgb(0 0 0 / 0.08) 88%, transparent 96%)";
+
 export function Hero() {
   const magneticRef = useMagnetic<HTMLAnchorElement>();
 
@@ -10,31 +38,14 @@ export function Hero() {
       id="top"
       className="relative overflow-hidden pt-24 pb-16 sm:pt-32 sm:pb-20 short:max-lg:pt-24 short:max-lg:pb-12 lg:pt-48 lg:pb-32"
     >
-      {/* céu do pôr do sol da foto, esticado como fundo de toda a tela inicial */}
+      {/* céu de fundo da seção: versão mais escura e calma do céu da foto, para o texto respirar.
+          O céu "de verdade" (idêntico ao da foto) é desenhado junto do retrato, ver PORTRAIT_SKY */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0"
         style={{
           background:
-            "linear-gradient(to bottom, #34254E 0%, #4B3168 20%, #6B3B72 40%, #5A2F58 58%, #241729 78%, var(--background) 100%)",
-        }}
-      />
-      {/* brilho do sol: no desktop fica atrás do retrato (coluna direita); no mobile o retrato
-          desce para o meio da seção, então o brilho acompanha — e sai de trás do texto */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 hidden opacity-70 lg:block"
-        style={{
-          background:
-            "radial-gradient(ellipse 60% 55% at 78% 34%, #F9B35D, transparent 60%), radial-gradient(ellipse 70% 60% at 78% 30%, #C6598F, transparent 70%)",
-        }}
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 opacity-70 lg:hidden"
-        style={{
-          background:
-            "radial-gradient(ellipse 80% 15% at 50% 57%, #F9B35D, transparent 60%), radial-gradient(ellipse 100% 20% at 50% 55%, #C6598F, transparent 70%)",
+            "linear-gradient(to bottom, #2F2248 0%, #38285A 22%, #452C60 38%, #4E2F62 52%, #45274F 62%, #21162A 76%, var(--background) 100%)",
         }}
       />
       <div
@@ -56,19 +67,8 @@ export function Hero() {
         }}
       />
 
-      <div className="container-page relative grid grid-cols-1 items-center gap-y-10 sm:gap-y-14 lg:grid-cols-[1.05fr_0.95fr] lg:grid-rows-[1fr_auto_auto_1fr] lg:gap-x-16 lg:gap-y-0">
+      <div className="container-page relative isolate grid grid-cols-1 items-center gap-y-10 sm:gap-y-14 lg:grid-cols-[1.05fr_0.95fr] lg:grid-rows-[1fr_auto_auto_1fr] lg:gap-x-16 lg:gap-y-0">
         <div className="relative lg:col-start-1 lg:row-start-2">
-          {/* painel com blur atrás do bloco de texto, para manter a leitura sobre o céu colorido */}
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute -inset-x-8 -inset-y-14 -z-10 hidden backdrop-blur-2xl lg:block"
-            style={{
-              WebkitMaskImage:
-                "radial-gradient(ellipse 78% 82% at 38% 50%, black 45%, transparent 100%)",
-              maskImage: "radial-gradient(ellipse 78% 82% at 38% 50%, black 45%, transparent 100%)",
-              background: "color-mix(in oklab, var(--background) 38%, transparent)",
-            }}
-          />
           <Reveal>
             <span className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5">
               <span className="size-1.5 rounded-full bg-primary-soft" aria-hidden="true" />
@@ -100,14 +100,14 @@ export function Hero() {
 
           <Reveal delay={520}>
             <div className="mt-7 flex flex-col gap-3 sm:mt-9 sm:flex-row sm:flex-wrap sm:gap-4">
-              <a
+              
                 ref={magneticRef}
                 href={hero.primaryCta.href}
                 className="magnetic btn-press shine-sweep inline-flex min-h-12 items-center justify-center rounded-xl bg-primary px-6 py-3.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary-bright"
               >
                 {hero.primaryCta.label}
               </a>
-              <a
+              
                 href={hero.secondaryCta.href}
                 className="btn-press inline-flex min-h-12 items-center justify-center rounded-xl border border-border-strong bg-surface px-6 py-3.5 text-sm font-medium transition-colors hover:bg-surface-raised"
               >
@@ -117,101 +117,84 @@ export function Hero() {
           </Reveal>
         </div>
 
-        <Reveal
-          delay={260}
-          variant="scale"
-          className="relative mx-auto w-full max-w-[20rem] sm:max-w-md lg:col-start-2 lg:row-span-4 lg:row-start-1 lg:max-w-none"
-        >
-          {/* halo do pôr do sol atrás do retrato — cada camada reproduz a tonalidade
-              da região correspondente na própria foto (índigo no topo, magenta no
-              meio, dourado onde fica o sol), como se o céu vazasse para fora do quadro */}
+        <div className="relative mx-auto w-full max-w-[20rem] sm:max-w-md lg:col-start-2 lg:row-span-4 lg:row-start-1 lg:max-w-none">
+          {/* prolongamento do céu da foto: reproduz o degradê das bordas da própria imagem, alinhado
+              linha a linha com ela, e continua para cima, para baixo e para os lados. Assim a foto
+              nunca encontra um fundo de outra cor — não existe "quadro" para a borda denunciar */}
           <div
             aria-hidden="true"
-            className="absolute -inset-6 rounded-[3rem] opacity-60 blur-3xl sm:-inset-10"
-            style={{
-              background: "radial-gradient(ellipse at 50% 18%, #4B3374, transparent 62%)",
-            }}
-          />
-          <div
-            aria-hidden="true"
-            className="absolute -inset-5 rounded-[3rem] opacity-70 blur-3xl sm:-inset-8"
-            style={{
-              background: "radial-gradient(circle at 50% 32%, #F9B35D, transparent 55%)",
-            }}
-          />
-          <div
-            aria-hidden="true"
-            className="absolute -inset-6 rounded-[3rem] opacity-55 blur-3xl sm:-inset-10"
-            style={{
-              background: "radial-gradient(ellipse at 50% 68%, #8B3F80, transparent 65%)",
-            }}
-          />
-
-          {/* fotografia + chips flutuam juntos, num ciclo longo e quase imperceptível */}
-          <div className="portrait-float relative">
-            <div className="relative aspect-[4/5]">
-              {hero.portraitSrc ? (
-                <>
-                  <img
-                    src={hero.portraitSrc}
-                    alt={hero.portraitAlt}
-                    className="size-full object-cover object-top"
-                    style={{
-                      filter: "contrast(0.82) brightness(0.92) saturate(0.88)",
-                      maskImage:
-                        "linear-gradient(to right, transparent 0%, black 22%, black 78%, transparent 100%), linear-gradient(to bottom, transparent 0%, black 16%, black 68%, transparent 100%)",
-                      WebkitMaskImage:
-                        "linear-gradient(to right, transparent 0%, black 22%, black 78%, transparent 100%), linear-gradient(to bottom, transparent 0%, black 16%, black 68%, transparent 100%)",
-                      maskComposite: "intersect",
-                      WebkitMaskComposite: "source-in, source-over",
-                    }}
-                    width={1024}
-                    height={1280}
-                    loading="eager"
-                    fetchPriority="high"
-                    decoding="async"
-                  />
-                  <div
-                    aria-hidden="true"
-                    className="pointer-events-none absolute inset-0"
-                    style={{
-                      mixBlendMode: "soft-light",
-                      background:
-                        "linear-gradient(to bottom, #4B3168 0%, #6B3B72 35%, #5A2F58 65%, #241729 100%)",
-                      maskImage:
-                        "linear-gradient(to right, transparent 0%, black 22%, black 78%, transparent 100%), linear-gradient(to bottom, transparent 0%, black 16%, black 68%, transparent 100%)",
-                      WebkitMaskImage:
-                        "linear-gradient(to right, transparent 0%, black 22%, black 78%, transparent 100%), linear-gradient(to bottom, transparent 0%, black 16%, black 68%, transparent 100%)",
-                      maskComposite: "intersect",
-                      WebkitMaskComposite: "source-in, source-over",
-                    }}
-                  />
-                </>
-              ) : (
-                <div className="flex size-full flex-col items-center justify-center gap-3 rounded-3xl border border-border-strong bg-surface p-8 text-center">
-                  <span className="mono-label text-primary-soft">retrato editorial</span>
-                  <p className="max-w-[16rem] text-sm text-muted-foreground">
-                    Placeholder do Hero. Substitua definindo{" "}
-                    <code className="font-mono text-foreground">portraitSrc</code> em{" "}
-                    <code className="font-mono text-foreground">src/data/portfolio.ts</code>.
-                  </p>
-                </div>
-              )}
-            </div>
-
-            <div className="absolute top-[12%] -left-2 rounded-lg border border-border-strong bg-background/90 px-2.5 py-1.5 font-mono text-[0.6875rem] backdrop-blur sm:top-[14%] sm:-left-6 sm:px-3 sm:py-2 sm:text-xs">
-              <span className="text-primary-soft">const </span>
-              <span>dev</span>
-              <span className="text-muted-foreground"> = </span>
-              <span className="text-primary-soft">&quot;muryllo&quot;</span>
-            </div>
-
-            <div className="absolute right-0 bottom-[10%] flex items-center gap-2 rounded-lg border border-border-strong bg-background/90 px-2.5 py-1.5 font-mono text-[0.6875rem] backdrop-blur sm:-right-6 sm:px-3 sm:py-2 sm:text-xs">
-              <span className="size-1.5 rounded-full bg-online" aria-hidden="true" />
-              {hero.statusChip}
-            </div>
+            className="pointer-events-none absolute -inset-y-[100vh] -inset-x-[70%] -z-20"
+            style={{ WebkitMaskImage: SKY_FEATHER, maskImage: SKY_FEATHER }}
+          >
+            <div
+              className="absolute inset-x-0 top-0 h-[100vh]"
+              style={{ background: "linear-gradient(to top, #3C2C5F, #2F2248)" }}
+            />
+            <div
+              className="absolute inset-x-0 top-[100vh] bottom-[100vh]"
+              style={{ background: `linear-gradient(to bottom, ${PORTRAIT_SKY})` }}
+            />
+            <div className="absolute inset-x-0 bottom-0 h-[100vh] bg-background" />
           </div>
-        </Reveal>
+
+          {/* brilho do sol: círculo desfocado centrado no sol da foto (≈53% × 29%) — o clarão
+              escapa do quadro de forma redonda, sem formar retângulo */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute top-[29%] left-[53%] -z-10 size-[58%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#F9B35D] opacity-25 blur-3xl"
+          />
+
+          <Reveal delay={260} variant="scale" className="relative">
+            {/* fotografia + chips flutuam juntos, num ciclo longo e quase imperceptível */}
+            <div className="portrait-float relative">
+              <div className="relative aspect-[4/5]">
+                {hero.portraitSrc ? (
+                  <>
+                    <img
+                      src={hero.portraitSrc}
+                      alt={hero.portraitAlt}
+                      className="size-full object-cover object-top"
+                      style={{
+                        maskImage:
+                          "linear-gradient(to right, transparent 0%, black 22%, black 78%, transparent 100%), linear-gradient(to bottom, transparent 0%, black 16%, black 68%, transparent 100%)",
+                        WebkitMaskImage:
+                          "linear-gradient(to right, transparent 0%, black 22%, black 78%, transparent 100%), linear-gradient(to bottom, transparent 0%, black 16%, black 68%, transparent 100%)",
+                        maskComposite: "intersect",
+                        WebkitMaskComposite: "source-in, source-over",
+                      }}
+                      width={1024}
+                      height={1280}
+                      loading="eager"
+                      fetchPriority="high"
+                      decoding="async"
+                    />
+                  </>
+                ) : (
+                  <div className="flex size-full flex-col items-center justify-center gap-3 rounded-3xl border border-border-strong bg-surface p-8 text-center">
+                    <span className="mono-label text-primary-soft">retrato editorial</span>
+                    <p className="max-w-[16rem] text-sm text-muted-foreground">
+                      Placeholder do Hero. Substitua definindo{" "}
+                      <code className="font-mono text-foreground">portraitSrc</code> em{" "}
+                      <code className="font-mono text-foreground">src/data/portfolio.ts</code>.
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              <div className="absolute top-[12%] -left-2 rounded-lg border border-border-strong bg-background/90 px-2.5 py-1.5 font-mono text-[0.6875rem] backdrop-blur sm:top-[14%] sm:-left-6 sm:px-3 sm:py-2 sm:text-xs">
+                <span className="text-primary-soft">const </span>
+                <span>dev</span>
+                <span className="text-muted-foreground"> = </span>
+                <span className="text-primary-soft">&quot;muryllo&quot;</span>
+              </div>
+
+              <div className="absolute right-0 bottom-[10%] flex items-center gap-2 rounded-lg border border-border-strong bg-background/90 px-2.5 py-1.5 font-mono text-[0.6875rem] backdrop-blur sm:-right-6 sm:px-3 sm:py-2 sm:text-xs">
+                <span className="size-1.5 rounded-full bg-online" aria-hidden="true" />
+                {hero.statusChip}
+              </div>
+            </div>
+          </Reveal>
+        </div>
 
         <Reveal delay={620} className="lg:col-start-1 lg:row-start-3 lg:mt-14 max-lg:delay-0!">
           <p className="mono-label text-muted-foreground">{hero.techLabel}</p>
