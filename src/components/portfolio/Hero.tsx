@@ -25,8 +25,7 @@ const PORTRAIT_SKY = [
   "var(--background) 100%",
 ].join(", ");
 
-// Esmaece a extensão do céu, dos dois lados, de forma gradual (várias paradas ≈ curva suave),
-// para que ela se dissolva no fundo da seção sem deixar uma borda perceptível.
+// Esmaece a extensão do céu, dos dois lados, de forma gradual
 const SKY_FEATHER =
   "linear-gradient(to right, transparent 4%, rgb(0 0 0 / 0.08) 12%, rgb(0 0 0 / 0.3) 20%, rgb(0 0 0 / 0.65) 28%, rgb(0 0 0 / 0.92) 34%, black 40%, black 60%, rgb(0 0 0 / 0.92) 66%, rgb(0 0 0 / 0.65) 72%, rgb(0 0 0 / 0.3) 80%, rgb(0 0 0 / 0.08) 88%, transparent 96%)";
 
@@ -38,8 +37,7 @@ export function Hero() {
       id="top"
       className="relative overflow-hidden pt-24 pb-16 sm:pt-32 sm:pb-20 short:max-lg:pt-24 short:max-lg:pb-12 lg:pt-48 lg:pb-32"
     >
-      {/* céu de fundo da seção: versão mais escura e calma do céu da foto, para o texto respirar.
-          O céu "de verdade" (idêntico ao da foto) é desenhado junto do retrato, ver PORTRAIT_SKY */}
+      {/* céu de fundo da seção */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0"
@@ -48,6 +46,7 @@ export function Hero() {
             "linear-gradient(to bottom, #2F2248 0%, #38285A 22%, #452C60 38%, #4E2F62 52%, #45274F 62%, #21162A 76%, var(--background) 100%)",
         }}
       />
+
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 opacity-80"
@@ -57,7 +56,7 @@ export function Hero() {
         }}
       />
 
-      {/* halo ambiente — reforço extra próximo dos elementos gráficos */}
+      {/* halo ambiente */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute -top-24 right-[-25%] size-[24rem] rounded-full opacity-30 blur-[80px] sm:-top-40 sm:right-[-10%] sm:size-[42rem] sm:blur-[120px]"
@@ -100,14 +99,15 @@ export function Hero() {
 
           <Reveal delay={520}>
             <div className="mt-7 flex flex-col gap-3 sm:mt-9 sm:flex-row sm:flex-wrap sm:gap-4">
-              
+              <a
                 ref={magneticRef}
                 href={hero.primaryCta.href}
                 className="magnetic btn-press shine-sweep inline-flex min-h-12 items-center justify-center rounded-xl bg-primary px-6 py-3.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary-bright"
               >
                 {hero.primaryCta.label}
               </a>
-              
+
+              <a
                 href={hero.secondaryCta.href}
                 className="btn-press inline-flex min-h-12 items-center justify-center rounded-xl border border-border-strong bg-surface px-6 py-3.5 text-sm font-medium transition-colors hover:bg-surface-raised"
               >
@@ -118,9 +118,7 @@ export function Hero() {
         </div>
 
         <div className="relative mx-auto w-full max-w-[20rem] sm:max-w-md lg:col-start-2 lg:row-span-4 lg:row-start-1 lg:max-w-none">
-          {/* prolongamento do céu da foto: reproduz o degradê das bordas da própria imagem, alinhado
-              linha a linha com ela, e continua para cima, para baixo e para os lados. Assim a foto
-              nunca encontra um fundo de outra cor — não existe "quadro" para a borda denunciar */}
+          {/* prolongamento do céu da foto */}
           <div
             aria-hidden="true"
             className="pointer-events-none absolute -inset-y-[100vh] -inset-x-[70%] -z-20"
@@ -130,22 +128,23 @@ export function Hero() {
               className="absolute inset-x-0 top-0 h-[100vh]"
               style={{ background: "linear-gradient(to top, #3C2C5F, #2F2248)" }}
             />
+
             <div
               className="absolute inset-x-0 top-[100vh] bottom-[100vh]"
               style={{ background: `linear-gradient(to bottom, ${PORTRAIT_SKY})` }}
             />
+
             <div className="absolute inset-x-0 bottom-0 h-[100vh] bg-background" />
           </div>
 
-          {/* brilho do sol: círculo desfocado centrado no sol da foto (≈53% × 29%) — o clarão
-              escapa do quadro de forma redonda, sem formar retângulo */}
+          {/* brilho do sol */}
           <div
             aria-hidden="true"
             className="pointer-events-none absolute top-[29%] left-[53%] -z-10 size-[58%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#F9B35D] opacity-25 blur-3xl"
           />
 
           <Reveal delay={260} variant="scale" className="relative">
-            {/* fotografia + chips flutuam juntos, num ciclo longo e quase imperceptível */}
+            {/* fotografia + chips flutuam juntos */}
             <div className="portrait-float relative">
               <div className="relative aspect-[4/5]">
                 {hero.portraitSrc ? (
@@ -171,11 +170,16 @@ export function Hero() {
                   </>
                 ) : (
                   <div className="flex size-full flex-col items-center justify-center gap-3 rounded-3xl border border-border-strong bg-surface p-8 text-center">
-                    <span className="mono-label text-primary-soft">retrato editorial</span>
+                    <span className="mono-label text-primary-soft">
+                      retrato editorial
+                    </span>
                     <p className="max-w-[16rem] text-sm text-muted-foreground">
                       Placeholder do Hero. Substitua definindo{" "}
-                      <code className="font-mono text-foreground">portraitSrc</code> em{" "}
-                      <code className="font-mono text-foreground">src/data/portfolio.ts</code>.
+                      <code className="font-mono text-foreground">portraitSrc</code>{" "}
+                      em{" "}
+                      <code className="font-mono text-foreground">
+                        src/data/portfolio.ts
+                      </code>.
                     </p>
                   </div>
                 )}
@@ -196,8 +200,12 @@ export function Hero() {
           </Reveal>
         </div>
 
-        <Reveal delay={620} className="lg:col-start-1 lg:row-start-3 lg:mt-14 max-lg:delay-0!">
+        <Reveal
+          delay={620}
+          className="lg:col-start-1 lg:row-start-3 lg:mt-14 max-lg:delay-0!"
+        >
           <p className="mono-label text-muted-foreground">{hero.techLabel}</p>
+
           <ul className="mt-4 flex flex-wrap gap-2 sm:gap-2.5">
             {hero.tech.map((t, i) => (
               <Reveal as="li" key={t} delay={40 + i * 40}>
@@ -210,7 +218,7 @@ export function Hero() {
         </Reveal>
       </div>
 
-      {/* indicador de scroll — sugere que há mais conteúdo abaixo (só no layout desktop) */}
+      {/* indicador de scroll */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-x-0 bottom-6 hidden justify-center lg:flex"
