@@ -36,8 +36,6 @@ const groups: { label: string; items: string[] }[] = [
       "Zod",
       "React Hook Form",
       "Cloudflare Workers",
-      "GitHub Pages",
-      "GitHub Actions",
     ],
   },
   {

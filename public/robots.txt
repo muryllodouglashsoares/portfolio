@@ -13,4 +13,4 @@ Allow: /
 User-agent: *
 Allow: /
 
-Sitemap: https://muryllodouglashsoares.github.io/portfolio/sitemap.xml
+Sitemap: https://portfolio-c1u.pages.dev/sitemap.xml

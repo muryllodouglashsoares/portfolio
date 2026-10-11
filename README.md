@@ -2,7 +2,7 @@
 
 Estudante de Informática (Ensino Médio Integrado ao Técnico) no **IFPB Campus Itaporanga** e desenvolvedor em formação. Este repositório é o código-fonte do meu portfólio pessoal — e também um retrato de como venho evoluindo de landing pages para sistemas com autenticação, banco de dados e regras de autorização reais.
 
-**[Ver portfólio ao vivo →](https://portfolio-c1u.pages.dev)**
+**[Ver portfólio ao vivo →](https://portfolio-c1u.pages.dev/)**
 
 ---
 
@@ -10,7 +10,7 @@ Estudante de Informática (Ensino Médio Integrado ao Técnico) no **IFPB Campus
 
 Sou estudante do 2º ano do Técnico em Informática no IFPB Itaporanga, construindo projetos reais como forma prática de aprender desenvolvimento de software. Meu foco está em desenvolvimento web (front-end e back-end), automação e, mais recentemente, arquitetura e estruturas de dados — a base para sistemas mais complexos do que os que eu conseguia construir há um ano.
 
-Não é um portfólio de "faço sites". É o histórico de alguém aumentando a complexidade técnica projeto a projeto: de landing pages estáticas para uma plataforma com três perfis de usuário, Firestore e regras de segurança testadas.
+Não é um portfólio de "faço sites". É o histórico de alguém aumentando a complexidade técnica projeto a projeto: de landing pages estáticas para uma plataforma com quatro perfis de usuário, Firestore e regras de segurança testadas.
 
 ## O que estou construindo
 
@@ -26,7 +26,7 @@ Comecei com páginas e interfaces para fixar HTML, CSS, JavaScript e responsivid
 
 ### 🎓 [Tekidu](https://github.com/muryllodouglashsoares/Tekidu) — em desenvolvimento
 
-O projeto de maior complexidade do portfólio. Uma plataforma de gestão e acompanhamento acadêmico com três experiências separadas — administrador, professor e estudante — cada uma com telas e permissões próprias.
+O projeto de maior complexidade do portfólio. Uma plataforma de gestão e acompanhamento acadêmico com quatro experiências separadas — administrador, professor, estudante e responsável — cada uma com telas e permissões próprias.
 
 - **O que resolve:** informações acadêmicas (notas, frequência, boletim, avisos) espalhadas entre planilhas e sistemas dispersos.
 - **Como:** autenticação completa com Firebase Auth (login, primeiro acesso, recuperação de senha), dados acadêmicos no Cloud Firestore, e autorização por perfil garantida via **Firestore Security Rules** — não apenas escondida na interface.
@@ -69,8 +69,6 @@ Robô seguidor de linha em LEGO Spike Prime para competição do IFPB, com duas 
 
 - **Stack:** LEGO Spike Prime · Python · Programação em blocos
 
-Além destes, tenho experiência com **robótica educacional** (LEGO SPIKE Prime, OBR) e um projeto de **sistema embarcado de alarme de incêndio**, unindo hardware, lógica de programação e automação.
-
 ## Stack / Tecnologias
 
 **Front-end**
@@ -89,7 +87,6 @@ Além destes, tenho experiência com **robótica educacional** (LEGO SPIKE Prime
 
 **Infraestrutura**
 ![Cloudflare](https://img.shields.io/badge/-Cloudflare-F38020?style=flat-square&logo=cloudflare&logoColor=white)
-![GitHub Pages](https://img.shields.io/badge/-GitHub_Pages-222222?style=flat-square&logo=github&logoColor=white)
 ![Vite](https://img.shields.io/badge/-Vite-646CFF?style=flat-square&logo=vite&logoColor=white)
 
 **Ferramentas**
@@ -100,7 +97,7 @@ Além destes, tenho experiência com **robótica educacional** (LEGO SPIKE Prime
 ![Python](https://img.shields.io/badge/-Python-3776AB?style=flat-square&logo=python&logoColor=white)
 ![LEGO SPIKE Prime](https://img.shields.io/badge/-LEGO_SPIKE_Prime-E3000B?style=flat-square)
 
-*Este portfólio em si (o código deste repositório) é construído com React 19, TypeScript, TanStack Start e Tailwind CSS 4, com build para GitHub Pages.*
+*Este portfólio em si (o código deste repositório) é construído com React 19, TypeScript, TanStack Start e Tailwind CSS 4, hospedado na Cloudflare Pages.*
 
 ## Atualmente estudando
 
@@ -120,10 +117,10 @@ Além destes, tenho experiência com **robótica educacional** (LEGO SPIKE Prime
 
 ## Contato
 
-- **Portfólio:** [muryllodouglashsoares.github.io/portfolio](https://muryllodouglashsoares.github.io/portfolio/)
+- **Portfólio:** [portfolio-c1u.pages.dev](https://portfolio-c1u.pages.dev/)
 - **GitHub:** [github.com/muryllodouglashsoares](https://github.com/muryllodouglashsoares)
 - **LinkedIn:** [linkedin.com/in/muryllodouglashsoares](https://linkedin.com/in/muryllodouglashsoares)
 
 ---
 
-<sub>Construído com React 19, TypeScript, TanStack Start e Tailwind CSS 4. Deploy contínuo via GitHub Actions para GitHub Pages.</sub>
+<sub>Construído com React 19, TypeScript, TanStack Start e Tailwind CSS 4. Hospedado na Cloudflare Pages.</sub>

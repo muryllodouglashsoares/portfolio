@@ -66,22 +66,26 @@ export const projects: Project[] = [
     id: "tekidu",
     title: "Tekidu",
     description:
-      "Plataforma de gestão e acompanhamento acadêmico com experiências separadas para administradores, professores e estudantes.",
+      "Plataforma de gestão e acompanhamento acadêmico com experiências separadas para administradores, professores, estudantes e responsáveis.",
     longDescription:
-      "A Tekidu centraliza informações acadêmicas — notas, frequência, boletim, turmas e comunicados — em um único ambiente, no lugar de planilhas e sistemas dispersos. A plataforma possui três experiências distintas, cada uma com telas e permissões próprias.",
+      "A Tekidu centraliza informações acadêmicas — notas, frequência, boletim, turmas e comunicados — em um único ambiente, no lugar de planilhas e sistemas dispersos. A plataforma possui quatro experiências distintas, cada uma com telas e permissões próprias.",
     problem:
       "Informações acadêmicas espalhadas entre planilhas e sistemas separados, sem um lugar único onde estudante, professor e administração enxerguem os mesmos dados.",
     solution:
-      "Um ambiente único com três perfis de acesso: o administrador gerencia estudantes, professores, turmas, disciplinas e avisos; o professor cuida de turmas, avaliações, notas e frequência; o estudante acessa boletim, desempenho, frequência e avisos, restrito aos próprios dados.",
+      "Um ambiente único com quatro perfis de acesso: o administrador gerencia estudantes, professores, turmas, disciplinas e avisos; o professor cuida de turmas, avaliações, notas e frequência; o estudante acessa boletim, desempenho, frequência, justificativas de falta, mensagens e avisos, restrito aos próprios dados; o responsável consulta boletim e frequência dos estudantes vinculados, somente leitura.",
     features: [
       "Autenticação completa: login, primeiro acesso com e-mail transacional e recuperação de senha via Firebase Authentication",
       "Gestão acadêmica com CRUDs completos de estudantes, professores, turmas, disciplinas e avaliações",
       "Lançamento de notas, cálculo de médias e boletim consolidado por estudante",
       "Registro de frequência por sessão, com histórico por período",
       "Relatórios e indicadores de desempenho por estudante e por turma",
+      "Justificativas de falta com documento comprobatório (imagem ou PDF) e mensagens entre professores e estudantes",
+      "Exportação de boletim em PDF e de frequência e relatórios em Excel/PDF",
       "Avisos, central de notificações e calendário acadêmico",
       "Command palette para navegação por atalhos de teclado",
       "UX mobile dedicada: bottom navigation, sheets e FAB próprios",
+      "PWA instalável, com Service Worker",
+      "Painel de acessibilidade com preferências de texto, contraste e movimento",
       "Dark mode via tokens de design em CSS variables",
     ],
     technologies: [
@@ -94,6 +98,7 @@ export const projects: Project[] = [
       "Firebase Auth",
       "Cloud Firestore",
       "Firestore Rules",
+      "Cloudflare Pages Functions",
       "Vitest",
     ],
     categories: ["Plataformas", "Web", "Acadêmicos"],
@@ -113,11 +118,12 @@ export const projects: Project[] = [
     featured: true,
     status: "in-progress",
     architecture: [
-      "React + TypeScript (Vite) — três experiências de UI (admin, professor, estudante) sobre a mesma base de componentes",
+      "React + TypeScript (Vite) — quatro experiências de UI (admin, professor, estudante, responsável) sobre a mesma base de componentes",
       "Firebase Authentication — login, primeiro acesso e recuperação de senha",
       "Cloud Firestore — dados acadêmicos: estudantes, turmas, notas, frequência, avisos",
       "Firestore Security Rules — autorização por perfil aplicada no banco, não só na UI",
       "Camada de serviços por domínio (students, grades, attendance, reports, audit, email) isolando o acesso a dados dos componentes",
+      "Cloudflare Pages Functions — e-mail de primeiro acesso, mantendo credenciais fora do bundle do cliente",
       "Deploy em Cloudflare Pages",
     ],
     challenges: [
@@ -135,13 +141,17 @@ export const projects: Project[] = [
         investigation:
           "Mapeamento das rotas por perfil de usuário para identificar quais telas nunca são acessadas juntas na mesma sessão.",
         solution:
-          "Praticamente todas as páginas carregadas sob demanda com React.lazy, agrupadas por Suspense conforme o perfil — cada usuário baixa só o código da sua própria experiência.",
+          "A maioria das páginas carregada sob demanda com React.lazy, agrupadas por Suspense conforme o perfil — cada usuário baixa só o código da sua própria experiência.",
       },
     ],
     notes: [
       {
         heading: "Camada de serviços por domínio",
-        body: "O acesso ao Firestore fica isolado em serviços (students, grades, attendance, reports, audit, email), mantendo os componentes de UI livres de lógica de dados. Alterações sensíveis, como edição de notas, geram log de auditoria assíncrono.",
+        body: "O acesso ao Firestore fica isolado em serviços (students, grades, attendance, reports, audit, email, entre outros), mantendo os componentes de UI livres de lógica de dados. Alterações sensíveis, como edição de notas, geram log de auditoria assíncrono.",
+      },
+      {
+        heading: "O que ainda falta",
+        body: "Segundo o roadmap do repositório, ainda não há pipeline de CI/CD nem testes de componentes de interface; também estão previstos monitoramento de erros em produção e uma auditoria de acessibilidade.",
       },
     ],
     learned:
@@ -170,23 +180,23 @@ export const projects: Project[] = [
     ],
     technologies: ["JavaScript", "HTML", "CSS", "Firebase Auth", "Realtime Database"],
     categories: ["Plataformas", "Web", "Acadêmicos"],
-    githubUrl: "https://github.com/muryllodouglashsoares/IFConnect",
-    image: raw("IFConnect", "screenshots/Captura%20de%20Tela%20(206).png"),
+    githubUrl: "https://github.com/muryllodouglashsoares/plataforma-comunicacao",
+    image: raw("plataforma-comunicacao", "screenshots/Captura%20de%20Tela%20(206).png"),
     screenshots: [
       {
-        src: raw("IFConnect", "screenshots/Captura%20de%20Tela%20(210).png"),
+        src: raw("plataforma-comunicacao", "screenshots/Captura%20de%20Tela%20(210).png"),
         caption: "Avisos",
       },
       {
-        src: raw("IFConnect", "screenshots/Captura%20de%20Tela%20(209).png"),
+        src: raw("plataforma-comunicacao", "screenshots/Captura%20de%20Tela%20(209).png"),
         caption: "Explorar",
       },
       {
-        src: raw("IFConnect", "screenshots/Captura%20de%20Tela%20(208).png"),
+        src: raw("plataforma-comunicacao", "screenshots/Captura%20de%20Tela%20(208).png"),
         caption: "Perfil",
       },
       {
-        src: raw("IFConnect", "screenshots/Captura%20de%20Tela%20(212).png"),
+        src: raw("plataforma-comunicacao", "screenshots/Captura%20de%20Tela%20(212).png"),
         caption: "Painel administrativo",
       },
     ],
@@ -195,7 +205,7 @@ export const projects: Project[] = [
       "JavaScript (sem framework de front-end) — feed, chat e painel administrativo",
       "Firebase Authentication — cadastro, login com Google e verificação de e-mail",
       "Firebase Realtime Database — posts, seguidores, chat e notificações em tempo real",
-      "Cargos (aluno, professor, administrador) controlando o que cada perfil pode ver e moderar",
+      "Cargos (aluno, professor, administrador) controlando o que cada perfil pode ver e moderar — permissões tratadas no código do cliente, sem backend próprio",
     ],
     notes: [
       {
@@ -255,6 +265,10 @@ export const projects: Project[] = [
     status: "completed",
     notes: [
       {
+        heading: "Origem do projeto",
+        body: "O projeto foi iniciado no Lovable e evoluído manualmente — incluindo a limpeza do scaffold de UI, que removeu componentes e dependências não utilizados.",
+      },
+      {
         heading: "Performance como decisão de design",
         body: "A sequência de montagem anima somente transform e opacity e roda uma única vez; nada usa repeat infinito além da auréola do prato. O will-change é aplicado só enquanto uma peça está caindo, e no mobile a timeline usa menos peças e menos partículas.",
       },
@@ -264,7 +278,7 @@ export const projects: Project[] = [
     id: "forja",
     title: "FORJA Training Studio",
     description:
-      "Landing page de alta conversão para um studio de treinamento conceitual, com SEO técnico e captura de lead integrada.",
+      "Landing page com foco em conversão para um studio de treinamento conceitual, com SEO técnico e captura de lead integrada.",
     longDescription:
       "O objetivo foi construir uma landing page no padrão que uma agência entregaria a um cliente do nicho fitness: identidade visual forte, copy persuasiva, formulário validado ponta a ponta, SEO técnico completo e cuidado com performance e acessibilidade. O studio é fictício.",
     features: [
@@ -308,23 +322,14 @@ export const projects: Project[] = [
     description:
       "Landing page de clínica odontológica construída a partir de um design de referência, com SSR e SEO técnico.",
     longDescription:
-      "Landing page pixel-perfect construída a partir de um design de referência para uma clínica odontológica, servindo como peça de portfólio para demonstrar domínio de SSR, SEO técnico e integração de formulário com automação real.",
+      "Landing page pixel-perfect construída a partir de um design de referência para uma clínica odontológica, servindo como peça de portfólio para exercitar SSR, SEO técnico e integração de formulário com automação real. A clínica e seus dados são fictícios.",
     features: [
       "Landing page completa (serviços, equipe, depoimentos, FAQ) renderizada via SSR",
       "Formulário de contato integrado a webhook real (Make → Google Sheets), com modo demonstração automático",
       "Dados estruturados JSON-LD para Dentist e FAQPage",
       "sitemap.xml, robots.txt e manifest.json (PWA) com ícones",
     ],
-    technologies: [
-      "TanStack Start",
-      "React 19",
-      "TypeScript",
-      "HTML",
-      "CSS",
-      "JavaScript",
-      "Tailwind CSS",
-      "Vite",
-    ],
+    technologies: ["TanStack Start", "React 19", "TypeScript", "HTML", "CSS", "JavaScript", "Vite"],
     categories: ["Web"],
     githubUrl: "https://github.com/muryllodouglashsoares/clinica-landing-page",
     demoUrl: "https://clinica-landing-page.muryllodouglash-soares.workers.dev/",

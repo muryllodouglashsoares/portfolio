@@ -1,15 +1,16 @@
 // Conteúdo editável do portfólio. Edite apenas este arquivo para atualizar textos.
 import heroPortrait from "@/assets/hero-sunset-portrait.jpg";
 import aboutIllustration from "@/assets/about-illustration.png";
+import { projects as projectList } from "@/data/projects";
 
 export const site = {
   name: "Muryllo",
   logo: "muryllo",
   fullName: "Muryllo Douglas",
   role: "Estudante · Desenvolvedor",
-  email: "muryllo@email.com",
+  email: "muryllodouglashsoares@gmail.com",
   github: "https://github.com/muryllodouglashsoares",
-  linkedin: "https://linkedin.com/in/muryllodouglas",
+  linkedin: "https://linkedin.com/in/muryllodouglashsoares",
   footer: "© 2026 Muryllo Douglas · Estudante, desenvolvedor, construtor.",
 };
 
@@ -43,7 +44,7 @@ export const about = {
   label: "sobre",
   title: ["Construindo,", "aprendendo", "e evoluindo."],
   paragraphs: [
-    "Sou estudante de Informática no IFPB e desenvolvedor em formação. Construo projetos reais desde cedo porque acredito que a melhor forma de aprender é fazendo.",
+    "Sou estudante de Informática no IFPB e desenvolvedor em formação. Construo projetos reais porque acredito que a melhor forma de aprender é fazendo.",
     "Tenho interesse em interfaces digitais, desenvolvimento web, automação e robótica. Cada projeto é uma oportunidade de explorar algo novo e entregar algo que funciona de verdade.",
     "Não estou tentando parecer alguém com anos de experiência que não tenho. Estou mostrando o que consigo construir agora — e evoluindo rápido.",
   ],
@@ -51,9 +52,12 @@ export const about = {
   illustrationSrc: aboutIllustration as string,
   illustrationAlt: "Ilustração digital estilizada de Muryllo Douglas",
   stats: [
-    { value: "6+", label: "Projetos documentados" },
-    { value: "4", label: "Projetos publicados" },
-    { value: "25+", label: "Tecnologias utilizadas" },
+    { value: String(projectList.length), label: "Projetos documentados" },
+    {
+      value: String(projectList.filter((p) => p.demoUrl).length),
+      label: "Projetos com demo online",
+    },
+    { value: "2", label: "Apps com autenticação e banco de dados" },
     { value: "∞", label: "Aprendizado contínuo" },
   ],
 };
@@ -73,7 +77,7 @@ export const stack = {
           note: "Tekidu, Savora, FORJA, OdontoPrime — tipagem de dados e componentes",
         },
         { name: "React", note: "Tekidu, Savora, FORJA, OdontoPrime — construção de interfaces" },
-        { name: "Tailwind CSS", note: "Tekidu, OdontoPrime — estilização utilitária" },
+        { name: "Tailwind CSS", note: "Tekidu, Savora, FORJA — estilização utilitária" },
         { name: "TanStack Start", note: "Savora, FORJA, OdontoPrime — SSR e roteamento" },
       ],
     },
@@ -116,15 +120,15 @@ export const engineering = {
       items: [
         "Componentização de interfaces em React, reaproveitando UI entre telas",
         "TypeScript para tipar dados, formulários e o contrato entre camadas",
-        "Design responsivo mobile-first, com dark mode via tokens de design",
+        "Design responsivo, com dark mode via tokens de design no Tekidu",
       ],
     },
     {
       title: "Dados e autorização",
       items: [
         "Modelagem de dados acadêmicos e sociais no Firestore / Realtime Database",
-        "Autenticação com Firebase Auth (e-mail/senha, Google, verificação de e-mail)",
-        "Autorização por perfil validada no banco via Security Rules — não só escondida na UI",
+        "Autenticação com Firebase Auth: e-mail/senha e recuperação de senha no Tekidu; e-mail/senha, Google e verificação de e-mail no IFConnect",
+        "Tekidu: autorização por perfil validada no banco via Security Rules — não só escondida na UI. No IFConnect, as permissões por cargo ficam no código do cliente",
       ],
     },
     {
@@ -138,8 +142,8 @@ export const engineering = {
     {
       title: "Deploy e automação",
       items: [
-        "Versionamento com Git, histórico organizado por commit no GitHub",
-        "Deploy contínuo em Cloudflare Pages / Workers",
+        "Versionamento com Git e GitHub em todos os projetos",
+        "Deploy em Cloudflare Pages / Workers",
         "Integração de formulários com automações reais (Make → Google Sheets)",
       ],
     },
@@ -181,7 +185,7 @@ export const timeline = {
       index: "04",
       title: "Publicação",
       description:
-        "Projetos entram em produção: deploy na Cloudflare, domínio próprio. O código chega ao mundo.",
+        "Projetos entram no ar: deploy na Cloudflare, com demos públicas. O código chega ao mundo.",
     },
     {
       index: "05",
@@ -203,7 +207,7 @@ export const githubSection = {
   label: "github",
   title: "Código aberto, projetos reais.",
   description: [
-    "Todos os meus projetos estão documentados e disponíveis.",
+    "Os projetos apresentados aqui estão documentados e disponíveis no GitHub.",
     "Código real, histórico real, evolução real.",
   ],
   cta: { label: "Ver GitHub →", href: site.github },

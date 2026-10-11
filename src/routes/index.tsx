@@ -26,7 +26,7 @@ export const Route = createFileRoute("/")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
-    links: [{ rel: "canonical", href: "https://muryllodouglashsoares.github.io/portfolio/" }],
+    links: [{ rel: "canonical", href: "https://portfolio-c1u.pages.dev/" }],
   }),
   component: Index,
 });

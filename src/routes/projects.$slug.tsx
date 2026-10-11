@@ -22,7 +22,7 @@ export const Route = createFileRoute("/projects/$slug")({
     }
     const { project } = loaderData;
     const title = `${project.title} — Projeto de Muryllo Douglas`;
-    const canonical = `https://muryllodouglashsoares.github.io/portfolio/projects/${project.id}`;
+    const canonical = `https://portfolio-c1u.pages.dev/projects/${project.id}`;
     return {
       links: [{ rel: "canonical", href: canonical }],
       meta: [
