@@ -170,16 +170,11 @@ export function Hero() {
                   </>
                 ) : (
                   <div className="flex size-full flex-col items-center justify-center gap-3 rounded-3xl border border-border-strong bg-surface p-8 text-center">
-                    <span className="mono-label text-primary-soft">
-                      retrato editorial
-                    </span>
+                    <span className="mono-label text-primary-soft">retrato editorial</span>
                     <p className="max-w-[16rem] text-sm text-muted-foreground">
                       Placeholder do Hero. Substitua definindo{" "}
-                      <code className="font-mono text-foreground">portraitSrc</code>{" "}
-                      em{" "}
-                      <code className="font-mono text-foreground">
-                        src/data/portfolio.ts
-                      </code>.
+                      <code className="font-mono text-foreground">portraitSrc</code> em{" "}
+                      <code className="font-mono text-foreground">src/data/portfolio.ts</code>.
                     </p>
                   </div>
                 )}
@@ -200,10 +195,7 @@ export function Hero() {
           </Reveal>
         </div>
 
-        <Reveal
-          delay={620}
-          className="lg:col-start-1 lg:row-start-3 lg:mt-14 max-lg:delay-0!"
-        >
+        <Reveal delay={620} className="lg:col-start-1 lg:row-start-3 lg:mt-14 max-lg:delay-0!">
           <p className="mono-label text-muted-foreground">{hero.techLabel}</p>
 
           <ul className="mt-4 flex flex-wrap gap-2 sm:gap-2.5">

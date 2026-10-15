@@ -2,7 +2,13 @@ import { Link } from "@tanstack/react-router";
 import { ArrowRight, ArrowUpRight, Github } from "lucide-react";
 
 import { projects as projectsCopy } from "@/data/portfolio";
-import { featuredProject, otherProjects, statusLabel, type Project } from "@/data/projects";
+import {
+  featuredProject,
+  otherProjects,
+  principalProjects,
+  statusLabel,
+  type Project,
+} from "@/data/projects";
 import { Reveal } from "./Reveal";
 import { SectionLabel } from "./SectionLabel";
 import { Tag } from "./Tag";
@@ -122,11 +128,21 @@ export function Projects() {
           </article>
         </Reveal>
 
-        {/* Demais projetos */}
-        <ul className="mt-4 grid grid-cols-1 gap-4 sm:mt-6 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {/* Outros projetos principais */}
+        <ul className="mt-4 grid grid-cols-1 gap-4 sm:mt-6 sm:gap-6 md:grid-cols-2">
+          {principalProjects.map((p, i) => (
+            <Reveal as="li" key={p.id} delay={i * 80}>
+              <ProjectListCard project={p} index={i} detailed />
+            </Reveal>
+          ))}
+        </ul>
+
+        {/* Projetos complementares */}
+        <h3 className="mono-label mt-14 text-muted-foreground sm:mt-20">Projetos complementares</h3>
+        <ul className="mt-5 grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
           {otherProjects.map((p, i) => (
             <Reveal as="li" key={p.id} delay={(i % 3) * 80}>
-              <ProjectListCard project={p} index={i} />
+              <ProjectListCard project={p} index={i + principalProjects.length} />
             </Reveal>
           ))}
         </ul>
@@ -144,7 +160,15 @@ export function Projects() {
  * um clique em qualquer ponto do card enquanto ele está visível abre o link de deploy
  * numa nova aba, em vez de navegar para a página de detalhes.
  */
-function ProjectListCard({ project: p, index: i }: { project: Project; index: number }) {
+function ProjectListCard({
+  project: p,
+  index: i,
+  detailed = false,
+}: {
+  project: Project;
+  index: number;
+  detailed?: boolean;
+}) {
   const { ref, pos, active } = usePointerChip<HTMLDivElement>();
   const showChip = active && Boolean(p.demoUrl);
 
@@ -166,8 +190,14 @@ function ProjectListCard({ project: p, index: i }: { project: Project; index: nu
           {statusLabel[p.status]}
         </p>
         <p className="mt-4 text-sm leading-relaxed text-muted-foreground">{p.description}</p>
+        {detailed && p.problem ? (
+          <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+            <span className="text-foreground">Problema: </span>
+            {p.problem}
+          </p>
+        ) : null}
         <ul className="mt-auto flex flex-wrap gap-2 pt-6">
-          {p.technologies.slice(0, 5).map((t) => (
+          {p.technologies.slice(0, detailed ? 8 : 5).map((t) => (
             <li key={t}>
               <Tag>{t}</Tag>
             </li>

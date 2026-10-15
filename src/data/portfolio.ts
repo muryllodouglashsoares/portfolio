@@ -10,7 +10,7 @@ export const site = {
   role: "Estudante · Desenvolvedor",
   email: "muryllodouglashsoares@gmail.com",
   github: "https://github.com/muryllodouglashsoares",
-  linkedin: "https://linkedin.com/in/muryllodouglashsoares",
+  linkedin: "https://www.linkedin.com/in/muryllo-douglas-henrique-soares-7a8416416/",
   footer: "© 2026 Muryllo Douglas · Estudante, desenvolvedor, construtor.",
 };
 
@@ -57,8 +57,14 @@ export const about = {
       value: String(projectList.filter((p) => p.demoUrl).length),
       label: "Projetos com demo online",
     },
-    { value: "2", label: "Apps com autenticação e banco de dados" },
-    { value: "∞", label: "Aprendizado contínuo" },
+    {
+      value: String(projectList.filter((p) => p.authAndDatabase).length),
+      label: "Apps com autenticação e banco de dados",
+    },
+    {
+      value: String(projectList.filter((p) => p.hasTests).length),
+      label: "Projetos com testes automatizados",
+    },
   ],
 };
 
@@ -74,27 +80,56 @@ export const stack = {
         { name: "JavaScript", note: "IFConnect, OdontoPrime — interatividade sem framework" },
         {
           name: "TypeScript",
-          note: "Tekidu, Savora, FORJA, OdontoPrime — tipagem de dados e componentes",
+          note: "LexContract, Evidence Finder, Tekidu, Savora, FORJA, OdontoPrime — tipagem de dados e componentes",
         },
-        { name: "React", note: "Tekidu, Savora, FORJA, OdontoPrime — construção de interfaces" },
-        { name: "Tailwind CSS", note: "Tekidu, Savora, FORJA — estilização utilitária" },
+        {
+          name: "React",
+          note: "LexContract, Evidence Finder, Tekidu, Savora, FORJA, OdontoPrime — construção de interfaces",
+        },
+        {
+          name: "Tailwind CSS",
+          note: "LexContract, Tekidu, Savora, FORJA — estilização utilitária",
+        },
         { name: "TanStack Start", note: "Savora, FORJA, OdontoPrime — SSR e roteamento" },
       ],
     },
     {
       title: "Back-end / Dados",
       items: [
+        { name: "Node.js + Fastify", note: "LexContract — API REST modular com JWT e papéis" },
+        {
+          name: "PostgreSQL + Prisma",
+          note: "LexContract — dados relacionais isolados por escritório",
+        },
+        { name: "Rust + Tauri", note: "Evidence Finder — núcleo do app desktop local" },
+        { name: "SQLite (FTS5)", note: "Evidence Finder — metadados e busca de texto local" },
         { name: "Firebase Auth", note: "Tekidu, IFConnect — autenticação de usuários" },
         { name: "Cloud Firestore", note: "Tekidu — dados acadêmicos e regras de acesso" },
         { name: "Realtime Database", note: "IFConnect — feed, chat e notificações" },
-        { name: "Vitest + Firebase Emulator", note: "Tekidu — testes das regras de segurança" },
       ],
     },
     {
-      title: "Deploy / Automação",
+      title: "Qualidade / Deploy",
       items: [
+        {
+          name: "Vitest + Firebase Emulator",
+          note: "Tekidu — testes das regras de segurança",
+        },
+        {
+          name: "Vitest",
+          note: "LexContract (API), Evidence Finder, Tekidu — testes automatizados",
+        },
+        { name: "Playwright", note: "LexContract — 4 fluxos E2E rodando no CI" },
+        { name: "Docker", note: "LexContract — imagens do frontend (Nginx) e do backend" },
+        {
+          name: "GitHub Actions",
+          note: "LexContract — CI e deploy só após todos os testes passarem",
+        },
         { name: "Git / GitHub", note: "Todos os projetos — versionamento e histórico" },
-        { name: "Cloudflare", note: "Tekidu, Savora, FORJA, OdontoPrime — deploy e hospedagem" },
+        {
+          name: "Cloudflare",
+          note: "LexContract, Tekidu, Savora, FORJA, OdontoPrime — deploy e hospedagem",
+        },
         { name: "Make", note: "Savora, FORJA, OdontoPrime — automação de formulários" },
         { name: "Zod", note: "FORJA — validação de formulário no cliente e no servidor" },
       ],
@@ -126,15 +161,16 @@ export const engineering = {
     {
       title: "Dados e autorização",
       items: [
-        "Modelagem de dados acadêmicos e sociais no Firestore / Realtime Database",
+        "Modelagem relacional com PostgreSQL e Prisma no LexContract; modelagem de dados acadêmicos e sociais no Firestore / Realtime Database",
         "Autenticação com Firebase Auth: e-mail/senha e recuperação de senha no Tekidu; e-mail/senha, Google e verificação de e-mail no IFConnect",
-        "Tekidu: autorização por perfil validada no banco via Security Rules — não só escondida na UI. No IFConnect, as permissões por cargo ficam no código do cliente",
+        "LexContract: papéis verificados no servidor e dados isolados por escritório. Tekidu: autorização por perfil validada no banco via Security Rules — não só escondida na UI. No IFConnect, as permissões por cargo ficam no código do cliente",
       ],
     },
     {
       title: "Qualidade",
       items: [
-        "Testes de regras de segurança com Firebase Emulator e Vitest",
+        "Testes unitários e de integração da API (LexContract), 4 fluxos E2E com Playwright e testes das regras de segurança do Firestore (Tekidu)",
+        "Núcleo em Rust com 164 testes automatizados no Evidence Finder, segundo o README do projeto",
         "Validação de formulário em duas camadas: cliente (Zod) e servidor",
         "Code splitting por perfil de usuário para reduzir o que cada um carrega",
       ],
@@ -143,7 +179,8 @@ export const engineering = {
       title: "Deploy e automação",
       items: [
         "Versionamento com Git e GitHub em todos os projetos",
-        "Deploy em Cloudflare Pages / Workers",
+        "Pipeline de CI/CD no LexContract: o deploy só ocorre depois de typecheck, build, testes, E2E e imagens Docker",
+        "Deploy em Cloudflare Pages / Workers e Render (API)",
         "Integração de formulários com automações reais (Make → Google Sheets)",
       ],
     },
@@ -179,7 +216,7 @@ export const timeline = {
       index: "03",
       title: "Construção",
       description:
-        "Primeiros projetos próprios ganham forma. Tekidu, IFConnect e outros nascem como ideias reais.",
+        "Primeiros projetos próprios ganham forma. IFConnect, Tekidu e outros nascem como ideias reais.",
     },
     {
       index: "04",
@@ -191,7 +228,7 @@ export const timeline = {
       index: "05",
       title: "Evolução",
       description:
-        "Sistemas mais complexos: autenticação, banco de dados, regras de segurança e testes automatizados.",
+        "Sistemas mais complexos: autenticação, banco de dados, regras de segurança e testes automatizados — e, no LexContract, backend próprio com PostgreSQL, testes E2E e pipeline de CI/CD.",
     },
     {
       index: "06",

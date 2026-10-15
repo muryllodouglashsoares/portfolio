@@ -37,7 +37,14 @@ export interface Project {
   image?: string;
   /** Additional real screenshots */
   screenshots?: { src: string; caption: string }[];
+  /** Projeto de maior destaque da página (apenas um) */
   featured?: boolean;
+  /** Projeto principal: profundidade técnica verificada no código. Os demais são complementares. */
+  principal?: boolean;
+  /** Verificado no código: o projeto usa autenticação de usuários e banco de dados */
+  authAndDatabase?: boolean;
+  /** Verificado no código: o repositório contém testes automatizados */
+  hasTests?: boolean;
   status: ProjectStatus;
   /** Extra notes about the build process, only when confirmed */
   notes?: ProjectSection[];
@@ -63,6 +70,159 @@ export const statusLabel: Record<ProjectStatus, string> = {
 
 export const projects: Project[] = [
   {
+    id: "lexcontract",
+    title: "LexContract",
+    description:
+      "SaaS de gestão de contratos de prestação de serviços jurídicos, com API própria, banco relacional, isolamento entre escritórios e pipeline de CI/CD.",
+    longDescription:
+      "O LexContract centraliza o ciclo de vida de contratos de advogados autônomos e pequenos escritórios — clientes, modelos, contratos, documentos, pagamentos e histórico de auditoria — em um único sistema, no lugar de planilhas, e-mail e papel. Cada escritório é um tenant com dados isolados. É o projeto com a maior amplitude técnica do portfólio: frontend, backend próprio, banco relacional, testes e automação de deploy.",
+    problem:
+      "Pequenos escritórios de advocacia acompanham contratos, cobranças e documentos espalhados entre e-mail, WhatsApp, planilhas e pastas físicas, sem rastreabilidade e com dificuldade de continuidade quando mais de uma pessoa acompanha o mesmo caso.",
+    solution:
+      "Um domínio central — o contrato — ligado a cliente, modelo, versões do texto, documentos, pagamentos e auditoria, tudo isolado por escritório (officeId). O contrato percorre estados controlados (rascunho → envio → assinatura → vigência → encerramento), com permissões por papel (ADMIN, LAWYER, ASSISTANT) aplicadas no backend.",
+    features: [
+      "Autenticação por e-mail e senha com JWT, hash de senha com bcryptjs e 2FA (TOTP) opcional para ADMIN e LAWYER",
+      "Permissões por papel (ADMIN, LAWYER, ASSISTANT) verificadas no backend, e não apenas escondidas na interface",
+      "Isolamento multi-tenant: os serviços filtram por escritório em toda leitura e escrita",
+      "Modelos de contrato com variáveis substituídas automaticamente e criação de contratos em etapas, com versionamento do conteúdo",
+      "Transições de status controladas, término e renovação com alerta automático de vencimento",
+      "Aceite eletrônico por link público de uso único (assinatura eletrônica simples, não ICP-Brasil), com token em hash, expiração e vínculo com a versão exata do contrato",
+      "Documentos, parcelas de pagamento com indicadores financeiros, notificações e Web Push",
+      "Dashboard, busca global, filtros avançados e histórico de auditoria das ações",
+    ],
+    technologies: [
+      "React 19",
+      "TypeScript",
+      "Vite",
+      "Tailwind CSS 4",
+      "Node.js",
+      "Fastify",
+      "PostgreSQL",
+      "Prisma",
+      "Zod",
+      "Vitest",
+      "Playwright",
+      "Docker",
+      "GitHub Actions",
+    ],
+    categories: ["Plataformas", "Web"],
+    githubUrl: "https://github.com/muryllodouglashsoares/law-contract-management",
+    demoUrl: "https://law-contract-management.pages.dev/",
+    image: raw("law-contract-management", "docs/screenshots/dashboard.webp"),
+    screenshots: [
+      {
+        src: raw("law-contract-management", "docs/screenshots/novo-contrato-revisao.webp"),
+        caption: "Novo contrato — revisão",
+      },
+      {
+        src: raw("law-contract-management", "docs/screenshots/contrato-resumo.webp"),
+        caption: "Detalhe do contrato",
+      },
+      {
+        src: raw("law-contract-management", "docs/screenshots/contrato-pagamentos.webp"),
+        caption: "Pagamentos do contrato",
+      },
+      {
+        src: raw("law-contract-management", "docs/screenshots/contratos-filtros.webp"),
+        caption: "Contratos com filtros",
+      },
+      {
+        src: raw("law-contract-management", "docs/screenshots/historico.webp"),
+        caption: "Histórico de auditoria",
+      },
+    ],
+    featured: true,
+    principal: true,
+    authAndDatabase: true,
+    hasTests: true,
+    status: "in-progress",
+    architecture: [
+      "React + TypeScript (Vite) — interface, sessão do usuário e cliente HTTP central",
+      "API Fastify — rotas e controllers por módulo, com autenticação e papéis nos preHandlers",
+      "Services — regras de negócio, sempre filtrando pelo escritório do usuário autenticado",
+      "Prisma ORM — acesso tipado ao banco, com índices e restrições de unicidade por escritório",
+      "PostgreSQL — dados relacionais: clientes, contratos, versões, documentos, pagamentos e auditoria",
+      "GitHub Actions — CI (frontend, backend, Docker, E2E) e deploy encadeado para Render (API) e Cloudflare Pages (frontend)",
+    ],
+    challenges: [
+      {
+        problem:
+          "Em um sistema multi-escritório, um erro de filtro em uma única consulta pode expor contratos de um escritório a outro.",
+        investigation:
+          "Mapeamento de todo recurso de negócio que precisa guardar o escritório de origem e de quais pontos o identificador poderia chegar à consulta.",
+        solution:
+          "Todo recurso guarda officeId e cada service filtra por request.user.officeId vindo do token, nunca por um id enviado livremente pelo cliente. Restrições de unicidade (como CPF/CNPJ) valem por escritório, não globalmente.",
+      },
+      {
+        problem: "Ocultar botões para quem não tem permissão não impede uma chamada direta à API.",
+        investigation:
+          "Separação entre autenticação, autorização e validação como etapas sequenciais de cada rota.",
+        solution:
+          "Autorização por papel aplicada no servidor (authenticate → requireRole → validação com Zod); quem força a chamada recebe 403. Há testes de integração dedicados às regras de papel.",
+      },
+    ],
+    notes: [
+      {
+        heading: "Qualidade e entrega",
+        body: "O repositório tem testes unitários e de integração no backend (Vitest, com PostgreSQL real no CI), 4 fluxos E2E em Playwright (login, criar contrato, enviar contrato, registrar pagamento) e um pipeline que só publica depois que typecheck, build, testes, E2E e build das imagens Docker passam.",
+      },
+      {
+        heading: "Limitações declaradas",
+        body: "A assinatura é um aceite eletrônico simples, sem validade ICP-Brasil. O projeto não alega conformidade com a LGPD nem certificação de segurança: os mecanismos listados são os que existem no código. É um projeto em evolução, sem usuários reais comprovados.",
+      },
+    ],
+    learned:
+      "O LexContract foi onde passei a pensar o sistema de ponta a ponta: modelagem relacional, API própria, autorização no servidor, isolamento de dados entre clientes, testes automatizados e um pipeline que impede deploy com falha.",
+  },
+  {
+    id: "evidence-finder",
+    title: "Evidence Finder",
+    description:
+      "Aplicativo desktop para Windows que organiza e pesquisa localmente textos, imagens, PDFs e conversas, com referência à fonte e exportação de evidências.",
+    longDescription:
+      "Aplicativo desktop (Tauri 2 com núcleo em Rust e interface em React) que reúne arquivos em projetos locais, extrai o texto, permite pesquisar esse conteúdo com trechos ligados ao documento de origem e exporta os resultados selecionados em um pacote com relatório PDF. O processamento é local: o aplicativo não contém cliente de rede nem telemetria, e a política de segurança do Tauri bloqueia conexões externas. O projeto está na Fase 5 e ainda não está completo.",
+    problem:
+      "Encontrar uma informação específica em muitas capturas de tela, PDFs e conversas exige abrir arquivo por arquivo, e é difícil provar de onde veio cada trecho.",
+    solution:
+      "Importar os arquivos em um projeto local, extrair o texto de cada formato, indexar tudo em SQLite FTS5 e devolver os resultados com o contexto e a fonte, com hash SHA-256 para verificar se o arquivo continua o mesmo.",
+    features: [
+      "Importação de PNG, JPEG, TXT e PDF, com formato conferido pelo conteúdo, detecção de duplicatas por SHA-256 e limite de 500 documentos por projeto",
+      "Extração de texto de TXT e PDF, e OCR local de imagens e PDFs digitalizados via Tesseract (exige o Tesseract instalado)",
+      "Busca lexical local com SQLite FTS5: palavras, frase exata e combinação de termos, com filtros e ordenação por relevância",
+      "Trechos com contexto e abertura segura do arquivo original",
+      "Exportação dos resultados selecionados em relatório PDF, pasta de fontes verificadas por hash e manifest.json",
+      "Camadas de proteção descritas no README: caminhos validados no núcleo, consultas parametrizadas e permissões mínimas do Tauri",
+    ],
+    technologies: ["Tauri 2", "Rust", "React 19", "TypeScript", "SQLite", "Vite", "Vitest"],
+    categories: ["Plataformas"],
+    githubUrl: "https://github.com/muryllodouglashsoares/evidence-finder",
+    principal: true,
+    hasTests: true,
+    status: "in-progress",
+    architecture: [
+      "React + TypeScript — telas; uma única camada de serviço chama o núcleo",
+      "Comandos Tauri (Rust) — superfície exposta, com validação e autorização",
+      "Serviços e módulos de domínio em Rust — importação, extração, busca e exportação",
+      "SQLite por projeto — metadados, hashes, texto extraído e índice FTS5",
+    ],
+    notes: [
+      {
+        heading: "Estado atual",
+        body: "Implementadas as fases de projetos, importação, extração, busca lexical e exportação. A busca semântica/com IA não existe, e a Fase 5 ainda não foi validada em um Windows real, segundo o próprio README.",
+      },
+      {
+        heading: "Limitações declaradas",
+        body: "O SQLite e as cópias gerenciadas não são criptografados e o app não protege contra malware nem contra outros usuários da mesma conta. Não há capturas de tela publicadas no repositório, por isso esta página não exibe imagens do app.",
+      },
+      {
+        heading: "Testes",
+        body: "O núcleo Rust tem 164 testes automatizados (cargo test) e o frontend usa Vitest, segundo o README.",
+      },
+    ],
+    learned:
+      "O Evidence Finder me tirou do ambiente web: aplicação desktop, linguagem de sistemas, persistência local, tratamento de arquivos não confiáveis e escolhas de segurança documentadas — inclusive o que o projeto ainda não garante.",
+  },
+  {
     id: "tekidu",
     title: "Tekidu",
     description:
@@ -74,7 +234,7 @@ export const projects: Project[] = [
     solution:
       "Um ambiente único com quatro perfis de acesso: o administrador gerencia estudantes, professores, turmas, disciplinas e avisos; o professor cuida de turmas, avaliações, notas e frequência; o estudante acessa boletim, desempenho, frequência, justificativas de falta, mensagens e avisos, restrito aos próprios dados; o responsável consulta boletim e frequência dos estudantes vinculados, somente leitura.",
     features: [
-      "Autenticação completa: login, primeiro acesso com e-mail transacional e recuperação de senha via Firebase Authentication",
+      "Autenticação completa: login, primeiro acesso com e-mail transacional (EmailJS, enviado pelo servidor) e recuperação de senha via Firebase Authentication",
       "Gestão acadêmica com CRUDs completos de estudantes, professores, turmas, disciplinas e avaliações",
       "Lançamento de notas, cálculo de médias e boletim consolidado por estudante",
       "Registro de frequência por sessão, com histórico por período",
@@ -115,7 +275,9 @@ export const projects: Project[] = [
       { src: raw("Tekidu", "docs/screenshots/avisos.png"), caption: "Avisos" },
       { src: raw("Tekidu", "docs/screenshots/login.png"), caption: "Login" },
     ],
-    featured: true,
+    principal: true,
+    authAndDatabase: true,
+    hasTests: true,
     status: "in-progress",
     architecture: [
       "React + TypeScript (Vite) — quatro experiências de UI (admin, professor, estudante, responsável) sobre a mesma base de componentes",
@@ -123,7 +285,7 @@ export const projects: Project[] = [
       "Cloud Firestore — dados acadêmicos: estudantes, turmas, notas, frequência, avisos",
       "Firestore Security Rules — autorização por perfil aplicada no banco, não só na UI",
       "Camada de serviços por domínio (students, grades, attendance, reports, audit, email) isolando o acesso a dados dos componentes",
-      "Cloudflare Pages Functions — e-mail de primeiro acesso, mantendo credenciais fora do bundle do cliente",
+      "Cloudflare Pages Functions — envio do e-mail de primeiro acesso (EmailJS) e Web Push, mantendo credenciais fora do bundle do cliente",
       "Deploy em Cloudflare Pages",
     ],
     challenges: [
@@ -200,6 +362,7 @@ export const projects: Project[] = [
         caption: "Painel administrativo",
       },
     ],
+    authAndDatabase: true,
     status: "completed",
     architecture: [
       "JavaScript (sem framework de front-end) — feed, chat e painel administrativo",
@@ -300,6 +463,7 @@ export const projects: Project[] = [
       "Zod",
     ],
     categories: ["Web"],
+    hasTests: true,
     githubUrl: "https://github.com/muryllodouglashsoares/gym-landing-page",
     demoUrl: "https://gym-landing-page.muryllodouglash-soares.workers.dev/",
     image: raw("gym-landing-page", "screenshots/Pagina_principal.png"),
@@ -402,7 +566,10 @@ export const projects: Project[] = [
 ];
 
 export const featuredProject = projects.find((p) => p.featured)!;
-export const otherProjects = projects.filter((p) => !p.featured);
+/** Projetos principais além do destaque (profundidade técnica verificada) */
+export const principalProjects = projects.filter((p) => p.principal && !p.featured);
+/** Projetos complementares: demonstram competências específicas */
+export const otherProjects = projects.filter((p) => !p.featured && !p.principal);
 
 export function getProject(id: string) {
   return projects.find((p) => p.id === id);

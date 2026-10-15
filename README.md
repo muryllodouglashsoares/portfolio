@@ -119,7 +119,7 @@ Robô seguidor de linha em LEGO Spike Prime para competição do IFPB, com duas 
 
 - **Portfólio:** [portfolio-c1u.pages.dev](https://portfolio-c1u.pages.dev/)
 - **GitHub:** [github.com/muryllodouglashsoares](https://github.com/muryllodouglashsoares)
-- **LinkedIn:** [linkedin.com/in/muryllodouglashsoares](https://linkedin.com/in/muryllodouglashsoares)
+- **LinkedIn:** [linkedin.com/in/muryllo-douglas-henrique-soares-7a8416416](https://www.linkedin.com/in/muryllo-douglas-henrique-soares-7a8416416/)
 
 ---
 

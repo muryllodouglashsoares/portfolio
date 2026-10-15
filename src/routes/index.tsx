@@ -14,7 +14,7 @@ import { ScrollRobot } from "@/components/robot/ScrollRobot";
 
 const title = "Muryllo Douglas — Estudante e Desenvolvedor Web";
 const description =
-  "Portfólio de Muryllo Douglas, estudante de Informática no IFPB e desenvolvedor em formação: projetos em React, TypeScript, Firebase, automação e robótica.";
+  "Portfólio de Muryllo Douglas, estudante de Informática no IFPB e desenvolvedor em formação: projetos com React, TypeScript, Node.js, PostgreSQL, Firebase, Rust, automação e robótica.";
 
 export const Route = createFileRoute("/")({
   head: () => ({
