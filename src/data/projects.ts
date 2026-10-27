@@ -81,7 +81,7 @@ export const projects: Project[] = [
     solution:
       "Um domínio central — o contrato — ligado a cliente, modelo, versões do texto, documentos, pagamentos e auditoria, tudo isolado por escritório (officeId). O contrato percorre estados controlados (rascunho → envio → assinatura → vigência → encerramento), com permissões por papel (ADMIN, LAWYER, ASSISTANT) aplicadas no backend.",
     features: [
-      "Autenticação por e-mail e senha com JWT, hash de senha com bcryptjs e 2FA (TOTP) opcional para ADMIN e LAWYER",
+      "Autenticação por e-mail e senha com JWT, sessão validada em /auth/me e hash de senha com bcryptjs",
       "Permissões por papel (ADMIN, LAWYER, ASSISTANT) verificadas no backend, e não apenas escondidas na interface",
       "Isolamento multi-tenant: os serviços filtram por escritório em toda leitura e escrita",
       "Modelos de contrato com variáveis substituídas automaticamente e criação de contratos em etapas, com versionamento do conteúdo",
@@ -164,11 +164,13 @@ export const projects: Project[] = [
     notes: [
       {
         heading: "Qualidade e entrega",
-        body: "O repositório tem testes unitários e de integração no backend (Vitest, com PostgreSQL real no CI), 4 fluxos E2E em Playwright (login, criar contrato, enviar contrato, registrar pagamento) e um pipeline que só publica depois que typecheck, build, testes, E2E e build das imagens Docker passam.",
+        body:
+          "O repositório tem testes unitários e de integração no backend (Vitest, com PostgreSQL real no CI), 4 fluxos E2E em Playwright (login, criar contrato, enviar contrato, registrar pagamento) e um pipeline que só publica depois que typecheck, build, testes, E2E e build das imagens Docker passam.",
       },
       {
         heading: "Limitações declaradas",
-        body: "A assinatura é um aceite eletrônico simples, sem validade ICP-Brasil. O projeto não alega conformidade com a LGPD nem certificação de segurança: os mecanismos listados são os que existem no código. É um projeto em evolução, sem usuários reais comprovados.",
+        body:
+          "A assinatura é um aceite eletrônico simples, sem validade ICP-Brasil. O projeto não alega conformidade com a LGPD nem certificação de segurança: os mecanismos listados são os que existem no código. É um projeto em evolução, sem usuários reais comprovados.",
       },
     ],
     learned:
@@ -178,45 +180,72 @@ export const projects: Project[] = [
     id: "evidence-finder",
     title: "Evidence Finder",
     description:
-      "Aplicativo desktop para Windows que organiza e pesquisa localmente textos, imagens, PDFs e conversas, com referência à fonte e exportação de evidências.",
+      "Aplicativo desktop (Tauri + Rust) que organiza e pesquisa localmente PDFs, imagens, textos e conversas, com busca exata e por significado, referência à fonte e exportação de evidências.",
     longDescription:
-      "Aplicativo desktop (Tauri 2 com núcleo em Rust e interface em React) que reúne arquivos em projetos locais, extrai o texto, permite pesquisar esse conteúdo com trechos ligados ao documento de origem e exporta os resultados selecionados em um pacote com relatório PDF. O processamento é local: o aplicativo não contém cliente de rede nem telemetria, e a política de segurança do Tauri bloqueia conexões externas. O projeto está na Fase 5 e ainda não está completo.",
+      "Aplicativo desktop (Tauri 2 com núcleo em Rust e interface em React) que reúne arquivos em projetos locais independentes, extrai o texto (com OCR local), permite pesquisar esse conteúdo — de forma exata, por significado ou híbrida — com trechos ligados ao documento de origem e exporta os resultados selecionados em um pacote com relatório PDF. O processamento é local: o código não contém cliente de rede nem telemetria. A versão é a 0.1.0 e o projeto está em desenvolvimento: ainda não há instalador publicado e a validação em um Windows real continua pendente.",
     problem:
       "Encontrar uma informação específica em muitas capturas de tela, PDFs e conversas exige abrir arquivo por arquivo, e é difícil provar de onde veio cada trecho.",
     solution:
-      "Importar os arquivos em um projeto local, extrair o texto de cada formato, indexar tudo em SQLite FTS5 e devolver os resultados com o contexto e a fonte, com hash SHA-256 para verificar se o arquivo continua o mesmo.",
+      "Importar os arquivos em um projeto local, extrair o texto de cada formato, indexar tudo em SQLite (FTS5 para a busca exata e vetores locais para a busca por significado) e devolver os resultados com contexto e fonte, com SHA-256 para verificar se o arquivo continua o mesmo na exportação.",
     features: [
-      "Importação de PNG, JPEG, TXT e PDF, com formato conferido pelo conteúdo, detecção de duplicatas por SHA-256 e limite de 500 documentos por projeto",
-      "Extração de texto de TXT e PDF, e OCR local de imagens e PDFs digitalizados via Tesseract (exige o Tesseract instalado)",
-      "Busca lexical local com SQLite FTS5: palavras, frase exata e combinação de termos, com filtros e ordenação por relevância",
-      "Trechos com contexto e abertura segura do arquivo original",
-      "Exportação dos resultados selecionados em relatório PDF, pasta de fontes verificadas por hash e manifest.json",
-      "Camadas de proteção descritas no README: caminhos validados no núcleo, consultas parametrizadas e permissões mínimas do Tauri",
+      "Projetos independentes: cada um tem a própria pasta, o próprio banco SQLite e o próprio índice, e a pesquisa nunca mistura projetos",
+      "Importação de PNG, JPEG, TXT e PDF, além de texto copiado, com formato conferido pelo conteúdo, detecção de duplicatas por SHA-256 e limite de 500 documentos por projeto",
+      "Extração de texto de PDFs e TXT e OCR local de imagens e PDFs digitalizados via Tesseract (dependência externa, instalada à parte)",
+      "Três modalidades de pesquisa: exata (SQLite FTS5), por significado (embeddings locais, com modelo instalado pelo usuário) e híbrida (fusão RRF), com filtros, ordenação e contexto dos trechos",
+      "Exportação dos resultados selecionados em relatório PDF, manifest.json e cópia das fontes cujo SHA-256 foi verificado",
+      "Privacidade e segurança descritas no README: processamento local, permissões mínimas do Tauri, CSP restritiva, caminhos validados no núcleo e arquivos originais nunca alterados",
     ],
-    technologies: ["Tauri 2", "Rust", "React 19", "TypeScript", "SQLite", "Vite", "Vitest"],
+    technologies: [
+      "Tauri 2",
+      "Rust",
+      "React 19",
+      "TypeScript",
+      "SQLite (FTS5)",
+      "Tesseract (OCR)",
+      "candle (embeddings locais)",
+      "Vite",
+      "Vitest",
+    ],
     categories: ["Plataformas"],
     githubUrl: "https://github.com/muryllodouglashsoares/evidence-finder",
+    image: raw("evidence-finder", "docs/screenshots/Dashboard.png"),
+    screenshots: [
+      { src: raw("evidence-finder", "docs/screenshots/Tela_Pesquisa.png"), caption: "Pesquisa" },
+      {
+        src: raw("evidence-finder", "docs/screenshots/Conteudo_Encontrado.png"),
+        caption: "Resultados e seleção",
+      },
+      {
+        src: raw("evidence-finder", "docs/screenshots/Fontes.png"),
+        caption: "Documentos e fontes",
+      },
+      { src: raw("evidence-finder", "docs/screenshots/PDF.png"), caption: "Relatório PDF" },
+    ],
     principal: true,
     hasTests: true,
     status: "in-progress",
     architecture: [
-      "React + TypeScript — telas; uma única camada de serviço chama o núcleo",
-      "Comandos Tauri (Rust) — superfície exposta, com validação e autorização",
-      "Serviços e módulos de domínio em Rust — importação, extração, busca e exportação",
-      "SQLite por projeto — metadados, hashes, texto extraído e índice FTS5",
+      "React + TypeScript — telas; uma única camada de serviço (services/core.ts) conversa com o núcleo",
+      "Comandos Tauri (Rust) — superfície exposta: a interface envia só identificadores e tokens opacos, e pastas e arquivos são escolhidos em diálogos nativos abertos pelo Rust",
+      "Núcleo em Rust — importação, extração, pesquisa (exata e semântica) e exportação",
+      "SQLite por projeto — metadados, trechos, índice FTS5 e vetores",
+      "Componentes locais opcionais — Tesseract (OCR), PDFium (evidência visual em PDFs digitais) e o modelo semântico, instalados à parte",
     ],
     notes: [
       {
         heading: "Estado atual",
-        body: "Implementadas as fases de projetos, importação, extração, busca lexical e exportação. A busca semântica/com IA não existe, e a Fase 5 ainda não foi validada em um Windows real, segundo o próprio README.",
+        body:
+          "Versão 0.1.0, em desenvolvimento. Segundo o README, estão implementados e testados em Linux: projetos, importação, extração, OCR, pesquisa exata, a lógica do índice semântico, a exportação em PDF e o manifesto. Continuam pendentes: a validação do fluxo completo em um Windows real, o instalador Windows (o script de empacotamento nunca foi executado), os testes com o modelo semântico real e a calibração do limiar de similaridade.",
       },
       {
         heading: "Limitações declaradas",
-        body: "O SQLite e as cópias gerenciadas não são criptografados e o app não protege contra malware nem contra outros usuários da mesma conta. Não há capturas de tela publicadas no repositório, por isso esta página não exibe imagens do app.",
+        body:
+          "O armazenamento local não é criptografado, não há auditoria profissional de segurança e o app não protege contra malware nem contra outros usuários da mesma conta. O SHA-256 mostra que o conteúdo é idêntico ao registrado na importação, mas não comprova autenticidade, autoria nem cadeia de custódia. Ainda não existe Release para download.",
       },
       {
         heading: "Testes",
-        body: "O núcleo Rust tem 164 testes automatizados (cargo test) e o frontend usa Vitest, segundo o README.",
+        body:
+          "Na última rodada registrada no repositório (docs/FASE7.md, em Linux), 82 testes de frontend (Vitest) e 258 testes Rust passaram. Outros 10 testes Rust ficam ignorados por dependerem de recursos externos, e os 4 testes do modelo semântico real não foram executados. São os números daquela rodada, não uma nova execução.",
       },
     ],
     learned:
@@ -309,15 +338,75 @@ export const projects: Project[] = [
     notes: [
       {
         heading: "Camada de serviços por domínio",
-        body: "O acesso ao Firestore fica isolado em serviços (students, grades, attendance, reports, audit, email, entre outros), mantendo os componentes de UI livres de lógica de dados. Alterações sensíveis, como edição de notas, geram log de auditoria assíncrono.",
+        body:
+          "O acesso ao Firestore fica isolado em serviços (students, grades, attendance, reports, audit, email, entre outros), mantendo os componentes de UI livres de lógica de dados. Alterações sensíveis, como edição de notas, geram log de auditoria assíncrono.",
       },
       {
         heading: "O que ainda falta",
-        body: "Segundo o roadmap do repositório, ainda não há pipeline de CI/CD nem testes de componentes de interface; também estão previstos monitoramento de erros em produção e uma auditoria de acessibilidade.",
+        body:
+          "Segundo o roadmap do repositório, ainda não há pipeline de CI/CD nem testes de componentes de interface; também estão previstos monitoramento de erros em produção e uma auditoria de acessibilidade.",
       },
     ],
     learned:
       "A Tekidu marcou a transição de construir interfaces isoladas para uma aplicação com autenticação, persistência de dados, autorização por perfil e regras de segurança validadas no banco — não só escondidas na tela.",
+  },
+  {
+    id: "gitflow",
+    title: "GitFlow Desktop",
+    description:
+      "Aplicativo desktop (Tauri + Rust + React) para operar repositórios Git locais pela interface: branches, commit seletivo com revisão do diff e sincronização remota com bloqueios de segurança.",
+    longDescription:
+      "O GitFlow Desktop (nome provisório) é um aplicativo desktop em Tauri, Rust, React e TypeScript para operar repositórios Git locais sem digitar comandos. Ele mostra o estado do repositório e os diffs, lista, cria e troca branches, cria commits apenas com os arquivos que o usuário selecionou e executa fetch, pull e push mostrando o resultado real do Git. O projeto está em desenvolvimento: as fases 1 a 3 estão implementadas, e ZIP, merge manual, pull requests, autenticação própria e instalador ainda não existem.",
+    problem:
+      "Operações do Git pelo terminal exigem comandos precisos, e um descuido pode incluir arquivos indesejados em um commit ou enviar alterações para o destino errado.",
+    solution:
+      "Uma interface que executa o Git local de forma controlada — sem shell, com argumentos separados e bloqueios explícitos — e só mostra sucesso quando o Git comprova o resultado: o HEAD avançou, o push não teve linhas rejeitadas, o pull alterou o HEAD.",
+    features: [
+      "Fase 1 (leitura): seleção de pasta, validação do repositório e exibição de branch, estado, arquivos alterados e diffs, com preparados e não preparados em grupos separados",
+      "Fase 2: listagem, criação e troca de branches; a troca é bloqueada com alterações em arquivos rastreados, e o app nunca usa --force, stash, reset ou clean para viabilizá-la",
+      "Commit seletivo: só os arquivos marcados entram (git commit --only, sem add . nem commit -a), com revisão do diff exato e recusa se algo mudou durante a revisão",
+      "Fase 3: diagnóstico de sincronização (sincronizada, adiantada, atrasada ou divergente) calculado com as referências locais, e fetch, pull e push com confirmação do destino exato",
+      "Push sem --force, sem alterar upstream e sem pular hooks; main e master exigem uma segunda confirmação validada também no backend",
+      "Classificação de falhas (autenticação, rede, TLS, push rejeitado, conflito) com detalhes técnicos higienizados; o app não armazena credenciais",
+    ],
+    technologies: [
+      "Tauri",
+      "Rust",
+      "React",
+      "TypeScript",
+      "Tailwind CSS",
+      "Vite",
+      "Vitest",
+      "Git CLI",
+    ],
+    categories: ["Plataformas"],
+    githubUrl: "https://github.com/muryllodouglashsoares/gitflow",
+    principal: true,
+    hasTests: true,
+    status: "in-progress",
+    architecture: [
+      "React + TypeScript — telas e hooks; services/gitService.ts é a única fronteira com o backend",
+      "Comandos Tauri finos (commands.rs), assíncronos, com permissões mínimas e CSP restritiva",
+      "Crate Rust separado (gitflow-git), sem dependência do Tauri — execução do Git, status, diff, branches, commit e sincronização remota",
+      "Git CLI executado sem shell, com ambiente endurecido, tempo limite, limite de saída e trava de uma operação de escrita por repositório",
+    ],
+    notes: [
+      {
+        heading: "Estado atual",
+        body:
+          "Segundo o README, as fases 1 a 3 (leitura, operações locais e sincronização remota) estão implementadas. Ainda não existem importação de ZIP, merge manual, resolução de conflitos, pull requests, autenticação própria nem instalador: hoje o app é iniciado em modo de desenvolvimento pelo iniciar.bat, que instala as dependências no Windows.",
+      },
+      {
+        heading: "Decisões de segurança",
+        body:
+          "A interface nunca envia comandos, só caminhos, que são validados e interpretados literalmente. O Git roda com fsmonitor desativado, sem terminal interativo e com variáveis perigosas removidas. Pull e push recebem o destino que o usuário viu, e o backend recusa a operação se o estado mudou nesse intervalo.",
+      },
+      {
+        heading: "Testes e limitações",
+        body:
+          "O README descreve testes de integração em Rust com Git real em repositórios temporários (incluindo remotos locais) e testes de frontend para a lógica pura; não há testes de componentes React. Falhas reais de autenticação e TLS não são reproduzíveis sem servidor, então a classificação é coberta por testes unitários com saídas reais do Git. As operações de rede não têm progresso percentual nem cancelamento.",
+      },
+    ],
   },
   {
     id: "ifconnect",
@@ -373,7 +462,8 @@ export const projects: Project[] = [
     notes: [
       {
         heading: "Tudo em JavaScript puro",
-        body: "A aplicação foi construída sem framework de front-end, com integração direta ao Firebase Authentication e ao Realtime Database — um exercício de organizar uma base grande de JavaScript por conta própria.",
+        body:
+          "A aplicação foi construída sem framework de front-end, com integração direta ao Firebase Authentication e ao Realtime Database — um exercício de organizar uma base grande de JavaScript por conta própria.",
       },
     ],
     learned:
@@ -429,11 +519,13 @@ export const projects: Project[] = [
     notes: [
       {
         heading: "Origem do projeto",
-        body: "O projeto foi iniciado no Lovable e evoluído manualmente — incluindo a limpeza do scaffold de UI, que removeu componentes e dependências não utilizados.",
+        body:
+          "O projeto foi iniciado no Lovable e evoluído manualmente — incluindo a limpeza do scaffold de UI, que removeu componentes e dependências não utilizados.",
       },
       {
         heading: "Performance como decisão de design",
-        body: "A sequência de montagem anima somente transform e opacity e roda uma única vez; nada usa repeat infinito além da auréola do prato. O will-change é aplicado só enquanto uma peça está caindo, e no mobile a timeline usa menos peças e menos partículas.",
+        body:
+          "A sequência de montagem anima somente transform e opacity e roda uma única vez; nada usa repeat infinito além da auréola do prato. O will-change é aplicado só enquanto uma peça está caindo, e no mobile a timeline usa menos peças e menos partículas.",
       },
     ],
   },
@@ -441,7 +533,7 @@ export const projects: Project[] = [
     id: "forja",
     title: "FORJA Training Studio",
     description:
-      "Landing page com foco em conversão para um studio de treinamento conceitual, com SEO técnico e captura de lead integrada.",
+      "Landing page de um studio de treinamento fictício, com validação dupla do formulário, SEO técnico e captura de lead integrada.",
     longDescription:
       "O objetivo foi construir uma landing page no padrão que uma agência entregaria a um cliente do nicho fitness: identidade visual forte, copy persuasiva, formulário validado ponta a ponta, SEO técnico completo e cuidado com performance e acessibilidade. O studio é fictício.",
     features: [
@@ -479,12 +571,24 @@ export const projects: Project[] = [
       },
     ],
     status: "completed",
+    notes: [
+      {
+        heading: "Projeto conceitual",
+        body:
+          "O studio é fictício e as imagens vêm de banco de imagens (Unsplash), já que não há uma academia real para fornecer fotos próprias. O formulário é funcional de verdade — conectado a uma automação real — apenas para demonstrar o fluxo completo de captura de lead.",
+      },
+      {
+        heading: "Testes",
+        body:
+          "O handler do formulário de contato (honeypot, validação, timeout e falhas do webhook) tem testes com fetch simulado, executados com node:test. O repositório não descreve outros testes automatizados.",
+      },
+    ],
   },
   {
     id: "odontoprime",
     title: "OdontoPrime",
     description:
-      "Landing page de clínica odontológica construída a partir de um design de referência, com SSR e SEO técnico.",
+      "Landing page de uma clínica odontológica fictícia, construída a partir de um design de referência, com SSR e SEO técnico.",
     longDescription:
       "Landing page pixel-perfect construída a partir de um design de referência para uma clínica odontológica, servindo como peça de portfólio para exercitar SSR, SEO técnico e integração de formulário com automação real. A clínica e seus dados são fictícios.",
     features: [
@@ -516,7 +620,8 @@ export const projects: Project[] = [
     notes: [
       {
         heading: "Por que HTML/CSS/JS puro dentro de uma rota React",
-        body: "O design foi construído como página estática, mas o projeto usa TanStack Start para servir esse conteúdo via SSR na rota /, em vez de redirecionar para um HTML solto. Isso evita o duplo carregamento e garante que crawlers e previews de link recebam o conteúdo real da página.",
+        body:
+          "O design foi construído como página estática, mas o projeto usa TanStack Start para servir esse conteúdo via SSR na rota /, em vez de redirecionar para um HTML solto. Isso evita o duplo carregamento e garante que crawlers e previews de link recebam o conteúdo real da página.",
       },
     ],
   },
@@ -559,7 +664,8 @@ export const projects: Project[] = [
     notes: [
       {
         heading: "Aprendizados",
-        body: "Programação em blocos e em Python, lógica computacional, robótica educacional, montagem mecânica, uso de sensores, resolução de problemas e trabalho em equipe.",
+        body:
+          "Programação em blocos e em Python, lógica computacional, robótica educacional, montagem mecânica, uso de sensores, resolução de problemas e trabalho em equipe.",
       },
     ],
   },

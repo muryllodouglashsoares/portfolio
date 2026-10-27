@@ -14,7 +14,7 @@ import { ScrollRobot } from "@/components/robot/ScrollRobot";
 
 const title = "Muryllo Douglas — Estudante e Desenvolvedor Web";
 const description =
-  "Portfólio de Muryllo Douglas, estudante de Informática no IFPB e desenvolvedor em formação: projetos com React, TypeScript, Node.js, PostgreSQL, Firebase, Rust, automação e robótica.";
+  "Portfólio de Muryllo Douglas, estudante do Técnico em Informática no IFPB Itaporanga e desenvolvedor em formação: projetos com React, TypeScript, Node.js, PostgreSQL, Firebase e Rust, em busca do primeiro estágio em TI.";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -24,6 +24,7 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: title },
       { property: "og:description", content: description },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://portfolio-c1u.pages.dev/" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [{ rel: "canonical", href: "https://portfolio-c1u.pages.dev/" }],
