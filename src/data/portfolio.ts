@@ -8,7 +8,7 @@ export const site = {
   logo: "muryllo",
   fullName: "Muryllo Douglas",
   role: "Estudante · Desenvolvedor",
-  email: "muryllodouglashsoares@gmail.com",
+  email: "muryllodouglash.soares@gmail.com",
   github: "https://github.com/muryllodouglashsoares",
   linkedin: "https://www.linkedin.com/in/muryllo-douglas-henrique-soares-7a8416416/",
   footer: "© 2026 Muryllo Douglas · Estudante, desenvolvedor, construtor.",
@@ -27,15 +27,15 @@ export const hero = {
   badge: "Estudante · Desenvolvedor",
   greeting: "Oi, eu sou",
   name: "Muryllo.",
-  subtitle: ["Eu construo experiências", "para a web."],
+  subtitle: ["Eu construo software", "do banco de dados à interface."],
   description:
-    "Sou estudante de Informática no IFPB e desenvolvedor em formação. Gosto de transformar ideias em projetos reais, explorando desenvolvimento web, software e novas tecnologias.",
+    "Estudante do Ensino Médio Integrado ao Técnico em Informática no IFPB — Campus Itaporanga. Desenvolvo projetos próprios, de um sistema de gestão de contratos a um app desktop de busca local, e busco minha primeira oportunidade na área de TI.",
   primaryCta: { label: "Ver projetos", href: "/#projetos" },
   secondaryCta: { label: "Conhecer mais", href: "/#sobre" },
   techLabel: "Tecnologias que utilizo",
-  tech: ["TypeScript", "React", "Python", "Git", "HTML", "CSS"],
+  tech: ["TypeScript", "React", "Node.js", "PostgreSQL", "Rust", "Git"],
   codeChip: 'const dev = "muryllo"',
-  statusChip: "open to opportunities",
+  statusChip: "aberto a estágio",
   portraitSrc: heroPortrait as string | null,
   portraitAlt: "Retrato editorial de Muryllo Douglas ao entardecer, com sol estilizado ao fundo",
 };
@@ -44,11 +44,11 @@ export const about = {
   label: "sobre",
   title: ["Construindo,", "aprendendo", "e evoluindo."],
   paragraphs: [
-    "Sou estudante de Informática no IFPB e desenvolvedor em formação. Construo projetos reais porque acredito que a melhor forma de aprender é fazendo.",
-    "Tenho interesse em interfaces digitais, desenvolvimento web, automação e robótica. Cada projeto é uma oportunidade de explorar algo novo e entregar algo que funciona de verdade.",
-    "Não estou tentando parecer alguém com anos de experiência que não tenho. Estou mostrando o que consigo construir agora — e evoluindo rápido.",
+    "Sou estudante do Ensino Médio Integrado ao Técnico em Informática no IFPB — Campus Itaporanga e desenvolvedor em formação. Construo projetos próprios porque acredito que a melhor forma de aprender é fazendo.",
+    "Meu foco é desenvolvimento web e engenharia de software. Tenho ampliado o alcance dos projetos: do front-end para APIs com banco relacional, autorização, testes e deploy automatizado e, mais recentemente, para uma aplicação desktop em Rust. Também me interesso por automação, segurança, estruturas de dados e robótica.",
+    "Não estou tentando parecer alguém com anos de experiência que não tenho. Estou mostrando o que consigo construir agora, e procuro um estágio ou posição inicial para continuar evoluindo em um time.",
   ],
-  tags: ["Desenvolvimento Web", "React", "TypeScript", "Robótica", "Automação", "IFPB"],
+  tags: ["Desenvolvimento Web", "React", "TypeScript", "Rust", "Automação", "Robótica", "IFPB"],
   illustrationSrc: aboutIllustration as string,
   illustrationAlt: "Ilustração digital estilizada de Muryllo Douglas",
   stats: [
@@ -71,7 +71,8 @@ export const about = {
 export const stack = {
   label: "stack",
   title: "Tecnologias que utilizo",
-  subtitle: "Onde cada tecnologia foi usada, e para quê.",
+  subtitle:
+    "Só o que já usei em projetos, e onde. Em estudo agora, sem projeto publicado: estruturas de dados e algoritmos, arquitetura de software e robótica autônoma.",
   groups: [
     {
       title: "Front-end",
@@ -80,11 +81,13 @@ export const stack = {
         { name: "JavaScript", note: "IFConnect, OdontoPrime — interatividade sem framework" },
         {
           name: "TypeScript",
-          note: "LexContract, Evidence Finder, Tekidu, Savora, FORJA, OdontoPrime — tipagem de dados e componentes",
+          note:
+            "LexContract, Evidence Finder, Tekidu, Savora, FORJA, OdontoPrime — tipagem de dados e componentes",
         },
         {
           name: "React",
-          note: "LexContract, Evidence Finder, Tekidu, Savora, FORJA, OdontoPrime — construção de interfaces",
+          note:
+            "LexContract, Evidence Finder, Tekidu, Savora, FORJA, OdontoPrime — construção de interfaces",
         },
         {
           name: "Tailwind CSS",
@@ -101,7 +104,10 @@ export const stack = {
           name: "PostgreSQL + Prisma",
           note: "LexContract — dados relacionais isolados por escritório",
         },
-        { name: "Rust + Tauri", note: "Evidence Finder — núcleo do app desktop local" },
+        {
+          name: "Rust + Tauri",
+          note: "Evidence Finder, GitFlow Desktop — núcleo dos apps desktop",
+        },
         { name: "SQLite (FTS5)", note: "Evidence Finder — metadados e busca de texto local" },
         { name: "Firebase Auth", note: "Tekidu, IFConnect — autenticação de usuários" },
         { name: "Cloud Firestore", note: "Tekidu — dados acadêmicos e regras de acesso" },
@@ -117,8 +123,9 @@ export const stack = {
         },
         {
           name: "Vitest",
-          note: "LexContract (API), Evidence Finder, Tekidu — testes automatizados",
+          note: "LexContract (API), Evidence Finder (frontend), Tekidu — testes automatizados",
         },
+        { name: "cargo test (Rust)", note: "Evidence Finder, GitFlow Desktop — testes do núcleo" },
         { name: "Playwright", note: "LexContract — 4 fluxos E2E rodando no CI" },
         { name: "Docker", note: "LexContract — imagens do frontend (Nginx) e do backend" },
         {
@@ -159,19 +166,21 @@ export const engineering = {
       ],
     },
     {
-      title: "Dados e autorização",
+      title: "Dados, autorização e privacidade",
       items: [
         "Modelagem relacional com PostgreSQL e Prisma no LexContract; modelagem de dados acadêmicos e sociais no Firestore / Realtime Database",
         "Autenticação com Firebase Auth: e-mail/senha e recuperação de senha no Tekidu; e-mail/senha, Google e verificação de e-mail no IFConnect",
         "LexContract: papéis verificados no servidor e dados isolados por escritório. Tekidu: autorização por perfil validada no banco via Security Rules — não só escondida na UI. No IFConnect, as permissões por cargo ficam no código do cliente",
+        "Evidence Finder: processamento local, sem cliente de rede nem telemetria, permissões mínimas do Tauri, caminhos validados no núcleo e SHA-256 para verificar a integridade das fontes — com limitações documentadas, como a ausência de criptografia do armazenamento",
+        "GitFlow Desktop: Git executado sem shell, caminhos validados, nenhuma operação destrutiva (sem force, reset ou clean) e confirmação do destino exato antes de pull e push",
       ],
     },
     {
       title: "Qualidade",
       items: [
         "Testes unitários e de integração da API (LexContract), 4 fluxos E2E com Playwright e testes das regras de segurança do Firestore (Tekidu)",
-        "Núcleo em Rust com 164 testes automatizados no Evidence Finder, segundo o README do projeto",
-        "Validação de formulário em duas camadas: cliente (Zod) e servidor",
+        "Evidence Finder: 258 testes Rust e 82 de frontend na última rodada registrada no repositório (docs/FASE7.md, executada em Linux). GitFlow Desktop: testes de integração em Rust com Git real em repositórios temporários",
+        "Validação de formulário em duas camadas: cliente (Zod) e servidor, com testes do handler do formulário no FORJA",
         "Code splitting por perfil de usuário para reduzir o que cada um carrega",
       ],
     },
@@ -228,7 +237,7 @@ export const timeline = {
       index: "05",
       title: "Evolução",
       description:
-        "Sistemas mais complexos: autenticação, banco de dados, regras de segurança e testes automatizados — e, no LexContract, backend próprio com PostgreSQL, testes E2E e pipeline de CI/CD.",
+        "Sistemas mais complexos: autenticação, banco de dados, regras de segurança e testes automatizados — no LexContract, backend próprio com PostgreSQL, testes E2E e pipeline de CI/CD; no Evidence Finder e no GitFlow Desktop, apps desktop com núcleo em Rust, ainda em desenvolvimento.",
     },
     {
       index: "06",
@@ -254,7 +263,7 @@ export const contact = {
   label: "contato",
   title: ["Vamos construir", "algo juntos?"],
   description:
-    "Estou sempre aberto a novas oportunidades de aprendizado, projetos e experiências em que eu possa contribuir e continuar evoluindo como desenvolvedor.",
+    "Estou buscando minha primeira oportunidade na área de TI — estágio ou posição inicial. Se o meu trabalho combina com o que você procura, vamos conversar.",
   actions: [
     { label: "Entrar em contato", href: `mailto:${site.email}`, primary: true },
     { label: "GitHub", href: site.github, primary: false },
