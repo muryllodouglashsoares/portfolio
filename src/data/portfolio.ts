@@ -75,6 +75,7 @@ export const stack = {
   groups: [
     {
       title: "Front-end",
+      icons: ["javascript", "typescript", "react", "tailwind", "tanstack"],
       items: [
         { name: "HTML / CSS", note: "Base de todos os projetos web" },
         { name: "JavaScript", note: "IFConnect, OdontoPrime — interatividade sem framework" },
@@ -97,6 +98,7 @@ export const stack = {
     },
     {
       title: "Back-end / Dados",
+      icons: ["nodejs", "postgresql", "rust", "sqlite", "firebase"],
       items: [
         { name: "Node.js + Fastify", note: "LexContract — API REST modular com JWT e papéis" },
         {
@@ -115,6 +117,7 @@ export const stack = {
     },
     {
       title: "Qualidade / Deploy",
+      icons: ["vitest", "docker", "githubactions", "git", "cloudflare"],
       items: [
         {
           name: "Vitest + Firebase Emulator",
@@ -142,6 +145,7 @@ export const stack = {
     },
     {
       title: "Robótica",
+      icons: ["python"],
       items: [
         { name: "Python", note: "Mini Olimpíada — leitura de sensor e lógica do robô" },
         { name: "LEGO Spike Prime", note: "Mini Olimpíada — montagem e programação em blocos" },
