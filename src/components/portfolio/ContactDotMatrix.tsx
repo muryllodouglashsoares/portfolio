@@ -14,6 +14,11 @@ interface Dot {
   light: number;
   /** 0..1 — o ponto sumiu (foi "absorvido" pela figura) */
   hide: number;
+  /** 0..1 — presença no brilho aleatório (independe do cursor) */
+  twinkle: number;
+  twinkleTarget: 0 | 1;
+  /** instante (ms do relógio interno) da próxima troca presente/ausente */
+  nextToggle: number;
   /** quanto o ponto some quando cada figura está formada */
   heartHide: number;
   smileHide: number;
@@ -34,15 +39,29 @@ const SMILE_CENTER: Point = [0.67, 0.5];
 
 // Aparência da matriz
 const BASE_ALPHA = 0.3;
-const BASE_RADIUS = 1.5;
+const BASE_RADIUS = 0.9;
 const FIGURE_ALPHA = 0.9;
-const FIGURE_RADIUS = 2.3;
+const FIGURE_RADIUS = 1.7;
 
 // Região animada ao redor do cursor
-const LIGHT_RADIUS = 90;
+const LIGHT_RADIUS = 170;
 const LIGHT_ALPHA = 0.85;
-const LIGHT_GROW = 1.1;
-const LIGHT_PULL = 4;
+const LIGHT_GROW = 0.8;
+const LIGHT_PULL = 5;
+
+// O cursor precisa estar perto da figura (fração do tamanho dela) para formá-la.
+// A saída é mais folgada que a entrada para não piscar na borda.
+const FIGURE_ENTER = 0.6;
+const FIGURE_EXIT = 0.85;
+
+// Presença aleatória dos pontos (ms): quanto tempo ficam visíveis / ausentes
+const TWINKLE_ON: Point = [2500, 8000];
+const TWINKLE_OFF: Point = [1200, 4500];
+const TWINKLE_ABSENT_SHARE = 0.25;
+
+function randomBetween([min, max]: Point) {
+  return min + Math.random() * (max - min);
+}
 
 function smoothstep(edge0: number, edge1: number, value: number) {
   const t = Math.min(1, Math.max(0, (value - edge0) / (edge1 - edge0)));
@@ -153,10 +172,20 @@ function buildDots(width: number, height: number, zoneHeight: number) {
         intensity: 0,
         light: 0,
         hide: 0,
+        twinkle: 1,
+        twinkleTarget: 1,
+        nextToggle: 0,
         heartHide: 0,
         smileHide: 0,
       });
     }
+  }
+
+  for (const dot of dots) {
+    const absent = Math.random() < TWINKLE_ABSENT_SHARE;
+    dot.twinkleTarget = absent ? 0 : 1;
+    dot.twinkle = dot.twinkleTarget;
+    dot.nextToggle = randomBetween(absent ? TWINKLE_OFF : TWINKLE_ON);
   }
 
   const size = Math.min(width * 0.24, zoneHeight * 0.48, 220);
@@ -181,7 +210,7 @@ function buildDots(width: number, height: number, zoneHeight: number) {
       : 1 - smoothstep(size * 0.55, size * 0.7, smileDistance);
   }
 
-  return dots;
+  return { dots, size };
 }
 
 export function ContactDotMatrix({
@@ -211,6 +240,11 @@ export function ContactDotMatrix({
     const isInteractive = () => !reducedMotion.matches && finePointer.matches;
 
     let dots: Dot[] = [];
+    let figureSize = 0;
+    let heartCenter: Point = [0, 0];
+    let smileCenter: Point = [0, 0];
+    let clock = 0;
+    let inView = true;
     let figure: Figure = "idle";
     let frame = 0;
     let lastTime = 0;
@@ -228,8 +262,10 @@ export function ContactDotMatrix({
       context.clearRect(0, 0, width, height);
 
       for (const dot of dots) {
-        const visible = 1 - dot.hide;
         const formed = dot.intensity;
+        // Brilho aleatório: pontos da figura e próximos do cursor ficam sempre presentes
+        const presence = Math.max(dot.twinkle, dot.light, formed);
+        const visible = (1 - dot.hide) * presence;
         if (visible < 0.01 && formed < 0.02) continue;
 
         const light = dot.light * (1 - formed);
@@ -283,9 +319,22 @@ export function ContactDotMatrix({
       const ease = 1 - Math.exp(-delta / 165);
       const lightEase = 1 - Math.exp(-delta / 110);
       const hideEase = 1 - Math.exp(-delta / 220);
-      let unsettled = false;
+      const twinkling = !reducedMotion.matches && inView;
+      const twinkleEase = 1 - Math.exp(-delta / 450);
+      let unsettled = twinkling;
+      if (twinkling) clock += delta;
 
       for (const dot of dots) {
+        if (twinkling) {
+          if (clock >= dot.nextToggle) {
+            dot.twinkleTarget = dot.twinkleTarget ? 0 : 1;
+            dot.nextToggle =
+              clock +
+              randomBetween(dot.twinkleTarget ? TWINKLE_ON : TWINKLE_OFF);
+          }
+          dot.twinkle += (dot.twinkleTarget - dot.twinkle) * twinkleEase;
+        }
+
         const [targetX, targetY] = targetFor(dot);
         const inFigure =
           (figure === "heart" && dot.heart) || (figure === "smile" && dot.smile);
@@ -343,6 +392,13 @@ export function ContactDotMatrix({
       requestDraw();
     };
 
+    const resetTwinkle = () => {
+      for (const dot of dots) {
+        dot.twinkle = 1;
+        dot.twinkleTarget = 1;
+      }
+    };
+
     const resize = () => {
       const sectionRect = section.getBoundingClientRect();
       const footerRect = footer?.getBoundingClientRect();
@@ -363,11 +419,17 @@ export function ContactDotMatrix({
       dotColor = styles.getPropertyValue("--muted-foreground").trim();
       figureColor = styles.getPropertyValue("--primary-soft").trim();
       hoverColor = styles.getPropertyValue("--foreground").trim();
-      dots = buildDots(width, height, zoneHeight);
+      const built = buildDots(width, height, zoneHeight);
+      dots = built.dots;
+      figureSize = built.size;
+      heartCenter = [width * HEART_CENTER[0], zoneHeight * HEART_CENTER[1]];
+      smileCenter = [width * SMILE_CENTER[0], zoneHeight * SMILE_CENTER[1]];
+      clock = 0;
+      if (reducedMotion.matches) resetTwinkle();
 
       if (!isInteractive()) figure = "idle";
       draw();
-      if (figure !== "idle" || pointerInside) requestDraw();
+      requestDraw();
     };
 
     const leave = () => {
@@ -398,19 +460,30 @@ export function ContactDotMatrix({
       pointerX = localX;
       pointerY = localY;
 
-      // Região de formação das figuras: faixa central da seção de contato
-      const zone = section.getBoundingClientRect();
-      const x = (lastPointer.x - zone.left) / zone.width;
-      const y = (lastPointer.y - zone.top) / zone.height;
+      // As figuras só se formam com o cursor perto delas
+      const heartDistance = Math.hypot(
+        pointerX - heartCenter[0],
+        pointerY - heartCenter[1],
+      );
+      const smileDistance = Math.hypot(
+        pointerX - smileCenter[0],
+        pointerY - smileCenter[1],
+      );
+      const enter = figureSize * FIGURE_ENTER;
+      const exit = figureSize * FIGURE_EXIT;
 
-      if (y < 0.12 || y > 0.9) {
-        setFigure("idle");
-      } else if (figure === "heart") {
-        if (x > 0.56) setFigure("smile");
-      } else if (figure === "smile") {
-        if (x < 0.44) setFigure("heart");
+      if (figure === "heart" && heartDistance < exit) {
+        if (smileDistance < enter && smileDistance < heartDistance) {
+          setFigure("smile");
+        }
+      } else if (figure === "smile" && smileDistance < exit) {
+        if (heartDistance < enter && heartDistance < smileDistance) {
+          setFigure("heart");
+        }
+      } else if (heartDistance < enter || smileDistance < enter) {
+        setFigure(heartDistance <= smileDistance ? "heart" : "smile");
       } else {
-        setFigure(x < 0.5 ? "heart" : "smile");
+        setFigure("idle");
       }
 
       requestDraw();
@@ -431,6 +504,12 @@ export function ContactDotMatrix({
       leave();
     };
 
+    const onMotionChange = () => {
+      if (reducedMotion.matches) resetTwinkle();
+      disableInteraction();
+      requestDraw();
+    };
+
     const disableInteraction = () => {
       if (!isInteractive()) {
         figure = "idle";
@@ -446,6 +525,14 @@ export function ContactDotMatrix({
       }
     };
 
+    // Pausa o brilho aleatório quando a matriz está fora da tela
+    const visibility = new IntersectionObserver(([entry]) => {
+      if (!entry) return;
+      inView = entry.isIntersecting;
+      if (inView) requestDraw();
+    });
+    visibility.observe(canvas);
+
     const observer = new ResizeObserver(resize);
     observer.observe(section);
     if (footer) observer.observe(footer);
@@ -453,12 +540,13 @@ export function ContactDotMatrix({
     window.addEventListener("scroll", onScroll, { passive: true });
     document.documentElement.addEventListener("pointerleave", onPointerLeave);
     window.addEventListener("blur", onPointerLeave);
-    reducedMotion.addEventListener("change", disableInteraction);
+    reducedMotion.addEventListener("change", onMotionChange);
     finePointer.addEventListener("change", disableInteraction);
     resize();
 
     return () => {
       observer.disconnect();
+      visibility.disconnect();
       window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("scroll", onScroll);
       document.documentElement.removeEventListener(
@@ -466,7 +554,7 @@ export function ContactDotMatrix({
         onPointerLeave,
       );
       window.removeEventListener("blur", onPointerLeave);
-      reducedMotion.removeEventListener("change", disableInteraction);
+      reducedMotion.removeEventListener("change", onMotionChange);
       finePointer.removeEventListener("change", disableInteraction);
       if (frame) cancelAnimationFrame(frame);
     };
