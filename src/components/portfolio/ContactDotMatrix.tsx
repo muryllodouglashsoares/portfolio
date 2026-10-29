@@ -1,15 +1,24 @@
 import { useEffect, useRef, type RefObject } from "react";
 
 type Figure = "idle" | "heart" | "smile";
+type Point = [number, number];
 
 interface Dot {
   homeX: number;
   homeY: number;
   x: number;
   y: number;
+  /** 0..1 — quanto o ponto já faz parte da figura */
   intensity: number;
-  heart?: [number, number];
-  smile?: [number, number];
+  /** 0..1 — proximidade animada do cursor */
+  light: number;
+  /** 0..1 — o ponto sumiu (foi "absorvido" pela figura) */
+  hide: number;
+  /** quanto o ponto some quando cada figura está formada */
+  heartHide: number;
+  smileHide: number;
+  heart?: Point;
+  smile?: Point;
 }
 
 // Poucos pontos por figura: com espaçamento visível entre eles, a silhueta
@@ -19,16 +28,30 @@ const SMILE_OUTLINE_DOTS = 28;
 const SMILE_EYE_DOTS = 3;
 const SMILE_MOUTH_DOTS = 18;
 
-// Aparência da matriz (base, hover e figuras)
+// Posição das figuras dentro da seção de contato (proporção da largura/altura)
+const HEART_CENTER: Point = [0.34, 0.53];
+const SMILE_CENTER: Point = [0.67, 0.5];
+
+// Aparência da matriz
 const BASE_ALPHA = 0.3;
 const BASE_RADIUS = 1.5;
-const HOVER_ALPHA = 0.62;
 const FIGURE_ALPHA = 0.9;
 const FIGURE_RADIUS = 2.3;
 
-function heartTargets(width: number, height: number, size: number) {
-  const cx = width * 0.34;
-  const cy = height * 0.53;
+// Região animada ao redor do cursor
+const LIGHT_RADIUS = 90;
+const LIGHT_ALPHA = 0.85;
+const LIGHT_GROW = 1.1;
+const LIGHT_PULL = 4;
+
+function smoothstep(edge0: number, edge1: number, value: number) {
+  const t = Math.min(1, Math.max(0, (value - edge0) / (edge1 - edge0)));
+  return t * t * (3 - 2 * t);
+}
+
+function heartTargets(width: number, zoneHeight: number, size: number) {
+  const cx = width * HEART_CENTER[0];
+  const cy = zoneHeight * HEART_CENTER[1];
 
   return Array.from({ length: FIGURE_DOTS }, (_, index) => {
     const angle = (index / FIGURE_DOTS) * Math.PI * 2;
@@ -40,15 +63,15 @@ function heartTargets(width: number, height: number, size: number) {
       2 * Math.cos(angle * 3) -
       Math.cos(angle * 4);
 
-    return [cx + (x / 34) * size, cy - (y / 32) * size] as [number, number];
+    return [cx + (x / 34) * size, cy - (y / 32) * size] as Point;
   });
 }
 
-function smileTargets(width: number, height: number, size: number) {
-  const cx = width * 0.67;
-  const cy = height * 0.5;
+function smileTargets(width: number, zoneHeight: number, size: number) {
+  const cx = width * SMILE_CENTER[0];
+  const cy = zoneHeight * SMILE_CENTER[1];
   const radius = size * 0.48;
-  const targets: Array<[number, number]> = [];
+  const targets: Point[] = [];
 
   for (let index = 0; index < SMILE_OUTLINE_DOTS; index += 1) {
     const angle = (index / SMILE_OUTLINE_DOTS) * Math.PI * 2;
@@ -79,7 +102,38 @@ function smileTargets(width: number, height: number, size: number) {
   return targets;
 }
 
-function buildDots(width: number, height: number) {
+/**
+ * Para cada ponto da figura, escolhe o ponto livre da matriz mais próximo.
+ * Assim a figura se forma com pontos que já estavam ali perto.
+ */
+function assignTargets(dots: Dot[], targets: Point[], key: "heart" | "smile") {
+  const used = new Set<Dot>();
+
+  for (const [tx, ty] of targets) {
+    let best: Dot | null = null;
+    let bestDistance = Infinity;
+
+    for (const dot of dots) {
+      if (used.has(dot)) continue;
+      const distance = (dot.homeX - tx) ** 2 + (dot.homeY - ty) ** 2;
+      if (distance < bestDistance) {
+        bestDistance = distance;
+        best = dot;
+      }
+    }
+
+    if (best) {
+      used.add(best);
+      best[key] = [tx, ty];
+    }
+  }
+}
+
+/**
+ * @param height     altura total da matriz (seção + rodapé)
+ * @param zoneHeight altura da seção de contato, onde as figuras são posicionadas
+ */
+function buildDots(width: number, height: number, zoneHeight: number) {
   const spacing = Math.max(22, Math.min(30, width / 40));
   const columns = Math.max(2, Math.floor(width / spacing));
   const rows = Math.max(2, Math.floor(height / spacing));
@@ -91,25 +145,41 @@ function buildDots(width: number, height: number) {
     for (let column = 0; column < columns; column += 1) {
       const x = offsetX + column * spacing;
       const y = offsetY + row * spacing;
-      dots.push({ homeX: x, homeY: y, x, y, intensity: 0 });
+      dots.push({
+        homeX: x,
+        homeY: y,
+        x,
+        y,
+        intensity: 0,
+        light: 0,
+        hide: 0,
+        heartHide: 0,
+        smileHide: 0,
+      });
     }
   }
 
-  const size = Math.min(width * 0.24, height * 0.48, 220);
-  const heart = heartTargets(width, height, size);
-  const smile = smileTargets(width, height, size);
-  const pool = [...dots]
-    .sort((a, b) => {
-      const aDistance = Math.hypot(a.homeX - width / 2, a.homeY - height / 2);
-      const bDistance = Math.hypot(b.homeX - width / 2, b.homeY - height / 2);
-      return aDistance - bDistance;
-    })
-    .slice(0, Math.min(FIGURE_DOTS, dots.length));
+  const size = Math.min(width * 0.24, zoneHeight * 0.48, 220);
+  assignTargets(dots, heartTargets(width, zoneHeight, size), "heart");
+  assignTargets(dots, smileTargets(width, zoneHeight, size), "smile");
 
-  pool.forEach((dot, index) => {
-    dot.heart = heart[index];
-    dot.smile = smile[index];
-  });
+  const heartX = width * HEART_CENTER[0];
+  const heartY = zoneHeight * HEART_CENTER[1];
+  const smileX = width * SMILE_CENTER[0];
+  const smileY = zoneHeight * SMILE_CENTER[1];
+
+  // Pontos vizinhos da figura somem, como se tivessem se organizado nela.
+  for (const dot of dots) {
+    const heartDistance = Math.hypot(dot.homeX - heartX, dot.homeY - heartY);
+    const smileDistance = Math.hypot(dot.homeX - smileX, dot.homeY - smileY);
+
+    dot.heartHide = dot.heart
+      ? 0
+      : 1 - smoothstep(size * 0.62, size * 0.8, heartDistance);
+    dot.smileHide = dot.smile
+      ? 0
+      : 1 - smoothstep(size * 0.55, size * 0.7, smileDistance);
+  }
 
   return dots;
 }
@@ -129,8 +199,17 @@ export function ContactDotMatrix({
     const context = canvas.getContext("2d");
     if (!context) return;
 
+    // A matriz continua pelo rodapé, que vem logo depois do <main>.
+    const nextElement = section.closest("main")?.nextElementSibling;
+    const footer =
+      nextElement instanceof HTMLElement && nextElement.tagName === "FOOTER"
+        ? nextElement
+        : null;
+
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
     const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)");
+    const isInteractive = () => !reducedMotion.matches && finePointer.matches;
+
     let dots: Dot[] = [];
     let figure: Figure = "idle";
     let frame = 0;
@@ -140,32 +219,51 @@ export function ContactDotMatrix({
     let dotColor = "";
     let figureColor = "";
     let hoverColor = "";
-    let hovered = false;
-    let glow = 0;
+    let pointerInside = false;
+    let pointerX = 0;
+    let pointerY = 0;
+    let lastPointer: { x: number; y: number } | null = null;
 
     const draw = () => {
       context.clearRect(0, 0, width, height);
 
-      const baseAlpha = BASE_ALPHA + (HOVER_ALPHA - BASE_ALPHA) * glow;
-
       for (const dot of dots) {
-        const isFigure = dot.intensity > 0.02;
+        const visible = 1 - dot.hide;
+        const formed = dot.intensity;
+        if (visible < 0.01 && formed < 0.02) continue;
+
+        const light = dot.light * (1 - formed);
+        let x = dot.x;
+        let y = dot.y;
+
+        // Puxão leve em direção ao cursor, só na região animada
+        if (light > 0.01) {
+          const dx = pointerX - x;
+          const dy = pointerY - y;
+          const distance = Math.hypot(dx, dy) || 1;
+          const pull = Math.min(LIGHT_PULL * light, distance);
+          x += (dx / distance) * pull;
+          y += (dy / distance) * pull;
+        }
+
         const radius =
-          BASE_RADIUS + (FIGURE_RADIUS - BASE_RADIUS) * dot.intensity;
+          BASE_RADIUS +
+          (FIGURE_RADIUS - BASE_RADIUS) * formed +
+          LIGHT_GROW * light;
+        const baseAlpha = (BASE_ALPHA + (LIGHT_ALPHA - BASE_ALPHA) * light) * visible;
 
         context.beginPath();
-        context.fillStyle = isFigure ? figureColor : dotColor;
-        context.globalAlpha =
-          baseAlpha + (FIGURE_ALPHA - baseAlpha) * dot.intensity;
-        context.arc(dot.x, dot.y, radius, 0, Math.PI * 2);
+        context.fillStyle = formed > 0.02 ? figureColor : dotColor;
+        context.globalAlpha = baseAlpha + (FIGURE_ALPHA - baseAlpha) * formed;
+        context.arc(x, y, radius, 0, Math.PI * 2);
         context.fill();
 
-        // Com o mouse sobre a matriz, os pontos clareiam (camada mais clara por cima)
-        if (!isFigure && glow > 0.01 && hoverColor) {
+        // Camada mais clara por cima nos pontos próximos do cursor
+        if (light > 0.02 && hoverColor) {
           context.beginPath();
           context.fillStyle = hoverColor;
-          context.globalAlpha = glow * 0.5 * (1 - dot.intensity);
-          context.arc(dot.x, dot.y, radius, 0, Math.PI * 2);
+          context.globalAlpha = light * 0.55 * visible;
+          context.arc(x, y, radius, 0, Math.PI * 2);
           context.fill();
         }
       }
@@ -173,7 +271,7 @@ export function ContactDotMatrix({
       context.globalAlpha = 1;
     };
 
-    const targetFor = (dot: Dot): [number, number] => {
+    const targetFor = (dot: Dot): Point => {
       if (figure === "heart" && dot.heart) return dot.heart;
       if (figure === "smile" && dot.smile) return dot.smile;
       return [dot.homeX, dot.homeY];
@@ -183,27 +281,45 @@ export function ContactDotMatrix({
       const delta = lastTime ? Math.min(40, time - lastTime) : 16;
       lastTime = time;
       const ease = 1 - Math.exp(-delta / 165);
+      const lightEase = 1 - Math.exp(-delta / 110);
+      const hideEase = 1 - Math.exp(-delta / 220);
       let unsettled = false;
-
-      const targetGlow = hovered ? 1 : 0;
-      glow = reducedMotion.matches
-        ? targetGlow
-        : glow + (targetGlow - glow) * ease;
-      if (Math.abs(targetGlow - glow) > 0.005) unsettled = true;
-      else glow = targetGlow;
 
       for (const dot of dots) {
         const [targetX, targetY] = targetFor(dot);
-        const targetIntensity =
-          figure !== "idle" && (dot.heart || dot.smile) ? 1 : 0;
+        const inFigure =
+          (figure === "heart" && dot.heart) || (figure === "smile" && dot.smile);
+        const targetIntensity = inFigure ? 1 : 0;
+        const targetHide =
+          figure === "heart"
+            ? dot.heartHide
+            : figure === "smile"
+              ? dot.smileHide
+              : 0;
+
+        let targetLight = 0;
+        if (pointerInside && !inFigure) {
+          const distance = Math.hypot(
+            dot.homeX - pointerX,
+            dot.homeY - pointerY,
+          );
+          if (distance < LIGHT_RADIUS) {
+            targetLight = 1 - smoothstep(0, LIGHT_RADIUS, distance);
+          }
+        }
+
         dot.x += (targetX - dot.x) * ease;
         dot.y += (targetY - dot.y) * ease;
         dot.intensity += (targetIntensity - dot.intensity) * ease;
+        dot.light += (targetLight - dot.light) * lightEase;
+        dot.hide += (targetHide - dot.hide) * hideEase;
 
         if (
           Math.abs(targetX - dot.x) > 0.05 ||
           Math.abs(targetY - dot.y) > 0.05 ||
-          Math.abs(targetIntensity - dot.intensity) > 0.005
+          Math.abs(targetIntensity - dot.intensity) > 0.005 ||
+          Math.abs(targetLight - dot.light) > 0.005 ||
+          Math.abs(targetHide - dot.hide) > 0.005
         ) {
           unsettled = true;
         }
@@ -228,10 +344,17 @@ export function ContactDotMatrix({
     };
 
     const resize = () => {
-      const rect = section.getBoundingClientRect();
+      const sectionRect = section.getBoundingClientRect();
+      const footerRect = footer?.getBoundingClientRect();
       const ratio = Math.min(window.devicePixelRatio || 1, 1.5);
-      width = Math.max(1, rect.width);
-      height = Math.max(1, rect.height);
+      const zoneHeight = Math.max(1, sectionRect.height);
+
+      width = Math.max(1, sectionRect.width);
+      height = footerRect
+        ? Math.max(zoneHeight, footerRect.bottom - sectionRect.top)
+        : zoneHeight;
+
+      canvas.style.height = `${height}px`;
       canvas.width = Math.round(width * ratio);
       canvas.height = Math.round(height * ratio);
       context.setTransform(ratio, 0, 0, ratio, 0, 0);
@@ -240,27 +363,45 @@ export function ContactDotMatrix({
       dotColor = styles.getPropertyValue("--muted-foreground").trim();
       figureColor = styles.getPropertyValue("--primary-soft").trim();
       hoverColor = styles.getPropertyValue("--foreground").trim();
-      dots = buildDots(width, height);
+      dots = buildDots(width, height, zoneHeight);
 
-      if (reducedMotion.matches || !finePointer.matches) figure = "idle";
+      if (!isInteractive()) figure = "idle";
       draw();
-      if (figure !== "idle") requestDraw();
+      if (figure !== "idle" || pointerInside) requestDraw();
     };
 
-    const setHovered = (next: boolean) => {
-      if (next === hovered) return;
-      hovered = next;
-      requestDraw();
+    const leave = () => {
+      if (pointerInside) {
+        pointerInside = false;
+        requestDraw();
+      }
+      setFigure("idle");
     };
 
-    const onPointerMove = (event: PointerEvent) => {
-      if (!finePointer.matches) return;
-      // Em qualquer ponto da matriz, os pontos ficam mais claros
-      setHovered(true);
-      if (reducedMotion.matches) return;
-      const rect = section.getBoundingClientRect();
-      const x = (event.clientX - rect.left) / rect.width;
-      const y = (event.clientY - rect.top) / rect.height;
+    // Avalia a posição do cursor em relação à matriz inteira (seção + rodapé)
+    const evaluatePointer = () => {
+      if (!lastPointer || !isInteractive()) {
+        leave();
+        return;
+      }
+
+      const rect = canvas.getBoundingClientRect();
+      const localX = lastPointer.x - rect.left;
+      const localY = lastPointer.y - rect.top;
+
+      if (localX < 0 || localX > rect.width || localY < 0 || localY > rect.height) {
+        leave();
+        return;
+      }
+
+      pointerInside = true;
+      pointerX = localX;
+      pointerY = localY;
+
+      // Região de formação das figuras: faixa central da seção de contato
+      const zone = section.getBoundingClientRect();
+      const x = (lastPointer.x - zone.left) / zone.width;
+      const y = (lastPointer.y - zone.top) / zone.height;
 
       if (y < 0.12 || y > 0.9) {
         setFigure("idle");
@@ -271,24 +412,35 @@ export function ContactDotMatrix({
       } else {
         setFigure(x < 0.5 ? "heart" : "smile");
       }
+
+      requestDraw();
+    };
+
+    const onPointerMove = (event: PointerEvent) => {
+      if (event.pointerType === "touch") return;
+      lastPointer = { x: event.clientX, y: event.clientY };
+      evaluatePointer();
+    };
+
+    const onScroll = () => {
+      if (lastPointer) evaluatePointer();
     };
 
     const onPointerLeave = () => {
-      setHovered(false);
-      setFigure("idle");
+      lastPointer = null;
+      leave();
     };
 
     const disableInteraction = () => {
-      if (!finePointer.matches) {
-        hovered = false;
-        glow = 0;
-      }
-      if (reducedMotion.matches || !finePointer.matches) {
+      if (!isInteractive()) {
         figure = "idle";
+        pointerInside = false;
         for (const dot of dots) {
           dot.x = dot.homeX;
           dot.y = dot.homeY;
           dot.intensity = 0;
+          dot.light = 0;
+          dot.hide = 0;
         }
         draw();
       }
@@ -296,16 +448,24 @@ export function ContactDotMatrix({
 
     const observer = new ResizeObserver(resize);
     observer.observe(section);
-    section.addEventListener("pointermove", onPointerMove, { passive: true });
-    section.addEventListener("pointerleave", onPointerLeave);
+    if (footer) observer.observe(footer);
+    window.addEventListener("pointermove", onPointerMove, { passive: true });
+    window.addEventListener("scroll", onScroll, { passive: true });
+    document.documentElement.addEventListener("pointerleave", onPointerLeave);
+    window.addEventListener("blur", onPointerLeave);
     reducedMotion.addEventListener("change", disableInteraction);
     finePointer.addEventListener("change", disableInteraction);
     resize();
 
     return () => {
       observer.disconnect();
-      section.removeEventListener("pointermove", onPointerMove);
-      section.removeEventListener("pointerleave", onPointerLeave);
+      window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("scroll", onScroll);
+      document.documentElement.removeEventListener(
+        "pointerleave",
+        onPointerLeave,
+      );
+      window.removeEventListener("blur", onPointerLeave);
       reducedMotion.removeEventListener("change", disableInteraction);
       finePointer.removeEventListener("change", disableInteraction);
       if (frame) cancelAnimationFrame(frame);
@@ -316,7 +476,8 @@ export function ContactDotMatrix({
     <canvas
       ref={canvasRef}
       aria-hidden="true"
-      className="pointer-events-none absolute inset-0 z-0 size-full"
+      className="pointer-events-none absolute top-0 left-0 z-0 w-full"
+      style={{ height: "100%" }}
     />
   );
 }
