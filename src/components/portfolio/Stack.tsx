@@ -1,12 +1,40 @@
 import { useEffect, useRef, type CSSProperties } from "react";
 
 import { stack } from "@/data/portfolio";
+import { techIcons, type TechIconKey } from "@/data/techIcons";
 import { Reveal } from "./Reveal";
 import { SectionLabel } from "./SectionLabel";
 
 function smoothstep(value: number) {
   const clamped = Math.min(Math.max(value, 0), 1);
   return clamped * clamped * (3 - 2 * clamped);
+}
+
+/**
+ * Faixa com as principais tecnologias do card. O SVG é decorativo (aria-hidden); o nome
+ * fica em texto para leitores de tela e aparece como rótulo discreto no hover.
+ */
+function StackIcons({ keys }: { keys: readonly string[] }) {
+  const icons = keys.filter((key): key is TechIconKey => key in techIcons).map((k) => techIcons[k]);
+  if (icons.length === 0) return null;
+
+  return (
+    <ul className="stack-icons" aria-label="Principais tecnologias deste grupo">
+      {icons.map((icon) => (
+        <li
+          key={icon.name}
+          className="stack-icon"
+          data-label={icon.name}
+          style={{ "--icon-color": icon.color } as CSSProperties}
+        >
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
+            <path d={icon.path} />
+          </svg>
+          <span className="sr-only">{icon.name}</span>
+        </li>
+      ))}
+    </ul>
+  );
 }
 
 export function Stack() {
@@ -122,6 +150,8 @@ export function Stack() {
                       </li>
                     ))}
                   </ul>
+
+                  <StackIcons keys={group.icons} />
                 </article>
               ))}
             </div>
