@@ -17,7 +17,6 @@ export const site = {
 export const nav = [
   { label: "Sobre", href: "/#sobre" },
   { label: "Skills", href: "/#stack" },
-  { label: "Engenharia", href: "/#engenharia" },
   { label: "Projetos", href: "/#projetos" },
   { label: "Trajetória", href: "/#trajetoria" },
   { label: "Contato", href: "/#contato" },
@@ -146,51 +145,6 @@ export const stack = {
       items: [
         { name: "Python", note: "Mini Olimpíada — leitura de sensor e lógica do robô" },
         { name: "LEGO Spike Prime", note: "Mini Olimpíada — montagem e programação em blocos" },
-      ],
-    },
-  ],
-};
-
-export const engineering = {
-  label: "engenharia",
-  title: "Como eu penso o desenvolvimento",
-  description:
-    "Tecnologia é meio, não fim. Estas são as competências que aplico de projeto em projeto — só o que já apareceu em código real.",
-  groups: [
-    {
-      title: "Front-end",
-      items: [
-        "Componentização de interfaces em React, reaproveitando UI entre telas",
-        "TypeScript para tipar dados, formulários e o contrato entre camadas",
-        "Design responsivo, com dark mode via tokens de design no Tekidu",
-      ],
-    },
-    {
-      title: "Dados, autorização e privacidade",
-      items: [
-        "Modelagem relacional com PostgreSQL e Prisma no LexContract; modelagem de dados acadêmicos e sociais no Firestore / Realtime Database",
-        "Autenticação com Firebase Auth: e-mail/senha e recuperação de senha no Tekidu; e-mail/senha, Google e verificação de e-mail no IFConnect",
-        "LexContract: papéis verificados no servidor e dados isolados por escritório. Tekidu: autorização por perfil validada no banco via Security Rules — não só escondida na UI. No IFConnect, as permissões por cargo ficam no código do cliente",
-        "Evidence Finder: processamento local, sem cliente de rede nem telemetria, permissões mínimas do Tauri, caminhos validados no núcleo e SHA-256 para verificar a integridade das fontes — com limitações documentadas, como a ausência de criptografia do armazenamento",
-        "GitFlow Desktop: Git executado sem shell, caminhos validados, nenhuma operação destrutiva (sem force, reset ou clean) e confirmação do destino exato antes de pull e push",
-      ],
-    },
-    {
-      title: "Qualidade",
-      items: [
-        "Testes unitários e de integração da API (LexContract), 4 fluxos E2E com Playwright e testes das regras de segurança do Firestore (Tekidu)",
-        "Evidence Finder: 258 testes Rust e 82 de frontend na última rodada registrada no repositório (docs/FASE7.md, executada em Linux). GitFlow Desktop: testes de integração em Rust com Git real em repositórios temporários",
-        "Validação de formulário em duas camadas: cliente (Zod) e servidor, com testes do handler do formulário no FORJA",
-        "Code splitting por perfil de usuário para reduzir o que cada um carrega",
-      ],
-    },
-    {
-      title: "Deploy e automação",
-      items: [
-        "Versionamento com Git e GitHub em todos os projetos",
-        "Pipeline de CI/CD no LexContract: o deploy só ocorre depois de typecheck, build, testes, E2E e imagens Docker",
-        "Deploy em Cloudflare Pages / Workers e Render (API)",
-        "Integração de formulários com automações reais (Make → Google Sheets)",
       ],
     },
   ],
