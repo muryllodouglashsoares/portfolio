@@ -3,7 +3,7 @@ import { Reveal } from "./Reveal";
 
 export function Footer() {
   return (
-    <footer className="border-t border-border py-8">
+    <footer className="relative z-10 border-t border-border py-8">
       <Reveal>
         <div className="container-page flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-6">
           <a
