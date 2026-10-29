@@ -12,7 +12,19 @@ interface Dot {
   smile?: [number, number];
 }
 
-const FIGURE_DOTS = 144;
+// Poucos pontos por figura: com espaçamento visível entre eles, a silhueta
+// aparece pontilhada em vez de parecer uma linha contínua.
+const FIGURE_DOTS = 52;
+const SMILE_OUTLINE_DOTS = 28;
+const SMILE_EYE_DOTS = 3;
+const SMILE_MOUTH_DOTS = 18;
+
+// Aparência da matriz (base, hover e figuras)
+const BASE_ALPHA = 0.3;
+const BASE_RADIUS = 1.5;
+const HOVER_ALPHA = 0.62;
+const FIGURE_ALPHA = 0.9;
+const FIGURE_RADIUS = 2.3;
 
 function heartTargets(width: number, height: number, size: number) {
   const cx = width * 0.34;
@@ -38,8 +50,8 @@ function smileTargets(width: number, height: number, size: number) {
   const radius = size * 0.48;
   const targets: Array<[number, number]> = [];
 
-  for (let index = 0; index < 84; index += 1) {
-    const angle = (index / 84) * Math.PI * 2;
+  for (let index = 0; index < SMILE_OUTLINE_DOTS; index += 1) {
+    const angle = (index / SMILE_OUTLINE_DOTS) * Math.PI * 2;
     targets.push([
       cx + Math.cos(angle) * radius,
       cy + Math.sin(angle) * radius,
@@ -47,8 +59,8 @@ function smileTargets(width: number, height: number, size: number) {
   }
 
   for (const direction of [-1, 1]) {
-    for (let index = 0; index < 10; index += 1) {
-      const angle = (index / 10) * Math.PI * 2;
+    for (let index = 0; index < SMILE_EYE_DOTS; index += 1) {
+      const angle = (index / SMILE_EYE_DOTS) * Math.PI * 2;
       targets.push([
         cx + direction * radius * 0.24 + Math.cos(angle) * radius * 0.055,
         cy - radius * 0.15 + Math.sin(angle) * radius * 0.1,
@@ -56,8 +68,8 @@ function smileTargets(width: number, height: number, size: number) {
     }
   }
 
-  for (let index = 0; index < 40; index += 1) {
-    const angle = Math.PI * (0.12 + (index / 39) * 0.76);
+  for (let index = 0; index < SMILE_MOUTH_DOTS; index += 1) {
+    const angle = Math.PI * (0.12 + (index / (SMILE_MOUTH_DOTS - 1)) * 0.76);
     targets.push([
       cx + Math.cos(angle) * radius * 0.6,
       cy + radius * 0.08 + Math.sin(angle) * radius * 0.52,
@@ -127,16 +139,35 @@ export function ContactDotMatrix({
     let height = 0;
     let dotColor = "";
     let figureColor = "";
+    let hoverColor = "";
+    let hovered = false;
+    let glow = 0;
 
     const draw = () => {
       context.clearRect(0, 0, width, height);
 
+      const baseAlpha = BASE_ALPHA + (HOVER_ALPHA - BASE_ALPHA) * glow;
+
       for (const dot of dots) {
+        const isFigure = dot.intensity > 0.02;
+        const radius =
+          BASE_RADIUS + (FIGURE_RADIUS - BASE_RADIUS) * dot.intensity;
+
         context.beginPath();
-        context.fillStyle = dot.intensity > 0.02 ? figureColor : dotColor;
-        context.globalAlpha = 0.11 + dot.intensity * 0.22;
-        context.arc(dot.x, dot.y, 1 + dot.intensity * 0.45, 0, Math.PI * 2);
+        context.fillStyle = isFigure ? figureColor : dotColor;
+        context.globalAlpha =
+          baseAlpha + (FIGURE_ALPHA - baseAlpha) * dot.intensity;
+        context.arc(dot.x, dot.y, radius, 0, Math.PI * 2);
         context.fill();
+
+        // Com o mouse sobre a matriz, os pontos clareiam (camada mais clara por cima)
+        if (!isFigure && glow > 0.01 && hoverColor) {
+          context.beginPath();
+          context.fillStyle = hoverColor;
+          context.globalAlpha = glow * 0.5 * (1 - dot.intensity);
+          context.arc(dot.x, dot.y, radius, 0, Math.PI * 2);
+          context.fill();
+        }
       }
 
       context.globalAlpha = 1;
@@ -153,6 +184,13 @@ export function ContactDotMatrix({
       lastTime = time;
       const ease = 1 - Math.exp(-delta / 165);
       let unsettled = false;
+
+      const targetGlow = hovered ? 1 : 0;
+      glow = reducedMotion.matches
+        ? targetGlow
+        : glow + (targetGlow - glow) * ease;
+      if (Math.abs(targetGlow - glow) > 0.005) unsettled = true;
+      else glow = targetGlow;
 
       for (const dot of dots) {
         const [targetX, targetY] = targetFor(dot);
@@ -201,6 +239,7 @@ export function ContactDotMatrix({
       const styles = getComputedStyle(section);
       dotColor = styles.getPropertyValue("--muted-foreground").trim();
       figureColor = styles.getPropertyValue("--primary-soft").trim();
+      hoverColor = styles.getPropertyValue("--foreground").trim();
       dots = buildDots(width, height);
 
       if (reducedMotion.matches || !finePointer.matches) figure = "idle";
@@ -208,8 +247,17 @@ export function ContactDotMatrix({
       if (figure !== "idle") requestDraw();
     };
 
+    const setHovered = (next: boolean) => {
+      if (next === hovered) return;
+      hovered = next;
+      requestDraw();
+    };
+
     const onPointerMove = (event: PointerEvent) => {
-      if (reducedMotion.matches || !finePointer.matches) return;
+      if (!finePointer.matches) return;
+      // Em qualquer ponto da matriz, os pontos ficam mais claros
+      setHovered(true);
+      if (reducedMotion.matches) return;
       const rect = section.getBoundingClientRect();
       const x = (event.clientX - rect.left) / rect.width;
       const y = (event.clientY - rect.top) / rect.height;
@@ -225,9 +273,16 @@ export function ContactDotMatrix({
       }
     };
 
-    const onPointerLeave = () => setFigure("idle");
+    const onPointerLeave = () => {
+      setHovered(false);
+      setFigure("idle");
+    };
 
     const disableInteraction = () => {
+      if (!finePointer.matches) {
+        hovered = false;
+        glow = 0;
+      }
       if (reducedMotion.matches || !finePointer.matches) {
         figure = "idle";
         for (const dot of dots) {
