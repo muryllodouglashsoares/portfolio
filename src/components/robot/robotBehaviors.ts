@@ -44,22 +44,12 @@ export const SECTION_BEHAVIORS: readonly SectionBehavior[] = [
   { id: "sobre", stages: [{ until: 1, to: 0, gait: "idle" }], restYaw: [34, 50], look: 7 },
   // STACK — Walking: atravessa a pista conforme a seção é percorrida.
   { id: "stack", stages: [{ until: 1, to: 1, gait: "walk" }], restYaw: [0, 0], weave: 4 },
-  // ENGENHARIA — Walking → Running: volta pela pista, cada vez mais rápido.
-  {
-    id: "engenharia",
-    stages: [
-      { until: 0.38, to: 0.8, gait: "walk" },
-      { until: 1, to: 0.26, gait: "run" },
-    ],
-    restYaw: [0, 0],
-    weave: 6,
-  },
-  // PROJETOS — Running → Walking → Idle: desacelera e "chega" perto do projeto principal.
+  // PROJETOS — Running → Walking → Idle: volta pela pista, desacelera e "chega" perto do projeto principal.
   {
     id: "projetos",
     stages: [
-      { until: 0.22, to: 0.12, gait: "run" },
-      { until: 0.55, to: 0, gait: "walk" },
+      { until: 0.4, to: 0.12, gait: "run" },
+      { until: 0.65, to: 0, gait: "walk" },
       { until: 1, to: 0, gait: "idle" },
     ],
     restYaw: [40, 40],
