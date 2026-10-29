@@ -1,9 +1,11 @@
+import type { CSSProperties } from "react";
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, ArrowUpRight, Github } from "lucide-react";
 
 import { projects as projectsCopy } from "@/data/portfolio";
 import {
   featuredProject,
+  getProject,
   otherProjects,
   principalProjects,
   statusLabel,
@@ -14,6 +16,60 @@ import { SectionLabel } from "./SectionLabel";
 import { Tag } from "./Tag";
 import { usePointerChip, useSpotlight } from "@/hooks/use-motion";
 import { cn } from "@/lib/utils";
+
+/** Ordem da faixa superior (os dados continuam na ordem original; só a exibição muda). */
+const marqueePrincipalIds = ["tekidu", "evidence-finder", "gitflow"];
+const marqueePrincipal = marqueePrincipalIds
+  .map((id) => getProject(id))
+  .filter((p): p is Project => Boolean(p));
+
+/** Quantas vezes a sequência é desenhada na faixa — só a primeira é lida por tecnologias assistivas. */
+const MARQUEE_COPIES = 4;
+
+/**
+ * Faixa horizontal com movimento contínuo em CSS puro (ver `.project-marquee` em styles.css).
+ * A primeira cópia é a lista real; as demais são apenas visuais (aria-hidden + inert: sem foco,
+ * sem anúncio duplicado e sem links repetidos). Pausa por hover/foco é feita via CSS.
+ */
+function ProjectMarquee({
+  label,
+  direction,
+  projects: items,
+  indexOf,
+  detailed = false,
+}: {
+  label: string;
+  direction: "left" | "right";
+  projects: Project[];
+  indexOf: (project: Project) => number;
+  detailed?: boolean;
+}) {
+  return (
+    <div
+      className="project-marquee"
+      data-direction={direction}
+      role="group"
+      aria-label={label}
+      style={{ "--marquee-count": items.length } as CSSProperties}
+    >
+      <div className="project-marquee-track">
+        {Array.from({ length: MARQUEE_COPIES }, (_, copy) => (
+          <ul
+            key={copy}
+            className="project-marquee-group"
+            {...(copy > 0 ? { "aria-hidden": true, inert: true } : {})}
+          >
+            {items.map((p) => (
+              <li key={p.id} className="project-marquee-card">
+                <ProjectListCard project={p} index={indexOf(p)} detailed={detailed} />
+              </li>
+            ))}
+          </ul>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export function Projects() {
   const f = featuredProject;
@@ -128,24 +184,27 @@ export function Projects() {
           </article>
         </Reveal>
 
-        {/* Outros projetos principais */}
-        <ul className="mt-4 grid grid-cols-1 gap-4 sm:mt-6 sm:gap-6 md:grid-cols-2">
-          {principalProjects.map((p, i) => (
-            <Reveal as="li" key={p.id} delay={i * 80}>
-              <ProjectListCard project={p} index={i} detailed />
-            </Reveal>
-          ))}
-        </ul>
+        {/* Outros projetos principais — faixa contínua para a esquerda */}
+        <Reveal delay={80} className="mt-4 sm:mt-6">
+          <ProjectMarquee
+            label="Projetos principais"
+            direction="left"
+            projects={marqueePrincipal}
+            indexOf={(p) => principalProjects.findIndex((x) => x.id === p.id)}
+            detailed
+          />
+        </Reveal>
 
-        {/* Projetos complementares */}
+        {/* Projetos complementares — faixa contínua para a direita */}
         <h3 className="mono-label mt-14 text-muted-foreground sm:mt-20">Projetos complementares</h3>
-        <ul className="mt-5 grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {otherProjects.map((p, i) => (
-            <Reveal as="li" key={p.id} delay={(i % 3) * 80}>
-              <ProjectListCard project={p} index={i + principalProjects.length} />
-            </Reveal>
-          ))}
-        </ul>
+        <Reveal delay={80} className="mt-5">
+          <ProjectMarquee
+            label="Projetos complementares"
+            direction="right"
+            projects={otherProjects}
+            indexOf={(p) => otherProjects.findIndex((x) => x.id === p.id) + principalProjects.length}
+          />
+        </Reveal>
       </div>
     </section>
   );

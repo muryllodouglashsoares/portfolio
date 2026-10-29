@@ -553,3 +553,96 @@
     display: none;
   }
 }
+
+/*
+ * Faixas de projetos (secundários e complementares).
+ * Loop em CSS puro: o track tem MARQUEE_COPIES cópias da sequência e desloca exatamente
+ * uma cópia (-25%), então o reinício é imperceptível. Cada cópia tem padding-right igual
+ * ao gap, para o espaçamento ser uniforme também na emenda.
+ * A duração é proporcional ao número de cards, mantendo velocidade visual parecida entre faixas.
+ */
+@keyframes project-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-25%);
+  }
+}
+
+.project-marquee {
+  --marquee-gap: 1rem;
+  --marquee-card-width: min(82vw, 20rem);
+  --marquee-speed: 9s; /* por card */
+  overflow: hidden;
+  padding-block: 1.25rem;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 4%, #000 96%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 4%, #000 96%, transparent);
+}
+
+@media (min-width: 40rem) {
+  .project-marquee {
+    --marquee-gap: 1.5rem;
+    --marquee-card-width: 22rem;
+  }
+}
+
+@media (min-width: 64rem) {
+  .project-marquee {
+    --marquee-card-width: 24rem;
+  }
+}
+
+.project-marquee-track {
+  display: flex;
+  width: max-content;
+  animation: project-marquee calc(var(--marquee-count) * var(--marquee-speed)) linear infinite;
+  will-change: transform;
+}
+
+.project-marquee[data-direction="right"] .project-marquee-track {
+  animation-direction: reverse;
+}
+
+.project-marquee-group {
+  display: flex;
+  flex: none;
+  gap: var(--marquee-gap);
+  padding-right: var(--marquee-gap);
+  margin: 0;
+  list-style: none;
+}
+
+.project-marquee-card {
+  display: flex;
+  flex: none;
+  width: var(--marquee-card-width);
+}
+
+.project-marquee-card > * {
+  width: 100%;
+}
+
+/* Pausa individual: só a faixa com card em hover/foco para; retoma da posição exata. */
+.project-marquee-track:has(.project-marquee-card:hover),
+.project-marquee-track:has(:focus-visible) {
+  animation-play-state: paused;
+}
+
+/* Reduced motion: sem animação; a faixa vira uma linha rolável manualmente. */
+@media (prefers-reduced-motion: reduce) {
+  .project-marquee {
+    overflow-x: auto;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+
+  .project-marquee-track {
+    animation: none !important;
+    will-change: auto;
+  }
+
+  .project-marquee-group[aria-hidden="true"] {
+    display: none;
+  }
+}
