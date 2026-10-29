@@ -1,22 +1,31 @@
+import { useRef } from "react";
+
 import { contact } from "@/data/portfolio";
 import { Reveal } from "./Reveal";
 import { SectionLabel } from "./SectionLabel";
 import { useMagnetic } from "@/hooks/use-motion";
+import { ContactDotMatrix } from "./ContactDotMatrix";
 
 export function Contact() {
   const magneticRef = useMagnetic<HTMLAnchorElement>();
+  const sectionRef = useRef<HTMLElement | null>(null);
 
   return (
-    <section id="contato" className="relative scroll-mt-24 py-16 sm:py-24 lg:py-32">
+    <section
+      ref={sectionRef}
+      id="contato"
+      className="relative isolate scroll-mt-24 overflow-hidden py-16 sm:py-24 lg:py-32"
+    >
+      <ContactDotMatrix sectionRef={sectionRef} />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute bottom-0 left-1/2 h-[22rem] w-full max-w-[40rem] -translate-x-1/2 rounded-full opacity-30 blur-[100px] sm:h-[30rem] sm:blur-[130px]"
+        className="pointer-events-none absolute bottom-0 left-1/2 z-0 h-[22rem] w-full max-w-[40rem] -translate-x-1/2 rounded-full opacity-30 blur-[100px] sm:h-[30rem] sm:blur-[130px]"
         style={{
           background:
             "radial-gradient(circle, color-mix(in oklab, var(--primary) 55%, transparent), transparent 70%)",
         }}
       />
-      <div className="container-page relative">
+      <div className="container-page relative z-10">
         <Reveal>
           <SectionLabel>{contact.label}</SectionLabel>
         </Reveal>
