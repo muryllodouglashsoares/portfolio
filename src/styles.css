@@ -573,7 +573,7 @@
 .project-marquee {
   --marquee-gap: 1rem;
   --marquee-card-width: min(82vw, 20rem);
-  --marquee-speed: 9s; /* por card */
+  --marquee-speed: 5s; /* por card */
   overflow: hidden;
   padding-block: 1.25rem;
   -webkit-mask-image: linear-gradient(to right, transparent, #000 4%, #000 96%, transparent);
