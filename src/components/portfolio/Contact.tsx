@@ -14,17 +14,21 @@ export function Contact() {
     <section
       ref={sectionRef}
       id="contato"
-      className="relative isolate scroll-mt-24 overflow-hidden py-16 sm:py-24 lg:py-32"
+      className="relative isolate scroll-mt-24 overflow-x-clip py-16 sm:py-24 lg:py-32"
     >
       <ContactDotMatrix sectionRef={sectionRef} />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute bottom-0 left-1/2 z-0 h-[22rem] w-full max-w-[40rem] -translate-x-1/2 rounded-full opacity-30 blur-[100px] sm:h-[30rem] sm:blur-[130px]"
-        style={{
-          background:
-            "radial-gradient(circle, color-mix(in oklab, var(--primary) 55%, transparent), transparent 70%)",
-        }}
-      />
+        className="pointer-events-none absolute inset-0 z-0 overflow-hidden"
+      >
+        <div
+          className="absolute bottom-0 left-1/2 h-[22rem] w-full max-w-[40rem] -translate-x-1/2 rounded-full opacity-30 blur-[100px] sm:h-[30rem] sm:blur-[130px]"
+          style={{
+            background:
+              "radial-gradient(circle, color-mix(in oklab, var(--primary) 55%, transparent), transparent 70%)",
+          }}
+        />
+      </div>
       <div className="container-page relative z-10">
         <Reveal>
           <SectionLabel>{contact.label}</SectionLabel>
