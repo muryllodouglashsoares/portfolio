@@ -1,0 +1,10 @@
+{
+  "description": "Portfólio de desenvolvedor web que apresenta projetos e tecnologias em uma seção Stack interativa, com cartões empilhados que revelam habilidades ao rolar.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
