@@ -134,8 +134,14 @@ export function Stack() {
                   style={{ zIndex: index + 1 } as CSSProperties}
                 >
                   <div className="stack-card-heading">
-                    <h3 className="mono-label text-primary-soft">{group.title}</h3>
+                    <span className="stack-card-index" aria-hidden="true">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                    <h3 className="stack-card-title">{group.title}</h3>
                     <span className="stack-card-rule" aria-hidden="true" />
+                    <span className="stack-card-count" aria-hidden="true">
+                      {group.items.length} {group.items.length === 1 ? "item" : "itens"}
+                    </span>
                   </div>
 
                   <ul className="stack-tech-grid">
