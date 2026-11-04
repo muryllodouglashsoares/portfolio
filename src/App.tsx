@@ -34,8 +34,9 @@ const sectionIds = [
   "contato",
 ]
 
-const projects = [
+const projectEntries = [
   {
+    slug: "lexcontract",
     index: "01",
     title: "LexContract",
     eyebrow: "Produto em destaque · Web",
@@ -52,6 +53,7 @@ const projects = [
     accent: "violet",
   },
   {
+    slug: "evidence-finder",
     index: "02",
     title: "Evidence Finder",
     eyebrow: "Desktop · Privacidade local",
@@ -67,6 +69,7 @@ const projects = [
     accent: "cyan",
   },
   {
+    slug: "gitflow-desktop",
     index: "03",
     title: "GitFlow Desktop",
     eyebrow: "Desktop · Developer tool",
@@ -80,6 +83,7 @@ const projects = [
     accent: "orange",
   },
   {
+    slug: "tekidu",
     index: "04",
     title: "Tekidu",
     eyebrow: "Plataforma acadêmica · Web",
@@ -96,6 +100,38 @@ const projects = [
     accent: "blue",
   },
 ]
+
+/**
+ * Capturas locais dos projetos.
+ *
+ * Basta colocar as imagens em `src/assets/projects/<slug>/` (slugs em
+ * `projectEntries`). `cover.*` vira a imagem do card; as demais entram na
+ * galeria, em ordem alfabética (use 01-, 02-… para controlar a ordem).
+ * Sem imagens locais, usa a captura remota antiga (`image`) ou o aviso.
+ */
+const localShots = import.meta.glob(
+  "./assets/projects/*/*.{png,jpg,jpeg,webp,avif}",
+  { eager: true, query: "?url", import: "default" },
+) as Record<string, string>
+
+function shotsFor(slug: string, fallback?: string): string[] {
+  const local = Object.entries(localShots)
+    .filter(([path]) => path.startsWith(`./assets/projects/${slug}/`))
+    .map(([path, url]) => ({ name: path.split("/").pop() ?? "", url }))
+    .sort((a, b) => {
+      const aCover = a.name.toLowerCase().startsWith("cover") ? 0 : 1
+      const bCover = b.name.toLowerCase().startsWith("cover") ? 0 : 1
+      return aCover - bCover || a.name.localeCompare(b.name, "pt-BR")
+    })
+    .map((shot) => shot.url)
+  if (local.length) return local
+  return fallback ? [fallback] : []
+}
+
+const projects = projectEntries.map((project) => {
+  const images = shotsFor(project.slug, project.image)
+  return { ...project, images, image: images[0] as string | undefined }
+})
 
 const complementary = [
   [
@@ -210,7 +246,7 @@ function ImageFrame({
   children,
 }: {
   project: ProjectData
-  onZoom: (image: string) => void
+  onZoom: () => void
   children: React.ReactNode
 }) {
   if (project.demo) {
@@ -235,7 +271,7 @@ function ImageFrame({
         project.image ? `Ampliar captura do projeto ${project.title}` : undefined
       }
       disabled={!project.image}
-      onClick={() => project.image && onZoom(project.image)}
+      onClick={() => project.image && onZoom()}
     >
       {children}
     </button>
@@ -273,6 +309,15 @@ export default function App() {
     images: LightboxImage[]
     index: number
   } | null>(null)
+  const openShots = (project: ProjectData, index: number) =>
+    setLightbox({
+      title: project.title,
+      images: project.images.map((src, i) => ({
+        src,
+        alt: `Captura ${i + 1} do projeto ${project.title}`,
+      })),
+      index,
+    })
   const menuButtonRef = useRef<HTMLButtonElement>(null)
   const mobileNavRef = useRef<HTMLElement>(null)
   const { activeSection, showBackToTop } = usePageExperience(sectionIds)
@@ -513,23 +558,23 @@ export default function App() {
                           Abrir demo <ArrowUpRight size={16} />
                         </ExternalLink>
                       )}
+                      {project.demo && project.images.length > 1 && (
+                        <a
+                          href="#projetos"
+                          onClick={(event) => {
+                            event.preventDefault()
+                            openShots(project, 0)
+                          }}
+                        >
+                          Ver capturas ({project.images.length})
+                        </a>
+                      )}
                     </div>
                   </div>
                   <div className="project-visual reveal-item reveal-scale">
                     <ImageFrame
                       project={project}
-                      onZoom={(image) =>
-                        setLightbox({
-                          title: project.title,
-                          images: [
-                            {
-                              src: image,
-                              alt: `Captura real do projeto ${project.title}`,
-                            },
-                          ],
-                          index: 0,
-                        })
-                      }
+                      onZoom={() => openShots(project, 0)}
                     >
                       <div className="browser-bar">
                         <div>
