@@ -61,7 +61,8 @@ function smoothDamp(
 }
 
 type Box = { left: number; top: number; width: number; height: number }
-type WordGeo = Box & { el: HTMLElement; font: number }
+type LetterGeo = { el: HTMLElement; left: number; width: number; sig: string }
+type WordGeo = Box & { el: HTMLElement; font: number; letters: LetterGeo[] }
 type FinalGeo = { x: number; y: number; r: number }
 
 type Geo = {
@@ -144,6 +145,12 @@ export function createOrbController({
   let snap = true
   let state: OrbState = "HERO"
   let slowFrames = 0
+  let idleFrames = 0
+  let frameNo = 0
+  let lastLit = false
+  let lastMeasure = -1
+  let lastScroll = -1
+  let finalOn = false
   let quality: "high" | "low" = "high"
   let interactionClock = 0
   const fin = { sph: 0, q: 0, m: 0, vs: { v: 0 }, vq: { v: 0 }, vm: { v: 0 }, ws: -1, wq: -1, wm: -1 }
@@ -169,13 +176,15 @@ export function createOrbController({
     heroEl?.querySelectorAll<HTMLElement>("[data-orb-word]").forEach((el) => {
       const id = el.dataset.orbWord as OrbId
       const b = box(el, scrollY)
-      // Posição de cada letra dentro da palavra → `--lx` (a máscara de cada
-      // letra precisa saber onde ela está em relação à esfera).
-      el.querySelectorAll<HTMLElement>(".name-letter").forEach((letter) => {
-        const lx = letter.getBoundingClientRect().left + window.scrollX - b.left
-        letter.style.setProperty("--lx", `${lx.toFixed(2)}px`)
+      // Caixa de cada letra (coordenadas de documento): a máscara é pintada só
+      // nas letras que a esfera sobrepõe.
+      const letters: LetterGeo[] = Array.from(
+        el.querySelectorAll<HTMLElement>(".name-letter"),
+      ).map((letter) => {
+        const lr = letter.getBoundingClientRect()
+        return { el: letter, left: lr.left + window.scrollX, width: lr.width, sig: "" }
       })
-      words[id] = { ...b, el, font: parseFloat(getComputedStyle(el).fontSize) || 100 }
+      words[id] = { ...b, el, letters, font: parseFloat(getComputedStyle(el).fontSize) || 100 }
     })
 
     const sections: Geo["sections"] = []
@@ -232,6 +241,32 @@ export function createOrbController({
     return clamp(vw * k, min, max)
   }
 
+  /**
+   * Pinta a esfera dentro das letras. Só as letras sobrepostas recebem
+   * variáveis (e só quando mudam); as demais ficam com a camada desligada,
+   * então quase nada é estilizado/repintado por quadro.
+   */
+  function paintWord(wg: WordGeo, x: number, y: number, r: number, gi: number, scrollY: number) {
+    const top = wg.top - scrollY
+    const nearY = y > top - r && y < top + wg.height + r
+    for (const L of wg.letters) {
+      const left = L.left - window.scrollX
+      const hit = gi > 0 && nearY && x + r > left - 2 && x - r < left + L.width + 2
+      const sig = hit ? `${(x - left).toFixed(1)}|${(y - top).toFixed(1)}|${r.toFixed(1)}|${gi.toFixed(2)}` : "off"
+      if (L.sig === sig) continue
+      L.sig = sig
+      const st = L.el.style
+      if (hit) {
+        st.setProperty("--ox", `${(x - left).toFixed(1)}px`)
+        st.setProperty("--oy", `${(y - top).toFixed(1)}px`)
+        st.setProperty("--or", `${r.toFixed(1)}px`)
+        st.setProperty("--gi", gi.toFixed(3))
+      } else {
+        st.setProperty("--gi", "0")
+      }
+    }
+  }
+
   // ───────────────────────── Quadro de animação ────────────────────────────
 
   function frame(now: number) {
@@ -251,8 +286,10 @@ export function createOrbController({
     }
 
     time += dt
-    if (dirty) {
+    frameNo++
+    if (dirty && (lastMeasure < 0 || now - lastMeasure > 120)) {
       measure()
+      lastMeasure = now
       dirty = false
     }
     if (!geo) return
@@ -313,8 +350,9 @@ export function createOrbController({
         }
       }
     }
-    const tlProgress = parseFloat(doc.style.getPropertyValue("--timeline-progress")) || 0
+    const tlProgress = parseFloat(timelineEl?.style.getPropertyValue("--timeline-progress") ?? "") || 0
 
+    let moved = 0
     const interactionOrbs: Array<{ id: OrbId; x: number; y: number; r: number }> = []
 
     for (const orb of orbs) {
@@ -404,6 +442,9 @@ export function createOrbController({
 
       // 4) Inércia. Nas letras o acompanhamento é exato (sem atraso).
       const smooth = lerp(0.02, MOTION.travelTime[id], smoothstep(0, 0.35, w)) * (1 - 0.35 * mm)
+      const px = orb.x
+      const py = orb.y
+      const pr = orb.r
       if (snap || (w < 0.003 && mm === 0)) {
         orb.x = tx
         orb.y = ty
@@ -414,6 +455,8 @@ export function createOrbController({
         orb.y = smoothDamp(orb.y, ty, orb.vy, smooth, dt)
         orb.r = smoothDamp(orb.r, tr, orb.vr, smooth * 0.8, dt)
       }
+
+      moved += Math.abs(orb.x - px) + Math.abs(orb.y - py) + Math.abs(orb.r - pr)
 
       // 5) Camada flutuante: aparece (emerge) na saída e cede lugar à figura final.
       const emerge = smoothstep(0, 0.4, heroP) * gate
@@ -442,13 +485,10 @@ export function createOrbController({
       }
 
       // 6) Máscara tipográfica: a MESMA esfera, desenhada dentro das letras.
-      if (wordGeo && heroVisible) {
-        const s = wordGeo.el.style
-        s.setProperty("--ox", `${(orb.x - (wordGeo.left - window.scrollX)).toFixed(1)}px`)
-        s.setProperty("--oy", `${(orb.y - (wordGeo.top - scrollY)).toFixed(1)}px`)
-        s.setProperty("--or", `${orb.r.toFixed(1)}px`)
-        s.setProperty("--gi", intro.toFixed(3))
-      }
+      // Em dispositivos modestos (ou se o navegador acusar quadros lentos) a
+      // máscara — a parte mais cara — é repintada a cada 2 quadros (30fps).
+      const paintNow = !(quality === "low" || lowPowerDevice) || (frameNo & 1) === 0
+      if (wordGeo && heroVisible && paintNow) paintWord(wordGeo, orb.x, orb.y, orb.r, intro, scrollY)
 
       interactionOrbs.push({ id, x: orb.x, y: orb.y, r: orb.r })
     }
@@ -474,6 +514,11 @@ export function createOrbController({
           fin[key] = r
         }
       }
+      const on = fin.sph > 0.004
+      if (on !== finalOn) {
+        finalOn = on
+        finalEl.dataset.on = String(on)
+      }
       put("--f-sph", fin.sph, "ws")
       put("--q", fin.q, "wq")
       put("--m", fin.m, "wm")
@@ -484,8 +529,30 @@ export function createOrbController({
     const step = quality === "low" || lowPowerDevice ? 1 / 15 : 1 / 30
     if (interactionClock >= step) {
       const activity = smoothstep(0.55, 0.95, w) * (1 - smoothstep(0.2, 0.5, mergeP))
-      interactions.update(interactionOrbs, scrollY, vh, activity, interactionClock)
+      lastLit = interactions.update(interactionOrbs, scrollY, vh, activity, interactionClock)
       interactionClock = 0
+    }
+    const litActive = lastLit
+
+    // ── Dormir quando nada muda: sem rolagem, esferas e etapas assentadas,
+    //    Hero fora de vista e nenhum elemento aceso. A rolagem acorda o loop. ──
+    const scrolled = scrollY !== lastScroll
+    lastScroll = scrollY
+    const heroAnimating = heroVisible && (readyAt < 0 || w < 0.999)
+    const settled =
+      !scrolled &&
+      moved < 0.04 &&
+      !heroAnimating &&
+      !litActive &&
+      Math.abs(fin.sph - clamp(smoothstep(0.45, 0.55, mergeP))) < 0.002 &&
+      Math.abs(fin.q - smoothstep(0.58, 0.82, mergeP)) < 0.002 &&
+      Math.abs(fin.m - smoothstep(0.8, 0.97, mergeP)) < 0.002 &&
+      !dirty
+    idleFrames = settled ? idleFrames + 1 : 0
+    if (idleFrames > 20 && !snap) {
+      cancelAnimationFrame(raf)
+      raf = 0
+      idleFrames = 0
     }
     snap = false
   }
@@ -501,18 +568,29 @@ export function createOrbController({
     for (const id of ORB_IDS) {
       const wg = g.words[id]
       if (!wg) continue
-      const s = wg.el.style
-      s.setProperty("--ox", `${(wg.width * fractions[id]).toFixed(1)}px`)
-      s.setProperty("--oy", `${(wg.height / 2).toFixed(1)}px`)
-      s.setProperty("--or", `${(HERO.radiusEm * wg.font).toFixed(1)}px`)
-      s.setProperty("--gi", "1")
+      for (const L of wg.letters) L.sig = ""
+      paintWord(
+        wg,
+        wg.left - window.scrollX + wg.width * fractions[id],
+        wg.top - window.scrollY + wg.height / 2,
+        HERO.radiusEm * wg.font,
+        1,
+        window.scrollY,
+      )
     }
   }
 
   // ───────────────────────── Observadores e ciclo de vida ──────────────────
 
+  const wake = () => {
+    if (reducedMotion || disposed || raf || document.hidden) return
+    last = performance.now()
+    raf = requestAnimationFrame(frame)
+  }
+
   const markDirty = () => {
     dirty = true
+    wake()
     if (reducedMotion) {
       measure()
       dirty = false
@@ -532,6 +610,8 @@ export function createOrbController({
   }
   const onFonts = () => markDirty()
   window.addEventListener("resize", onResize)
+  // Único listener de rolagem do sistema: só acorda o loop (sem cálculo).
+  window.addEventListener("scroll", wake, { passive: true })
   window.addEventListener("load", onFonts)
   document.fonts?.addEventListener?.("loadingdone", onFonts)
 
@@ -555,9 +635,8 @@ export function createOrbController({
     if (document.hidden) {
       cancelAnimationFrame(raf)
       raf = 0
-    } else if (!raf && !disposed) {
-      last = performance.now()
-      raf = requestAnimationFrame(frame)
+    } else {
+      wake()
     }
   }
   document.addEventListener("visibilitychange", onVisibility)
@@ -578,13 +657,13 @@ export function createOrbController({
       resizeObserver.disconnect()
       finalObserver?.disconnect()
       window.removeEventListener("resize", onResize)
+      window.removeEventListener("scroll", wake)
       window.removeEventListener("load", onFonts)
       document.fonts?.removeEventListener?.("loadingdone", onFonts)
       document.removeEventListener("visibilitychange", onVisibility)
       interactions.dispose()
-      heroEl?.querySelectorAll<HTMLElement>("[data-orb-word]").forEach((el) => {
-        for (const v of ["--ox", "--oy", "--or", "--gi"]) el.style.removeProperty(v)
-        el.querySelectorAll<HTMLElement>(".name-letter").forEach((l) => l.style.removeProperty("--lx"))
+      heroEl?.querySelectorAll<HTMLElement>(".name-letter").forEach((l) => {
+        for (const v of ["--ox", "--oy", "--or", "--gi"]) l.style.removeProperty(v)
       })
       for (const n of ["--f-sph", "--q", "--m"]) finalEl?.style.removeProperty(n)
     },

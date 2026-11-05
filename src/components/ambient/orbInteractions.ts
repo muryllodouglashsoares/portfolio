@@ -12,12 +12,11 @@
 
 import { TONE_RGB, type OrbId } from "./orbConfig"
 
-type Kind = "title" | "text" | "card" | "button" | "tag" | "line" | "marker"
+type Kind = "title" | "card" | "button" | "tag" | "line" | "marker"
 
 /** Seletores por tipo — todos fora do Hero (as letras têm a própria máscara). */
 const TARGETS: Array<{ kind: Kind; selector: string }> = [
   { kind: "title", selector: "main .section-heading h2, main .project h3, main .contact-copy h2, main .complementary-heading h3, main .about-lead p" },
-  { kind: "text", selector: "main .about-body p, main .project-description, main .contact-copy p, main .project-detail" },
   { kind: "card", selector: "main .project-visual, main .tech-context, main .principles, main .robotics-note" },
   { kind: "button", selector: "main section:not(.hero) .button" },
   { kind: "tag", selector: "main .stack-items button, main .about-tags span, main .tech-list li" },
@@ -28,7 +27,6 @@ const TARGETS: Array<{ kind: Kind; selector: string }> = [
 /** Alcance (px, antes de escalar pelo raio da esfera) e força máxima por tipo. */
 const REACH: Record<Kind, number> = {
   title: 150,
-  text: 105,
   card: 220,
   button: 130,
   tag: 95,
@@ -37,7 +35,6 @@ const REACH: Record<Kind, number> = {
 }
 const STRENGTH: Record<Kind, number> = {
   title: 0.9,
-  text: 0.6,
   card: 1,
   button: 1,
   tag: 1,
@@ -120,6 +117,7 @@ export function createInteractions() {
   ) {
     const follow = 1 - Math.exp(-dt * 7)
     const margin = 320
+    let anyLit = false
     for (const t of targets) {
       const top = t.top - scrollY
       let goal = 0
@@ -152,6 +150,7 @@ export function createInteractions() {
       }
 
       t.lit += (goal - t.lit) * follow
+      if (Math.abs(goal - t.lit) > 0.01) anyLit = true
       if (Math.abs(t.lit - t.written) < 0.012 && !(t.lit < 0.004)) {
         // Mesmo sem mudar a intensidade, o ponto de luz acompanha a esfera.
         if (needsLocal.has(t.kind) && t.lit > 0.05) {
@@ -173,6 +172,7 @@ export function createInteractions() {
         s.setProperty("--ly", `${ly.toFixed(0)}px`)
       }
     }
+    return anyLit
   }
 
   function dispose() {

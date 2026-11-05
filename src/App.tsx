@@ -593,6 +593,8 @@ export default function App() {
                         <img
                           src={project.image}
                           alt={`Captura real do projeto ${project.title}`}
+                          loading="lazy"
+                          decoding="async"
                         />
                       ) : (
                         <div className="image-placeholder">

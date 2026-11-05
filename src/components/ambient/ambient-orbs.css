@@ -143,13 +143,17 @@
   margin: -100px 0 0 -100px;
   color: var(--o-solid);
   opacity: var(--f-sph);
-  will-change: transform;
+  visibility: hidden;
   transform: translate3d(
       calc(var(--x0) + (var(--x1) - var(--x0)) * var(--q)),
       calc(var(--arc) * 4 * var(--q) * (1 - var(--q))),
       0
     )
     scale(calc(var(--af-s0) + (var(--af-s1) - var(--af-s0)) * var(--q)));
+}
+.ambient-final[data-on="true"] .af-unit {
+  visibility: visible;
+  will-change: transform;
 }
 .af-disc {
   position: absolute;
@@ -234,9 +238,6 @@
 [data-orb-kind="title"] {
   text-shadow: 0 0 calc(var(--lit, 0) * 30px) rgb(var(--tone, 189 164 255) / calc(var(--lit, 0) * 0.34));
 }
-[data-orb-kind="text"] {
-  text-shadow: 0 0 calc(var(--lit, 0) * 16px) rgb(var(--tone, 189 164 255) / calc(var(--lit, 0) * 0.3));
-}
 
 /* ── Responsivo ──────────────────────────────────────────────────────────── */
 @media (max-width: 1050px) {
@@ -253,5 +254,4 @@
       estáticos ao entrar na tela (ver orbController.ts → modo reduzido). ── */
 @media (prefers-reduced-motion: reduce) {
   .ambient-orbs { display: none; }
-  .af-unit { will-change: auto; }
 }

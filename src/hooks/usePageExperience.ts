@@ -17,6 +17,9 @@ export function usePageExperience(sectionIds: string[]): PageExperience {
       .filter((section): section is HTMLElement => Boolean(section))
     let frame = 0
 
+    const progressEl = document.querySelector<HTMLElement>(".reading-progress")
+    const timelineEl = document.querySelector<HTMLElement>("#trajetoria .timeline")
+
     const update = () => {
       const scrollRange =
         document.documentElement.scrollHeight - window.innerHeight
@@ -42,13 +45,12 @@ export function usePageExperience(sectionIds: string[]): PageExperience {
         )
       }
 
-      document.documentElement.style.setProperty(
-        "--reading-progress",
-        String(progress),
-      )
-      document.documentElement.style.setProperty(
+      // Variáveis gravadas só nos elementos que as usam: no :root elas
+      // invalidariam o estilo da página inteira a cada quadro de rolagem.
+      progressEl?.style.setProperty("--reading-progress", progress.toFixed(4))
+      timelineEl?.style.setProperty(
         "--timeline-progress",
-        String(timelineProgress),
+        timelineProgress.toFixed(4),
       )
 
       setExperience((current) => {
