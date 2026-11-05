@@ -89,21 +89,28 @@
   display: none;
 }
 
-/* ── 3. Composição final (região decorativa no fim do Contato) ───────────── */
+/* ── 3. Encerramento: as esferas viram 4 ícones ─────────────────────────────
+   Etapas (todas em função da rolagem e suavizadas no controlador):
+   --f-sph  os discos assumem o lugar das esferas flutuantes
+   --q      cada esfera se divide e os 4 discos viajam em arco até seus lugares
+   --m      o disco encolhe enquanto o traço do ícone se desenha */
 .site-shell .contact {
-  padding-bottom: calc(clamp(300px, 42vw, 420px) + 12px);
+  padding-bottom: calc(clamp(260px, 30vw, 330px) + 12px);
 }
 .ambient-final {
   --f-sph: 0;
-  --f-field: 0;
+  --q: 0;
+  --m: 0;
   --af-w: min(92vw, 880px);
-  --af-s: 1.1;
+  --af-s0: 1.1;
+  --af-s1: 0.6;
+  --af-gap: 200px;
   position: absolute;
   left: 0;
   right: 0;
   bottom: 0;
   z-index: 1;
-  height: clamp(300px, 42vw, 420px);
+  height: clamp(260px, 30vw, 330px);
   pointer-events: none;
   display: grid;
   place-items: center;
@@ -111,84 +118,68 @@
 .af-stage {
   position: relative;
   width: var(--af-w);
-  height: calc(var(--af-w) * 0.42);
+  height: 100%;
 }
-.af-field {
+/* Marcadores invisíveis: dizem ao controlador onde as esferas flutuantes devem
+   chegar (posição e tamanho iniciais dos discos). */
+.af-marker {
+  position: absolute;
+  left: calc(50% + var(--side) * var(--af-s0) * 72px);
+  top: 50%;
+  width: 200px;
+  height: 200px;
+  margin: -100px 0 0 -100px;
+  transform: scale(var(--af-s0));
+  visibility: hidden;
+}
+.af-unit {
+  --x0: calc(var(--side) * var(--af-s0) * 72px);
+  --x1: calc(var(--k) * var(--af-gap));
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 200px;
+  height: 200px;
+  margin: -100px 0 0 -100px;
+  color: var(--o-solid);
+  opacity: var(--f-sph);
+  will-change: transform;
+  transform: translate3d(
+      calc(var(--x0) + (var(--x1) - var(--x0)) * var(--q)),
+      calc(var(--arc) * 4 * var(--q) * (1 - var(--q))),
+      0
+    )
+    scale(calc(var(--af-s0) + (var(--af-s1) - var(--af-s0)) * var(--q)));
+}
+.af-disc {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--o-solid);
+  transform: scale(calc(1 - 0.92 * var(--m)));
+  opacity: calc(1.15 - var(--m) * 1.3);
+}
+.af-glyph {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   overflow: visible;
-  opacity: var(--f-field);
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 38%);
-  mask-image: linear-gradient(to bottom, transparent 0, #000 38%);
+  opacity: min(1, calc(var(--m) * 6));
+  transform: scale(calc(0.7 + 0.3 * var(--m)));
 }
-.af-sphere {
-  --dx: calc(var(--af-s) * 72px);
-  top: 50%;
-  margin: -100px 0 0 -100px;
-  opacity: var(--f-sph);
-  transform: scale(var(--af-s));
-}
-.af-sphere[data-orb-final-sphere="purple"] { left: calc(50% - var(--dx)); }
-.af-sphere[data-orb-final-sphere="white"] { left: calc(50% + var(--dx)); }
-/* Interseção das duas circunferências, em cor sólida (recorte do disco branco
-   pelo círculo roxo: o centro roxo fica a 144·s px, em coordenadas locais -44px). */
-.af-overlap {
-  top: 50%;
-  left: calc(50% + var(--af-s) * 72px);
-  margin: -100px 0 0 -100px;
-  opacity: var(--f-sph);
-  transform: scale(var(--af-s));
-  background: #bda4ff;
-  border-radius: 50%;
-  clip-path: circle(100px at -44px 100px);
-  position: absolute;
-  width: 200px;
-  height: 200px;
-}
-.af-ring {
+.af-glyph .ln {
   fill: none;
-  stroke: rgba(189, 164, 255, 0.28);
-  stroke-width: 1;
-  vector-effect: non-scaling-stroke;
+  stroke: currentColor;
+  stroke-width: 6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: calc(1 - var(--m));
 }
-.af-contour {
-  fill: none;
-  stroke: rgba(189, 164, 255, 0.34);
-  stroke-width: 1;
-  vector-effect: non-scaling-stroke;
-}
-.af-particle {
-  position: absolute;
-  left: var(--x);
-  top: var(--y);
-  width: var(--s);
-  height: var(--s);
-  border-radius: 50%;
-  background: rgba(244, 242, 248, 0.85);
-  opacity: 0;
-}
-.ambient-final[data-active="true"] .af-particle {
-  animation: af-float var(--t) ease-in-out var(--d) infinite;
-}
-.ambient-final[data-active="true"] .af-breathe {
-  animation: af-breathe 11s ease-in-out infinite alternate;
-}
-.ambient-final[data-active="true"] .af-ring-a { animation: af-spin 46s linear infinite; }
-.ambient-final[data-active="true"] .af-ring-b { animation: af-spin 62s linear infinite reverse; }
-.af-ring-a, .af-ring-b { transform-origin: 450px 190px; }
-@keyframes af-float {
-  0%, 100% { opacity: 0; transform: translate3d(0, 6px, 0); }
-  30%, 70% { opacity: calc(var(--f-field) * 0.9); }
-  50% { transform: translate3d(var(--mx), var(--my), 0); }
-}
-@keyframes af-breathe {
-  from { transform: scale(0.985); }
-  to { transform: scale(1.025); }
-}
-@keyframes af-spin {
-  to { transform: rotate(360deg); }
+.af-glyph .fl {
+  fill: currentColor;
+  fill-opacity: max(0, calc((var(--m) - 0.55) * 2.2));
 }
 
 /* ── 4. Reações luminosas dos elementos (ver orbInteractions.ts) ─────────────
@@ -249,25 +240,18 @@
 
 /* ── Responsivo ──────────────────────────────────────────────────────────── */
 @media (max-width: 1050px) {
-  .ambient-final { --af-s: 0.95; }
+  .ambient-final { --af-s0: 0.95; --af-s1: 0.52; --af-gap: 150px; }
 }
 @media (max-width: 600px) {
-  .ambient-final { --af-s: 0.66; --af-w: 96vw; }
-  .site-shell .contact { padding-bottom: calc(clamp(260px, 70vw, 330px) + 12px); }
-  .ambient-final { height: clamp(260px, 70vw, 330px); }
-  .af-particle:nth-child(n + 8) { display: none; }
+  .ambient-final { --af-s0: 0.66; --af-s1: 0.3; --af-gap: 78px; --af-w: 96vw; height: clamp(220px, 60vw, 280px); }
+  .site-shell .contact { padding-bottom: calc(clamp(220px, 60vw, 280px) + 12px); }
   .orb-halo { opacity: calc(var(--ha) * 0.7); }
 }
 .ambient-orbs[data-quality="low"] .orb-halo { display: none; }
 
-/* ── Movimento reduzido: sem camada flutuante e sem animações contínuas.
-      A esfera nas letras fica estática e a composição final aparece de forma
-      discreta (ver orbController.ts → modo reduzido). ── */
+/* ── Movimento reduzido: sem camada flutuante; os ícones aparecem prontos e
+      estáticos ao entrar na tela (ver orbController.ts → modo reduzido). ── */
 @media (prefers-reduced-motion: reduce) {
   .ambient-orbs { display: none; }
-  .ambient-final .af-particle,
-  .ambient-final .af-breathe,
-  .ambient-final .af-ring-a,
-  .ambient-final .af-ring-b { animation: none !important; }
-  .af-particle { opacity: 0.5; }
+  .af-unit { will-change: auto; }
 }

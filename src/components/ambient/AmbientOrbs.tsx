@@ -2,22 +2,6 @@ import { useEffect, useRef, useState } from "react"
 import "./ambient-orbs.css"
 import { createOrbController } from "./orbController"
 
-/** Partículas da composição final: posição, tamanho, deriva e ritmo. */
-const PARTICLES = [
-  { x: "22%", y: "58%", s: 3, mx: "10px", my: "-22px", t: 9, d: 0 },
-  { x: "31%", y: "30%", s: 2, mx: "-8px", my: "-16px", t: 11, d: 1.2 },
-  { x: "41%", y: "72%", s: 2, mx: "6px", my: "-26px", t: 10, d: 2.4 },
-  { x: "47%", y: "18%", s: 3, mx: "12px", my: "-12px", t: 12, d: 0.6 },
-  { x: "53%", y: "80%", s: 2, mx: "-10px", my: "-20px", t: 9.5, d: 3.1 },
-  { x: "59%", y: "26%", s: 2, mx: "8px", my: "-18px", t: 11.5, d: 1.8 },
-  { x: "66%", y: "64%", s: 3, mx: "-12px", my: "-24px", t: 10.5, d: 4.2 },
-  { x: "74%", y: "40%", s: 2, mx: "10px", my: "-14px", t: 12.5, d: 2.9 },
-  { x: "80%", y: "70%", s: 2, mx: "-6px", my: "-22px", t: 9, d: 5.1 },
-  { x: "27%", y: "44%", s: 2, mx: "9px", my: "-18px", t: 13, d: 3.6 },
-  { x: "70%", y: "20%", s: 2, mx: "-9px", my: "-12px", t: 10, d: 0.9 },
-  { x: "37%", y: "86%", s: 2, mx: "7px", my: "-16px", t: 11, d: 4.6 },
-]
-
 function useReducedMotion() {
   const [reduced, setReduced] = useState(() =>
     typeof window === "undefined"
@@ -71,65 +55,75 @@ export function AmbientOrbs({ sectionIds }: { sectionIds: string[] }) {
 }
 
 /**
- * Região decorativa de encerramento (dentro do Contato, sem texto): as duas
- * esferas sobrepostas, núcleo luminoso, contornos orgânicos, anéis e
- * partículas. As esferas daqui são do mesmo desenho das flutuantes, então a
- * passagem de uma para a outra é imperceptível.
+ * Ícones do encerramento — traço único por ícone (pathLength=1), para que o
+ * "desenhar" seja só animar o stroke-dashoffset conforme a rolagem.
+ */
+const UNITS = [
+  { tone: "purple", side: -1, k: -1.5, arc: -64, icon: "cursor" },
+  { tone: "white", side: 1, k: -0.5, arc: -48, icon: "chip" },
+  { tone: "purple", side: -1, k: 0.5, arc: 70, icon: "code" },
+  { tone: "white", side: 1, k: 1.5, arc: 52, icon: "nodes" },
+] as const
+
+function Glyph({ icon }: { icon: (typeof UNITS)[number]["icon"] }) {
+  return (
+    <svg className="af-glyph" viewBox="0 0 100 100" focusable="false">
+      {icon === "cursor" && (
+        <>
+          <path className="fl" d="M26 12 L26 80 L44 64 L56 88 L68 82 L56 59 L80 59 Z" />
+          <path className="ln" pathLength="1" d="M26 12 L26 80 L44 64 L56 88 L68 82 L56 59 L80 59 Z" />
+        </>
+      )}
+      {icon === "chip" && (
+        <>
+          <rect className="fl" x="42" y="42" width="16" height="16" rx="2" />
+          <path
+            className="ln"
+            pathLength="1"
+            d="M36 30 H64 A6 6 0 0 1 70 36 V64 A6 6 0 0 1 64 70 H36 A6 6 0 0 1 30 64 V36 A6 6 0 0 1 36 30 Z M40 30 V14 M50 30 V14 M60 30 V14 M40 70 V86 M50 70 V86 M60 70 V86 M30 40 H14 M30 50 H14 M30 60 H14 M70 40 H86 M70 50 H86 M70 60 H86"
+          />
+        </>
+      )}
+      {icon === "code" && (
+        <path className="ln" pathLength="1" d="M36 30 L14 50 L36 70 M64 30 L86 50 L64 70 M56 22 L44 78" />
+      )}
+      {icon === "nodes" && (
+        <>
+          <circle className="fl" cx="28" cy="22" r="7" />
+          <circle className="fl" cx="28" cy="78" r="7" />
+          <circle className="fl" cx="72" cy="40" r="7" />
+          <path
+            className="ln"
+            pathLength="1"
+            d="M35 22 A7 7 0 1 1 21 22 A7 7 0 1 1 35 22 M28 29 V71 M35 78 A7 7 0 1 1 21 78 A7 7 0 1 1 35 78 M28 60 C28 46 72 58 72 47 M79 40 A7 7 0 1 1 65 40 A7 7 0 1 1 79 40"
+          />
+        </>
+      )}
+    </svg>
+  )
+}
+
+/**
+ * Região decorativa de encerramento (dentro do Contato, sem texto). Começa
+ * com quatro discos sobrepostos exatamente onde as duas esferas flutuantes
+ * chegam; depois eles se separam, viajam e viram ícones (ver CSS, seção 3).
  */
 export function AmbientFinalForm() {
   return (
     <div className="ambient-final" data-orb-final aria-hidden="true">
       <div className="af-stage">
-        <svg
-          className="af-field af-breathe"
-          viewBox="0 0 900 378"
-          preserveAspectRatio="xMidYMid meet"
-          focusable="false"
-        >
-          <defs>
-            <filter id="af-warp" x="-20%" y="-30%" width="140%" height="160%">
-              <feTurbulence type="fractalNoise" baseFrequency="0.009 0.014" numOctaves="2" seed="7" result="n" />
-              <feDisplacementMap in="SourceGraphic" in2="n" scale="58" xChannelSelector="R" yChannelSelector="G" />
-            </filter>
-          </defs>
-          {/* Contornos deformados de forma orgânica (filtro estático). */}
-          <g filter="url(#af-warp)">
-            <ellipse className="af-contour" cx="450" cy="189" rx="228" ry="126" />
-            <ellipse className="af-contour" cx="450" cy="189" rx="296" ry="158" opacity="0.55" />
-          </g>
-          {/* Anéis em perspectiva — profundidade. */}
-          <g transform="translate(0 0)">
-            <ellipse className="af-ring af-ring-a" cx="450" cy="190" rx="250" ry="64" />
-            <ellipse className="af-ring af-ring-b" cx="450" cy="190" rx="206" ry="150" opacity="0.7" />
-          </g>
-        </svg>
-
-        <span className="orb af-sphere" data-orb-final-sphere="purple" data-orb-tone="purple">
-          <span className="orb-halo" />
-          <span className="orb-body" />
-        </span>
-        <span className="orb af-sphere" data-orb-final-sphere="white" data-orb-tone="white">
-          <span className="orb-halo" />
-          <span className="orb-body" />
-        </span>
-        <span className="af-overlap" />
-
-        {PARTICLES.map((p, i) => (
-          <i
-            className="af-particle"
-            key={i}
-            style={
-              {
-                "--x": p.x,
-                "--y": p.y,
-                "--s": `${p.s}px`,
-                "--mx": p.mx,
-                "--my": p.my,
-                "--t": `${p.t}s`,
-                "--d": `${p.d}s`,
-              } as React.CSSProperties
-            }
-          />
+        <span className="af-marker" data-orb-final-sphere="purple" style={{ "--side": -1 } as React.CSSProperties} />
+        <span className="af-marker" data-orb-final-sphere="white" style={{ "--side": 1 } as React.CSSProperties} />
+        {UNITS.map((u) => (
+          <span
+            className="af-unit"
+            data-orb-tone={u.tone}
+            key={u.icon}
+            style={{ "--side": u.side, "--k": u.k, "--arc": `${u.arc}px` } as React.CSSProperties}
+          >
+            <span className="af-disc" />
+            <Glyph icon={u.icon} />
+          </span>
         ))}
       </div>
     </div>

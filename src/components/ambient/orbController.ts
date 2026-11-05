@@ -146,8 +146,7 @@ export function createOrbController({
   let slowFrames = 0
   let quality: "high" | "low" = "high"
   let interactionClock = 0
-  let wFinalSph = -1
-  let wFinalField = -1
+  const fin = { sph: 0, q: 0, m: 0, vs: { v: 0 }, vq: { v: 0 }, vm: { v: 0 }, ws: -1, wq: -1, wm: -1 }
 
   // ───────────────────────── Medição (só quando o layout muda) ─────────────
 
@@ -272,7 +271,7 @@ export function createOrbController({
     const maxScroll = Math.max(1, g.docHeight - vh)
     const mergeStart = Math.max(g.contactTop - vh * MOTION.mergeLead, g.heroHeight)
     const mergeP = clamp((scrollY - mergeStart) / Math.max(1, maxScroll - mergeStart))
-    const mm = smoothstep(0, 0.82, mergeP)
+    const mm = smoothstep(0, 0.55, mergeP)
 
     // ── Estado (derivado) ──
     let next: OrbState
@@ -418,7 +417,7 @@ export function createOrbController({
 
       // 5) Camada flutuante: aparece (emerge) na saída e cede lugar à figura final.
       const emerge = smoothstep(0, 0.4, heroP) * gate
-      const handoff = 1 - smoothstep(0.9, 0.99, mergeP)
+      const handoff = 1 - smoothstep(0.5, 0.58, mergeP)
       const opacity = reducedMotion ? 0 : emerge * handoff
       const transform = `translate3d(${orb.x.toFixed(1)}px,${orb.y.toFixed(1)}px,0) scale(${(orb.r / 100).toFixed(3)})`
       if (transform !== orb.wT) {
@@ -453,30 +452,42 @@ export function createOrbController({
 
       interactionOrbs.push({ id, x: orb.x, y: orb.y, r: orb.r })
     }
-    snap = false
-
-    // ── Composição final (fica atrás do conteúdo, no fim do Contato) ──
+    // ── Encerramento: discos → separação → ícones. Cada etapa tem alvo em
+    //    função da rolagem e é suavizada com inércia (fluidez e reversão). ──
     if (finalEl) {
-      const sph = Math.round(smoothstep(0.8, 0.92, mergeP) * 1000) / 1000
-      const field = Math.round(smoothstep(0.45, 0.95, mergeP) * 1000) / 1000
-      if (sph !== wFinalSph) {
-        finalEl.style.setProperty("--f-sph", String(sph))
-        wFinalSph = sph
+      const tSph = smoothstep(0.45, 0.55, mergeP)
+      const tQ = smoothstep(0.58, 0.82, mergeP)
+      const tM = smoothstep(0.8, 0.97, mergeP)
+      if (snap) {
+        fin.sph = tSph
+        fin.q = tQ
+        fin.m = tM
+      } else {
+        fin.sph = smoothDamp(fin.sph, tSph, fin.vs, 0.12, dt)
+        fin.q = smoothDamp(fin.q, tQ, fin.vq, 0.45, dt)
+        fin.m = smoothDamp(fin.m, tM, fin.vm, 0.5, dt)
       }
-      if (field !== wFinalField) {
-        finalEl.style.setProperty("--f-field", String(field))
-        wFinalField = field
+      const put = (name: string, v: number, key: "ws" | "wq" | "wm") => {
+        const r = Math.round(clamp(v) * 1000) / 1000
+        if (r !== fin[key]) {
+          finalEl.style.setProperty(name, String(r))
+          fin[key] = r
+        }
       }
+      put("--f-sph", fin.sph, "ws")
+      put("--q", fin.q, "wq")
+      put("--m", fin.m, "wm")
     }
 
     // ── Reações dos elementos (≈30Hz; 15Hz em dispositivos modestos) ──
     interactionClock += dt
     const step = quality === "low" || lowPowerDevice ? 1 / 15 : 1 / 30
     if (interactionClock >= step) {
-      const activity = smoothstep(0.55, 0.95, w) * (1 - smoothstep(0.7, 1, mm))
+      const activity = smoothstep(0.55, 0.95, w) * (1 - smoothstep(0.2, 0.5, mergeP))
       interactions.update(interactionOrbs, scrollY, vh, activity, interactionClock)
       interactionClock = 0
     }
+    snap = false
   }
 
   // ───────────────────────── Modo movimento reduzido ───────────────────────
@@ -531,8 +542,7 @@ export function createOrbController({
             finalEl.dataset.active = String(entry.isIntersecting)
             if (reducedMotion) {
               const v = entry.isIntersecting ? "1" : "0"
-              finalEl.style.setProperty("--f-sph", v)
-              finalEl.style.setProperty("--f-field", v)
+              for (const n of ["--f-sph", "--q", "--m"]) finalEl.style.setProperty(n, v)
             }
           },
           { threshold: reducedMotion ? 0.35 : 0 },
@@ -576,8 +586,7 @@ export function createOrbController({
         for (const v of ["--ox", "--oy", "--or", "--gi"]) el.style.removeProperty(v)
         el.querySelectorAll<HTMLElement>(".name-letter").forEach((l) => l.style.removeProperty("--lx"))
       })
-      finalEl?.style.removeProperty("--f-sph")
-      finalEl?.style.removeProperty("--f-field")
+      for (const n of ["--f-sph", "--q", "--m"]) finalEl?.style.removeProperty(n)
     },
   }
 }

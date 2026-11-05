@@ -65,7 +65,7 @@ export const MOTION = {
   radiusDesktop: [54, 0.05, 90] as const,
   radiusPhone: [34, 0.11, 58] as const,
   /** Quanto da página (em alturas de viewport) antes do contato a união começa. */
-  mergeLead: 0.95,
+  mergeLead: 1.75,
 }
 
 export type Anchor = {
