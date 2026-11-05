@@ -115,7 +115,12 @@ function Letters({ text }: { text: string }) {
   return (
     <>
       {Array.from(text).map((letter, index) => (
-        <span className="name-letter" style={letterStyle(index)} key={index}>
+        <span
+          className="name-letter"
+          style={letterStyle(index)}
+          data-char={letter}
+          key={index}
+        >
           {letter}
         </span>
       ))}
@@ -158,6 +163,8 @@ export function Hero({ github }: { github: string }) {
               <span
                 className="name-word name-word-first"
                 ref={firstRef}
+                data-orb-word="purple"
+                data-orb-tone="purple"
                 aria-hidden="true"
               >
                 <Letters text={FIRST_WORD} />
@@ -167,6 +174,8 @@ export function Hero({ github }: { github: string }) {
               <span
                 className="name-word name-word-second"
                 ref={secondRef}
+                data-orb-word="white"
+                data-orb-tone="white"
                 aria-hidden="true"
               >
                 <Letters text={SECOND_WORD} />

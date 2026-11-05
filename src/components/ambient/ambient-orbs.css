@@ -1,0 +1,273 @@
+/* ───────────────────────────────────────────────────────────────────────────
+   Ambient Orbs — duas esferas que atravessam o nome, deixam a tipografia,
+   acompanham a página e se unem no encerramento.
+   Controle: orbController.ts · interações: orbInteractions.ts
+   ─────────────────────────────────────────────────────────────────────────── */
+
+/* Paleta de cada esfera (usada nas letras, na camada flutuante e no final). */
+[data-orb-tone="purple"] { --o-solid: #8b5cf6; --o-overlap: #bda4ff; }
+[data-orb-tone="white"] { --o-solid: #f4f2f8; --o-overlap: #bda4ff; }
+
+/* ── Camadas: as esferas ficam ACIMA dos fundos das seções e ABAIXO do texto,
+      então nunca encobrem informação nem bloqueiam cliques. ── */
+.site-shell .hero-inner,
+.site-shell .hero-meta {
+  z-index: 2;
+}
+.site-shell .section > .container,
+.site-shell .contact-inner,
+.site-shell .footer > .container {
+  position: relative;
+  z-index: 2;
+}
+
+/* ── 1. Esfera dentro das letras (máscara tipográfica) ──────────────────────
+   Cada .name-letter ganha um ::after com o mesmo caractere, em
+   background-clip:text. Ele herda fonte, corpo, espaçamento e a animação de
+   entrada da letra, então a esfera só é vista no preenchimento real da
+   tipografia. A palavra inteira já é aria-hidden (o <h1> tem aria-label),
+   logo nada é lido em duplicidade. */
+.name-letter {
+  position: relative;
+}
+.name-letter::after {
+  --pad: 0.16em;
+  --gr: var(--or, 60px);
+  --gx: calc(var(--ox, -9999px) - var(--lx, 0px) + var(--pad));
+  --gy: calc(var(--oy, -9999px) + var(--pad));
+  content: attr(data-char);
+  position: absolute;
+  inset: calc(var(--pad) * -1);
+  padding: var(--pad);
+  pointer-events: none;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+  background-repeat: no-repeat;
+  /* Círculo de cor sólida, borda nítida. */
+  background-image: radial-gradient(circle var(--gr) at var(--gx) var(--gy), var(--o-solid) calc(var(--gr) - 1px), transparent var(--gr));
+  opacity: var(--gi, 0);
+}
+
+/* ── 2. Camada flutuante ──────────────────────────────────────────────────── */
+.ambient-orbs {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
+  contain: layout paint style;
+}
+.orb {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 200px;
+  height: 200px;
+  margin: -100px 0 0 -100px;
+  pointer-events: none;
+  will-change: transform, opacity;
+  --a: 1;
+  --ha: 1;
+}
+.ambient-orbs .orb {
+  visibility: hidden;
+  opacity: 0;
+}
+.orb-body,
+.orb-halo {
+  position: absolute;
+  border-radius: 50%;
+}
+.orb-body {
+  inset: 0;
+  opacity: var(--a);
+  background: var(--o-solid);
+}
+.orb-halo {
+  display: none;
+}
+
+/* ── 3. Composição final (região decorativa no fim do Contato) ───────────── */
+.site-shell .contact {
+  padding-bottom: calc(clamp(300px, 42vw, 420px) + 12px);
+}
+.ambient-final {
+  --f-sph: 0;
+  --f-field: 0;
+  --af-w: min(92vw, 880px);
+  --af-s: 1.1;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  height: clamp(300px, 42vw, 420px);
+  pointer-events: none;
+  display: grid;
+  place-items: center;
+}
+.af-stage {
+  position: relative;
+  width: var(--af-w);
+  height: calc(var(--af-w) * 0.42);
+}
+.af-field {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  opacity: var(--f-field);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 38%);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 38%);
+}
+.af-sphere {
+  --dx: calc(var(--af-s) * 72px);
+  top: 50%;
+  margin: -100px 0 0 -100px;
+  opacity: var(--f-sph);
+  transform: scale(var(--af-s));
+}
+.af-sphere[data-orb-final-sphere="purple"] { left: calc(50% - var(--dx)); }
+.af-sphere[data-orb-final-sphere="white"] { left: calc(50% + var(--dx)); }
+/* Interseção das duas circunferências, em cor sólida (recorte do disco branco
+   pelo círculo roxo: o centro roxo fica a 144·s px, em coordenadas locais -44px). */
+.af-overlap {
+  top: 50%;
+  left: calc(50% + var(--af-s) * 72px);
+  margin: -100px 0 0 -100px;
+  opacity: var(--f-sph);
+  transform: scale(var(--af-s));
+  background: #bda4ff;
+  border-radius: 50%;
+  clip-path: circle(100px at -44px 100px);
+  position: absolute;
+  width: 200px;
+  height: 200px;
+}
+.af-ring {
+  fill: none;
+  stroke: rgba(189, 164, 255, 0.28);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+.af-contour {
+  fill: none;
+  stroke: rgba(189, 164, 255, 0.34);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+.af-particle {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: var(--s);
+  height: var(--s);
+  border-radius: 50%;
+  background: rgba(244, 242, 248, 0.85);
+  opacity: 0;
+}
+.ambient-final[data-active="true"] .af-particle {
+  animation: af-float var(--t) ease-in-out var(--d) infinite;
+}
+.ambient-final[data-active="true"] .af-breathe {
+  animation: af-breathe 11s ease-in-out infinite alternate;
+}
+.ambient-final[data-active="true"] .af-ring-a { animation: af-spin 46s linear infinite; }
+.ambient-final[data-active="true"] .af-ring-b { animation: af-spin 62s linear infinite reverse; }
+.af-ring-a, .af-ring-b { transform-origin: 450px 190px; }
+@keyframes af-float {
+  0%, 100% { opacity: 0; transform: translate3d(0, 6px, 0); }
+  30%, 70% { opacity: calc(var(--f-field) * 0.9); }
+  50% { transform: translate3d(var(--mx), var(--my), 0); }
+}
+@keyframes af-breathe {
+  from { transform: scale(0.985); }
+  to { transform: scale(1.025); }
+}
+@keyframes af-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── 4. Reações luminosas dos elementos (ver orbInteractions.ts) ─────────────
+   As variáveis --lit/--lx/--ly/--tone são gravadas só nos elementos que estão
+   realmente perto de uma esfera. Todos os efeitos usam pseudo-elementos ou
+   text-shadow, então não competem com os estilos/hover existentes. */
+[data-orb-kind="card"],
+[data-orb-kind="tag"],
+[data-orb-kind="button"],
+[data-orb-kind="line"],
+[data-orb-kind="marker"] {
+  position: relative;
+}
+[data-orb-kind="card"]::after,
+[data-orb-kind="tag"]::after,
+[data-orb-kind="button"]::after,
+[data-orb-kind="line"]::after,
+[data-orb-kind="marker"]::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  opacity: var(--lit, 0);
+}
+[data-orb-kind="card"]::after {
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle 280px at var(--lx, 50%) var(--ly, 50%), rgb(var(--tone, 189 164 255) / 0.17), transparent 70%);
+  box-shadow: inset 0 0 0 1px rgb(var(--tone, 189 164 255) / 0.26);
+}
+[data-orb-kind="tag"]::after {
+  inset: -1px;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px rgb(var(--tone, 189 164 255) / 0.5), 0 0 14px rgb(var(--tone, 189 164 255) / 0.24);
+}
+[data-orb-kind="button"]::after {
+  inset: -1px;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px rgb(var(--tone, 189 164 255) / 0.5), 0 0 24px rgb(var(--tone, 189 164 255) / 0.3);
+}
+[data-orb-kind="line"]::after {
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 1px;
+  background: radial-gradient(ellipse 260px 1px at var(--lx, 50%) 50%, rgb(var(--tone, 189 164 255) / 0.9), transparent);
+}
+[data-orb-kind="marker"]::after {
+  inset: -2px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgb(var(--tone, 189 164 255) / 0.5), 0 0 22px rgb(var(--tone, 189 164 255) / 0.5);
+}
+[data-orb-kind="title"] {
+  text-shadow: 0 0 calc(var(--lit, 0) * 30px) rgb(var(--tone, 189 164 255) / calc(var(--lit, 0) * 0.34));
+}
+[data-orb-kind="text"] {
+  text-shadow: 0 0 calc(var(--lit, 0) * 16px) rgb(var(--tone, 189 164 255) / calc(var(--lit, 0) * 0.3));
+}
+
+/* ── Responsivo ──────────────────────────────────────────────────────────── */
+@media (max-width: 1050px) {
+  .ambient-final { --af-s: 0.95; }
+}
+@media (max-width: 600px) {
+  .ambient-final { --af-s: 0.66; --af-w: 96vw; }
+  .site-shell .contact { padding-bottom: calc(clamp(260px, 70vw, 330px) + 12px); }
+  .ambient-final { height: clamp(260px, 70vw, 330px); }
+  .af-particle:nth-child(n + 8) { display: none; }
+  .orb-halo { opacity: calc(var(--ha) * 0.7); }
+}
+.ambient-orbs[data-quality="low"] .orb-halo { display: none; }
+
+/* ── Movimento reduzido: sem camada flutuante e sem animações contínuas.
+      A esfera nas letras fica estática e a composição final aparece de forma
+      discreta (ver orbController.ts → modo reduzido). ── */
+@media (prefers-reduced-motion: reduce) {
+  .ambient-orbs { display: none; }
+  .ambient-final .af-particle,
+  .ambient-final .af-breathe,
+  .ambient-final .af-ring-a,
+  .ambient-final .af-ring-b { animation: none !important; }
+  .af-particle { opacity: 0.5; }
+}

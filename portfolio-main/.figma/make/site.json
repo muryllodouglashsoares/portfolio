@@ -1,0 +1,10 @@
+{
+  "description": "A polished developer portfolio showcases software projects, technical skills, education, and experience to help recruiters and clients assess the creator’s work.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}

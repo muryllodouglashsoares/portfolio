@@ -9,6 +9,7 @@ import {
   Menu,
   X,
 } from "lucide-react"
+import { AmbientFinalForm, AmbientOrbs } from "./components/ambient/AmbientOrbs"
 import { Hero } from "./components/Hero"
 import { OpenCursor } from "./components/OpenCursor"
 import {
@@ -397,6 +398,7 @@ export default function App() {
       <div className="reading-progress" aria-hidden="true">
         <span />
       </div>
+      <AmbientOrbs sectionIds={sectionIds} />
       <a href="#conteudo" className="skip-link">
         Pular para o conteúdo
       </a>
@@ -747,6 +749,7 @@ export default function App() {
 
         <section id="contato" className="contact">
           <div className="contact-grid" />
+          <AmbientFinalForm />
           <div className="container contact-inner">
             <div className="contact-copy reveal-item">
               <span className="section-label">05 / Contato</span>
