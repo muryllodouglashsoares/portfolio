@@ -258,6 +258,7 @@ function ImageFrame({
         target="_blank"
         rel="noreferrer"
         data-cursor="open"
+        data-cursor-title={project.title}
         aria-label={`Abrir o site de ${project.title} em nova aba`}
       >
         {children}

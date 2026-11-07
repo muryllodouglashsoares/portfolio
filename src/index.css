@@ -119,7 +119,12 @@
 .console-bar i:nth-child(3), .browser-bar i:nth-child(3) { background: #3e725a; }
 /* Cursor "Abrir" (ver OpenCursor.tsx) */
 .has-open-cursor [data-cursor="open"], .has-open-cursor [data-cursor="open"] * { cursor: none; }
-.open-cursor { position: fixed; z-index: 90; left: 0; top: 0; padding: 8px 16px; border-radius: 999px; background: #fff; color: #09090d; font: 700 12px/1 var(--sans); letter-spacing: -.01em; box-shadow: 0 8px 24px rgba(0,0,0,.4); pointer-events: none; opacity: 0; scale: .7; transition: opacity 140ms ease, scale 200ms cubic-bezier(.16,1,.3,1); will-change: transform; }
+.open-cursor { position: fixed; z-index: 90; left: 0; top: 0; display: flex; align-items: center; gap: 14px; width: max-content; max-width: min(320px, calc(100vw - 24px)); padding: 12px 22px 12px 12px; border-radius: 18px; background: #fff; color: #09090d; box-shadow: 0 14px 36px rgba(0,0,0,.45), 0 0 0 1px rgba(139,92,246,.18); pointer-events: none; opacity: 0; scale: .85; transition: opacity 140ms ease, scale 200ms cubic-bezier(.16,1,.3,1); will-change: transform; }
+.open-cursor-icon { display: grid; flex: none; place-items: center; width: 40px; height: 40px; border-radius: 12px; background: var(--purple); color: #fff; }
+.open-cursor-text { display: grid; gap: 2px; min-width: 0; }
+.open-cursor-label { color: #6535d8; font: 700 10px/1.2 var(--mono); letter-spacing: .1em; text-transform: uppercase; }
+.open-cursor-title { font: 700 16px/1.25 var(--sans); letter-spacing: -.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.open-cursor-url { color: #5a5568; font: 500 12px/1.3 var(--mono); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .open-cursor[data-visible="true"] { opacity: 1; scale: 1; }
 @media (hover: none), (pointer: coarse) { .open-cursor { display: none; } }
 .hero-scroll { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); text-decoration: none; transition: color 180ms; }

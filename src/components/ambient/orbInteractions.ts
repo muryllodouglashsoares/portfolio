@@ -34,7 +34,7 @@ const REACH: Record<Kind, number> = {
   marker: 110,
 }
 const STRENGTH: Record<Kind, number> = {
-  title: 0.9,
+  title: 0.5,
   card: 1,
   button: 1,
   tag: 1,
@@ -53,6 +53,12 @@ type Target = {
   written: number
 }
 
+/** Blocos de texto que as esferas nunca podem prejudicar (fora do Hero). */
+const TEXT_SELECTOR =
+  ":is(main section:not(.hero), footer) :is(h2, h3, h4, p, li, dt, dd, blockquote, figcaption, .section-label, .button, .stack-items button, .about-tags span, .contact-links a)"
+
+type Zone = { left: number; top: number; right: number; bottom: number }
+
 export type InteractionOrb = { id: OrbId; x: number; y: number; r: number }
 
 const smoothstep = (a: number, b: number, v: number) => {
@@ -62,6 +68,8 @@ const smoothstep = (a: number, b: number, v: number) => {
 
 export function createInteractions() {
   let targets: Target[] = []
+  let zones: Zone[] = []
+  const cover: Record<OrbId, number> = { purple: 0, white: 0 }
   const needsLocal = new Set<Kind>(["card", "line"])
 
   const reset = (t: Target) => {
@@ -102,6 +110,53 @@ export function createInteractions() {
       })
     }
     targets = next
+
+    // Zonas de texto (coordenadas de documento) para o controle de legibilidade.
+    const nextZones: Zone[] = []
+    document.querySelectorAll<HTMLElement>(TEXT_SELECTOR).forEach((el) => {
+      const rect = el.getBoundingClientRect()
+      if (!rect.width || !rect.height) return
+      nextZones.push({
+        left: rect.left + window.scrollX,
+        top: rect.top + scrollY,
+        right: rect.right + window.scrollX,
+        bottom: rect.bottom + scrollY,
+      })
+    })
+    zones = nextZones
+  }
+
+  /**
+   * Quanto cada esfera cobre texto (0..1, suavizado). Só aritmética sobre
+   * caixas já medidas — nenhuma leitura de layout. Retorna true enquanto
+   * algum valor ainda está em transição (mantém o loop acordado).
+   */
+  function updateCover(orbs: InteractionOrb[], scrollY: number, vh: number, dt: number) {
+    const follow = 1 - Math.exp(-dt * 9)
+    let moving = false
+    for (const orb of orbs) {
+      let goal = 0
+      const lo = scrollY + orb.y - orb.r * 1.2
+      const hi = scrollY + orb.y + orb.r * 1.2
+      if (orb.y > -orb.r * 2 && orb.y < vh + orb.r * 2) {
+        const ox = orb.x + window.scrollX
+        const oy = scrollY + orb.y
+        for (const z of zones) {
+          if (z.bottom < lo || z.top > hi) continue
+          const dx = Math.max(z.left - ox, 0, ox - z.right)
+          const dy = Math.max(z.top - oy, 0, oy - z.bottom)
+          // 0 quando a borda da esfera apenas toca a caixa; 1 com o texto sob o miolo.
+          const c = 1 - smoothstep(orb.r * 0.3, orb.r * 1.05, Math.hypot(dx, dy))
+          if (c > goal) goal = c
+          if (goal >= 1) break
+        }
+      }
+      const cur = cover[orb.id]
+      const nextVal = Math.abs(goal - cur) < 0.004 ? goal : cur + (goal - cur) * follow
+      if (Math.abs(goal - nextVal) > 0.01) moving = true
+      cover[orb.id] = nextVal
+    }
+    return moving
   }
 
   /**
@@ -181,9 +236,10 @@ export function createInteractions() {
       t.el.removeAttribute("data-orb-kind")
     })
     targets = []
+    zones = []
   }
 
-  return { rebuild, update, dispose }
+  return { rebuild, update, updateCover, cover, dispose }
 }
 
 export type Interactions = ReturnType<typeof createInteractions>

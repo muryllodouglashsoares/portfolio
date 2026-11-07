@@ -119,3 +119,24 @@ export const TONE_RGB: Record<OrbId, string> = {
   purple: "189 164 255",
   white: "244 242 248",
 }
+
+/**
+ * Modos de movimento (data-motion no container):
+ *  scrolling → esferas seguem a rolagem; nenhuma animação secundária.
+ *  idle      → rolagem parada: animações secundárias (CSS, só transform/opacity).
+ *  paused    → aba em segundo plano: tudo suspenso.
+ */
+export type OrbMotion = "scrolling" | "idle" | "paused"
+
+/** Tempo sem eventos de rolagem (ms) para considerar o scroll parado. */
+export const IDLE_DELAY_MS = 220
+
+/**
+ * Legibilidade: opacidade mínima da esfera quando sobreposta a texto
+ * (1 = sem texto por perto). A esfera clara é a que mais compete com o texto.
+ */
+export const LEGIBILITY = {
+  minOpacity: { purple: 0.24, white: 0.14 } as Record<OrbId, number>,
+  /** Em telas estreitas o texto ocupa quase toda a largura: atenua mais. */
+  phoneFactor: 0.8,
+}

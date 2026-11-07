@@ -42,12 +42,15 @@ export function AmbientOrbs({ sectionIds }: { sectionIds: string[] }) {
       ref={rootRef}
       className="ambient-orbs"
       data-state="HERO"
+      data-motion="scrolling"
       aria-hidden="true"
     >
       {(["purple", "white"] as const).map((tone) => (
         <div className="orb" data-orb={tone} data-orb-tone={tone} key={tone}>
-          <span className="orb-halo" />
-          <span className="orb-body" />
+          <span className="orb-drift">
+            <span className="orb-body" />
+            <span className="orb-sheen" />
+          </span>
         </div>
       ))}
     </div>

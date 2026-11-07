@@ -24,12 +24,15 @@ import {
   ANCHORS,
   FOLLOW,
   HERO,
+  IDLE_DELAY_MS,
+  LEGIBILITY,
   MOTION,
   ORB_IDS,
   SECTION_ORDER,
   PATH,
   type Anchor,
   type OrbId,
+  type OrbMotion,
   type OrbState,
   type SectionKey,
 } from "./orbConfig"
@@ -94,6 +97,7 @@ type Orb = {
   wO: number
   wA: number
   wH: number
+  wL: number
 }
 
 export type OrbController = { destroy(): void }
@@ -128,6 +132,7 @@ export function createOrbController({
     wO: -1,
     wA: -1,
     wH: -1,
+    wL: -1,
   })).filter((o) => o.el)
 
   const interactions = createInteractions()
@@ -152,6 +157,13 @@ export function createOrbController({
   let lastScroll = -1
   let finalOn = false
   let quality: "high" | "low" = "high"
+  // SCROLLING ↔ IDLE: as animações secundárias (CSS) só rodam com a rolagem parada.
+  let motion: OrbMotion = "scrolling"
+  let idleAllowed = false
+  let lastScrollAt = 0
+  let idleTimer = 0
+  let lastCoverMoving = false
+  root.dataset.motion = motion
   let interactionClock = 0
   const fin = { sph: 0, q: 0, m: 0, vs: { v: 0 }, vq: { v: 0 }, vm: { v: 0 }, ws: -1, wq: -1, wm: -1 }
 
@@ -321,6 +333,9 @@ export function createOrbController({
       state = next
       root.dataset.state = state
     }
+    // Suspensas só no Hero, na saída das letras e na forma final (onde a
+    // esfera é substituída pelo disco — um deslocamento ali seria visível).
+    idleAllowed = state === "FOLLOWING_PAGE" || (state === "MERGING" && mergeP < 0.4)
 
     // ── Introdução no Hero (depois de as letras entrarem) ──
     if (readyAt < 0 && heroEl?.dataset.ready === "true") readyAt = time
@@ -484,6 +499,13 @@ export function createOrbController({
         orb.wH = h
       }
 
+      const lgMin = LEGIBILITY.minOpacity[id] * (phone ? LEGIBILITY.phoneFactor : 1)
+      const lg = Math.round((1 - interactions.cover[id] * (1 - lgMin)) * 100) / 100
+      if (lg !== orb.wL) {
+        orb.el.style.setProperty("--lg", String(lg))
+        orb.wL = lg
+      }
+
       // 6) Máscara tipográfica: a MESMA esfera, desenhada dentro das letras.
       // Em dispositivos modestos (ou se o navegador acusar quadros lentos) a
       // máscara — a parte mais cara — é repintada a cada 2 quadros (30fps).
@@ -530,9 +552,10 @@ export function createOrbController({
     if (interactionClock >= step) {
       const activity = smoothstep(0.55, 0.95, w) * (1 - smoothstep(0.2, 0.5, mergeP))
       lastLit = interactions.update(interactionOrbs, scrollY, vh, activity, interactionClock)
+      lastCoverMoving = interactions.updateCover(interactionOrbs, scrollY, vh, interactionClock)
       interactionClock = 0
     }
-    const litActive = lastLit
+    const litActive = lastLit || lastCoverMoving
 
     // ── Dormir quando nada muda: sem rolagem, esferas e etapas assentadas,
     //    Hero fora de vista e nenhum elemento aceso. A rolagem acorda o loop. ──
@@ -582,6 +605,32 @@ export function createOrbController({
 
   // ───────────────────────── Observadores e ciclo de vida ──────────────────
 
+  const setMotion = (m: OrbMotion) => {
+    if (m === motion) return
+    motion = m
+    root.dataset.motion = m
+  }
+
+  // Detecção de parada sem listener extra: um único timer, rearmado só pelo
+  // tempo restante (não recriado a cada evento de scroll).
+  const checkIdle = () => {
+    idleTimer = 0
+    if (disposed) return
+    const remaining = IDLE_DELAY_MS - (performance.now() - lastScrollAt)
+    if (remaining > 4) {
+      idleTimer = window.setTimeout(checkIdle, remaining)
+      return
+    }
+    setMotion(!document.hidden && idleAllowed && !reducedMotion ? "idle" : "scrolling")
+  }
+
+  const onScroll = () => {
+    lastScrollAt = performance.now()
+    setMotion("scrolling") // interrompe as animações secundárias de imediato
+    if (!idleTimer) idleTimer = window.setTimeout(checkIdle, IDLE_DELAY_MS)
+    wake()
+  }
+
   const wake = () => {
     if (reducedMotion || disposed || raf || document.hidden) return
     last = performance.now()
@@ -611,7 +660,7 @@ export function createOrbController({
   const onFonts = () => markDirty()
   window.addEventListener("resize", onResize)
   // Único listener de rolagem do sistema: só acorda o loop (sem cálculo).
-  window.addEventListener("scroll", wake, { passive: true })
+  window.addEventListener("scroll", onScroll, { passive: true })
   window.addEventListener("load", onFonts)
   document.fonts?.addEventListener?.("loadingdone", onFonts)
 
@@ -635,7 +684,11 @@ export function createOrbController({
     if (document.hidden) {
       cancelAnimationFrame(raf)
       raf = 0
+      setMotion("paused")
     } else {
+      setMotion("scrolling")
+      lastScrollAt = performance.now()
+      if (!idleTimer) idleTimer = window.setTimeout(checkIdle, IDLE_DELAY_MS)
       wake()
     }
   }
@@ -648,16 +701,20 @@ export function createOrbController({
   } else {
     last = performance.now()
     raf = requestAnimationFrame(frame)
+    // Página aberta já parada (ex.: restauração de rolagem): entra em idle.
+    lastScrollAt = performance.now()
+    idleTimer = window.setTimeout(checkIdle, IDLE_DELAY_MS)
   }
 
   return {
     destroy() {
       disposed = true
       cancelAnimationFrame(raf)
+      clearTimeout(idleTimer)
       resizeObserver.disconnect()
       finalObserver?.disconnect()
       window.removeEventListener("resize", onResize)
-      window.removeEventListener("scroll", wake)
+      window.removeEventListener("scroll", onScroll)
       window.removeEventListener("load", onFonts)
       document.fonts?.removeEventListener?.("loadingdone", onFonts)
       document.removeEventListener("visibilitychange", onVisibility)

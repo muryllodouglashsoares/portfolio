@@ -5,8 +5,28 @@
    ─────────────────────────────────────────────────────────────────────────── */
 
 /* Paleta de cada esfera (usada nas letras, na camada flutuante e no final). */
-[data-orb-tone="purple"] { --o-solid: #8b5cf6; --o-overlap: #bda4ff; }
-[data-orb-tone="white"] { --o-solid: #f4f2f8; --o-overlap: #bda4ff; }
+[data-orb-tone="purple"] {
+  --o-solid: #8b5cf6; --o-overlap: #bda4ff;
+  /* Superfície: luz → meio-tom → sombra, mais um reflexo frio de retorno. */
+  --o-hi: #d6c8ff; --o-mid: #9266f4; --o-lo: #5a30c2; --o-edge: #2b1470;
+  --o-shade: 20 8 64; --o-bounce: 104 168 255;
+  /* Variação individual do movimento em repouso (ver seção 2b). */
+  --i-orbit: 11s; --i-breathe: 7.3s; --i-sheen: 9.5s; --i-dx: 15px; --i-dy: 11px; --i-tilt: 22deg;
+}
+[data-orb-tone="white"] {
+  --o-solid: #f4f2f8; --o-overlap: #bda4ff;
+  --o-hi: #ffffff; --o-mid: #e6e0f3; --o-lo: #b5add2; --o-edge: #70689a;
+  --o-shade: 52 40 110; --o-bounce: 170 150 255;
+  --i-orbit: 13.5s; --i-breathe: 8.9s; --i-sheen: 12s; --i-dx: 12px; --i-dy: 16px; --i-tilt: -18deg;
+}
+/* Preenchimento esférico compartilhado (esferas flutuantes e discos finais):
+   só gradientes estáticos — sem blur, filtro ou sombra. */
+[data-orb-tone] {
+  --o-fill:
+    radial-gradient(circle at 50% 50%, transparent 56%, rgb(var(--o-shade) / 0.5) 100%),
+    radial-gradient(circle at 75% 83%, rgb(var(--o-bounce) / 0.34), transparent 44%),
+    radial-gradient(circle at 33% 27%, var(--o-hi) 0%, var(--o-mid) 36%, var(--o-lo) 72%, var(--o-edge) 100%);
+}
 
 /* ── Camadas: as esferas ficam ACIMA dos fundos das seções e ABAIXO do texto,
       então nunca encobrem informação nem bloqueiam cliques. ── */
@@ -46,7 +66,7 @@
   background-clip: text;
   background-repeat: no-repeat;
   /* Círculo de cor sólida, borda nítida. */
-  background-image: radial-gradient(circle var(--gr) at var(--gx) var(--gy), var(--o-solid) calc(var(--gr) - 1px), transparent var(--gr));
+  background-image: radial-gradient(circle var(--gr) at var(--gx) var(--gy), var(--o-hi) 0, var(--o-solid) calc(var(--gr) * 0.5), var(--o-lo) calc(var(--gr) - 1px), transparent var(--gr));
   opacity: var(--gi, 0);
 }
 
@@ -70,23 +90,73 @@
   will-change: transform, opacity;
   --a: 1;
   --ha: 1;
+  /* Legibilidade: 1 = livre · menor = esfera atenuada sobre texto (orbController). */
+  --lg: 1;
 }
 .ambient-orbs .orb {
   visibility: hidden;
   opacity: 0;
 }
+.orb-drift,
 .orb-body,
-.orb-halo {
+.orb-sheen {
   position: absolute;
+  inset: 0;
   border-radius: 50%;
 }
-.orb-body {
-  inset: 0;
-  opacity: var(--a);
-  background: var(--o-solid);
+.orb-drift {
+  opacity: var(--lg);
 }
-.orb-halo {
-  display: none;
+.orb-body {
+  opacity: var(--a);
+  background: var(--o-fill);
+}
+/* Brilho especular e reflexo secundário: giram/pulsam levemente em repouso. */
+.orb-sheen {
+  background:
+    radial-gradient(circle at 30% 23%, rgb(255 255 255 / 0.55) 0, rgb(255 255 255 / 0.12) 7%, transparent 15%),
+    radial-gradient(circle at 69% 77%, rgb(var(--o-bounce) / 0.22) 0, transparent 20%);
+  opacity: calc(var(--a) * 0.85);
+}
+
+/* ── 2b. Animações secundárias (só com a rolagem parada) ────────────────────
+   Estado vem de data-motion (orbController): "idle" liga, qualquer outro valor
+   pausa NO LUGAR (sem salto ao retomar). Só `translate`, `scale`, `rotate` e
+   `opacity` — compostos pela GPU, sem repintura e sem JavaScript por quadro.
+   Cada esfera usa períodos diferentes (primos entre si), então nunca se
+   sincronizam. O raio de deriva fica dentro de ~±16px locais (≈ ±10px). */
+.orb-drift {
+  animation:
+    orb-orbit var(--i-orbit) ease-in-out infinite,
+    orb-breathe var(--i-breathe) ease-in-out infinite;
+  animation-play-state: paused;
+}
+.orb-sheen {
+  animation:
+    orb-tilt var(--i-sheen) ease-in-out infinite,
+    orb-glow calc(var(--i-sheen) * 0.62) ease-in-out infinite;
+  animation-play-state: paused;
+}
+.ambient-orbs[data-motion="idle"]:not([data-state="HERO"]):not([data-state="FINAL_FORM"]) :is(.orb-drift, .orb-sheen) {
+  animation-play-state: running;
+}
+@keyframes orb-orbit {
+  0%, 100% { translate: 0 0; }
+  25% { translate: var(--i-dx) calc(var(--i-dy) * -0.55); }
+  50% { translate: calc(var(--i-dx) * 0.3) var(--i-dy); }
+  75% { translate: calc(var(--i-dx) * -0.9) calc(var(--i-dy) * 0.2); }
+}
+@keyframes orb-breathe {
+  0%, 100% { scale: 1; }
+  50% { scale: 1.035; }
+}
+@keyframes orb-tilt {
+  0%, 100% { rotate: 0deg; }
+  50% { rotate: var(--i-tilt); }
+}
+@keyframes orb-glow {
+  0%, 100% { opacity: calc(var(--a) * 0.7); }
+  50% { opacity: calc(var(--a) * 1); }
 }
 
 /* ── 3. Encerramento: as esferas viram 4 ícones ─────────────────────────────
@@ -159,7 +229,7 @@
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  background: var(--o-solid);
+  background: var(--o-fill);
   transform: scale(calc(1 - 0.92 * var(--m)));
   opacity: calc(1.15 - var(--m) * 1.3);
 }
@@ -236,7 +306,7 @@
   box-shadow: inset 0 0 0 1px rgb(var(--tone, 189 164 255) / 0.5), 0 0 22px rgb(var(--tone, 189 164 255) / 0.5);
 }
 [data-orb-kind="title"] {
-  text-shadow: 0 0 calc(var(--lit, 0) * 30px) rgb(var(--tone, 189 164 255) / calc(var(--lit, 0) * 0.34));
+  text-shadow: 0 0 calc(var(--lit, 0) * 24px) rgb(var(--tone, 189 164 255) / calc(var(--lit, 0) * 0.2));
 }
 
 /* ── Responsivo ──────────────────────────────────────────────────────────── */
@@ -246,9 +316,10 @@
 @media (max-width: 600px) {
   .ambient-final { --af-s0: 0.66; --af-s1: 0.3; --af-gap: 78px; --af-w: 96vw; height: clamp(220px, 60vw, 280px); }
   .site-shell .contact { padding-bottom: calc(clamp(220px, 60vw, 280px) + 12px); }
-  .orb-halo { opacity: calc(var(--ha) * 0.7); }
+  .orb-drift { --i-dx: 8px; --i-dy: 7px; }
 }
-.ambient-orbs[data-quality="low"] .orb-halo { display: none; }
+/* Dispositivos modestos: mantém só a deriva (sem rotação/pulso do brilho). */
+.ambient-orbs[data-quality="low"] .orb-sheen { animation: none; }
 
 /* ── Movimento reduzido: sem camada flutuante; os ícones aparecem prontos e
       estáticos ao entrar na tela (ver orbController.ts → modo reduzido). ── */
