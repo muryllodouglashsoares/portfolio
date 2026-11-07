@@ -1,29 +1,23 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef } from "react"
 import "./ambient-orbs.css"
 import { createOrbController } from "./orbController"
-
-function useReducedMotion() {
-  const [reduced, setReduced] = useState(() =>
-    typeof window === "undefined"
-      ? false
-      : window.matchMedia("(prefers-reduced-motion: reduce)").matches,
-  )
-  useEffect(() => {
-    const query = window.matchMedia("(prefers-reduced-motion: reduce)")
-    const onChange = () => setReduced(query.matches)
-    query.addEventListener("change", onChange)
-    return () => query.removeEventListener("change", onChange)
-  }, [])
-  return reduced
-}
 
 /**
  * Camada fixa com as duas esferas. Fica ACIMA dos fundos das seções e ABAIXO
  * do texto (ver z-index em ambient-orbs.css): decorativa, sem eventos, sem
  * participar do fluxo do documento.
+ *
+ * `reduced` já junta `prefers-reduced-motion` e a escolha do visitante
+ * (ver useEffectsPreference): com ele ligado, o controlador entra no modo
+ * estático (sem laço de animação).
  */
-export function AmbientOrbs({ sectionIds }: { sectionIds: string[] }) {
-  const reduced = useReducedMotion()
+export function AmbientOrbs({
+  sectionIds,
+  reduced,
+}: {
+  sectionIds: string[]
+  reduced: boolean
+}) {
   const rootRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {

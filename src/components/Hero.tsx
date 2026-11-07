@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react"
-import { ArrowDown, ArrowDownRight, GitBranch } from "lucide-react"
+import { ArrowDown, ArrowDownRight, Compass } from "lucide-react"
 
 const FIRST_WORD = "MURYLLO"
 const SECOND_WORD = "DOUGLAS"
@@ -128,7 +128,7 @@ function Letters({ text }: { text: string }) {
   )
 }
 
-export function Hero({ github }: { github: string }) {
+export function Hero() {
   const [ready, setReady] = useState(false)
   const { rootRef, firstRef, secondRef } = useFittedName(() => setReady(true))
 
@@ -205,14 +205,9 @@ export function Hero({ github }: { github: string }) {
               <a className="button button-primary" href="#projetos">
                 Explorar projetos <ArrowDownRight size={18} />
               </a>
-              <a
-                className="button button-secondary"
-                href={github}
-                target="_blank"
-                rel="noreferrer"
-              >
-                <GitBranch size={18} />
-                Ver GitHub
+              <a className="button button-secondary" href="#trajetoria">
+                <Compass size={18} aria-hidden="true" />
+                Conhecer minha trajetória
               </a>
             </div>
           </div>

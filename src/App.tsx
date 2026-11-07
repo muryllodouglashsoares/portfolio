@@ -7,15 +7,26 @@ import {
   GitBranch,
   Mail,
   Menu,
+  Sparkles,
   X,
 } from "lucide-react"
 import { AmbientFinalForm, AmbientOrbs } from "./components/ambient/AmbientOrbs"
+import { CopyEmailButton } from "./components/CopyEmailButton"
+import { ExternalLink } from "./components/ExternalLink"
 import { Hero } from "./components/Hero"
 import { OpenCursor } from "./components/OpenCursor"
 import {
   ProjectLightbox,
   type LightboxImage,
 } from "./components/ProjectLightbox"
+import { ProjectsExplorer } from "./components/projects/ProjectsExplorer"
+import {
+  featuredProjects,
+  github,
+  projectAnchor,
+} from "./components/projects/projectsData"
+import { StackExplorer } from "./components/StackExplorer"
+import { useEffectsPreference } from "./hooks/useEffectsPreference"
 import { usePageExperience } from "./hooks/usePageExperience"
 
 const links = [
@@ -25,7 +36,7 @@ const links = [
   ["Trajetória", "#trajetoria"],
   ["Contato", "#contato"],
 ]
-const github = "https://github.com/muryllodouglashsoares"
+const email = "muryllodouglash.soares@gmail.com"
 const sectionIds = [
   "inicio",
   "sobre",
@@ -35,160 +46,15 @@ const sectionIds = [
   "contato",
 ]
 
-const projectEntries = [
-  {
-    slug: "lexcontract",
-    index: "01",
-    title: "LexContract",
-    eyebrow: "Produto em destaque · Web",
-    description:
-      "Sistema de gestão de contratos jurídicos que centraliza clientes, documentos, pagamentos e auditoria, com isolamento entre escritórios.",
-    detail:
-      "Um projeto de ponta a ponta: interface, API própria, banco relacional, autorização por papéis, testes e pipeline de entrega.",
-    tech: ["React", "TypeScript", "Fastify", "Prisma", "PostgreSQL"],
-    status: "Em desenvolvimento",
-    image:
-      "https://raw.githubusercontent.com/muryllodouglashsoares/law-contract-management/main/docs/screenshots/dashboard.webp",
-    repo: `${github}/law-contract-management`,
-    demo: "https://law-contract-management.pages.dev/",
-    accent: "violet",
-  },
-  {
-    slug: "evidence-finder",
-    index: "02",
-    title: "Evidence Finder",
-    eyebrow: "Desktop · Privacidade local",
-    description:
-      "Aplicação desktop para organizar e pesquisar PDFs, imagens, textos e conversas, com referência à fonte e exportação de evidências.",
-    detail:
-      "Processamento local, OCR e busca exata, semântica ou híbrida sobre projetos independentes.",
-    tech: ["Tauri 2", "Rust", "React", "SQLite FTS5", "Tesseract"],
-    status: "Em desenvolvimento",
-    image:
-      "https://raw.githubusercontent.com/muryllodouglashsoares/evidence-finder/main/docs/screenshots/Dashboard.png",
-    repo: `${github}/evidence-finder`,
-    accent: "cyan",
-  },
-  {
-    slug: "gitflow-desktop",
-    index: "03",
-    title: "GitFlow Desktop",
-    eyebrow: "Desktop · Developer tool",
-    description:
-      "Interface desktop para operar repositórios Git locais com branches, revisão de diff, commits seletivos e sincronização segura.",
-    detail:
-      "O núcleo em Rust executa o Git sem shell e confirma os resultados reais antes de reportar sucesso.",
-    tech: ["Tauri", "Rust", "React", "TypeScript", "Git CLI"],
-    status: "Em desenvolvimento",
-    repo: `${github}/gitflow`,
-    accent: "orange",
-  },
-  {
-    slug: "tekidu",
-    index: "04",
-    title: "Tekidu",
-    eyebrow: "Plataforma acadêmica · Web",
-    description:
-      "Plataforma de gestão acadêmica com experiências separadas para administradores, professores, estudantes e responsáveis.",
-    detail:
-      "Autenticação, dados acadêmicos, regras de acesso testadas e uma experiência mobile dedicada.",
-    tech: ["React", "TypeScript", "Firebase Auth", "Firestore", "Vitest"],
-    status: "Em desenvolvimento",
-    image:
-      "https://raw.githubusercontent.com/muryllodouglashsoares/Tekidu/main/docs/screenshots/landing-page.png",
-    repo: `${github}/Tekidu`,
-    demo: "https://tekidu.pages.dev/",
-    accent: "blue",
-  },
+/** [fase, título, texto, projetos relacionados (slugs dos principais)] */
+type TimelineItem = readonly [
+  phase: string,
+  title: string,
+  text: string,
+  related?: readonly string[],
 ]
 
-/**
- * Capturas locais dos projetos.
- *
- * Basta colocar as imagens em `src/assets/projects/<slug>/` (slugs em
- * `projectEntries`). `cover.*` vira a imagem do card; as demais entram na
- * galeria, em ordem alfabética (use 01-, 02-… para controlar a ordem).
- * Sem imagens locais, usa a captura remota antiga (`image`) ou o aviso.
- */
-const localShots = import.meta.glob(
-  "./assets/projects/*/*.{png,jpg,jpeg,webp,avif}",
-  { eager: true, query: "?url", import: "default" },
-) as Record<string, string>
-
-function shotsFor(slug: string, fallback?: string): string[] {
-  const local = Object.entries(localShots)
-    .filter(([path]) => path.startsWith(`./assets/projects/${slug}/`))
-    .map(([path, url]) => ({ name: path.split("/").pop() ?? "", url }))
-    .sort((a, b) => {
-      const aCover = a.name.toLowerCase().startsWith("cover") ? 0 : 1
-      const bCover = b.name.toLowerCase().startsWith("cover") ? 0 : 1
-      return aCover - bCover || a.name.localeCompare(b.name, "pt-BR")
-    })
-    .map((shot) => shot.url)
-  if (local.length) return local
-  return fallback ? [fallback] : []
-}
-
-const projects = projectEntries.map((project) => {
-  const images = shotsFor(project.slug, project.image)
-  return { ...project, images, image: images[0] as string | undefined }
-})
-
-const complementary = [
-  [
-    "IFConnect",
-    "Plataforma acadêmica",
-    "JavaScript · Firebase",
-    `${github}/plataforma-comunicacao`,
-  ],
-  [
-    "Savora",
-    "Experiência web",
-    "React · TanStack Start",
-    `${github}/savora-landing-page`,
-  ],
-  [
-    "FORJA",
-    "Produto conceitual",
-    "React · TypeScript · Zod",
-    `${github}/gym-landing-page`,
-  ],
-  [
-    "Mini Olimpíada",
-    "Robótica educacional",
-    "Python · LEGO Spike",
-    `${github}/mini-robotics-competition`,
-  ],
-]
-
-const stack = [
-  [
-    "01",
-    "Frontend",
-    "Interfaces tipadas, acessíveis e adaptáveis.",
-    ["React", "TypeScript", "JavaScript", "Tailwind CSS", "TanStack Start"],
-  ],
-  [
-    "02",
-    "Backend & dados",
-    "APIs, autorização e modelagem relacional.",
-    ["Node.js", "Fastify", "PostgreSQL", "Prisma", "Firebase", "SQLite"],
-  ],
-  [
-    "03",
-    "Desktop",
-    "Aplicações locais com foco em segurança.",
-    ["Rust", "Tauri", "Git CLI", "Tesseract OCR"],
-  ],
-  [
-    "04",
-    "Qualidade & entrega",
-    "Testes, automação e publicação contínua.",
-    ["Vitest", "Playwright", "Docker", "GitHub Actions", "Cloudflare"],
-  ],
-] as const
-
-const timeline = [
+const timeline: readonly TimelineItem[] = [
   [
     "Fundamentos",
     "A curiosidade vira código",
@@ -203,11 +69,13 @@ const timeline = [
     "Construção",
     "Problemas reais, projetos próprios",
     "IFConnect e Tekidu marcam a transição para produtos com autenticação e persistência.",
+    ["tekidu"],
   ],
   [
     "Engenharia",
     "Mais profundidade técnica",
     "LexContract, Evidence Finder e GitFlow ampliam o trabalho para APIs, bancos relacionais, Rust, testes e CI/CD.",
+    ["lexcontract", "evidence-finder", "gitflow-desktop"],
   ],
   [
     "Agora",
@@ -215,70 +83,6 @@ const timeline = [
     "Aprofundando estruturas de dados, arquitetura de software e robótica autônoma.",
   ],
 ]
-
-const projectAnchor = (title: string) =>
-  `projeto-${title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}`
-
-function ExternalLink({
-  href,
-  children,
-  className = "",
-}: {
-  href: string
-  children: React.ReactNode
-  className?: string
-}) {
-  return (
-    <a className={className} href={href} target="_blank" rel="noreferrer">
-      {children}
-    </a>
-  )
-}
-
-type ProjectData = (typeof projects)[number]
-
-/**
- * Moldura da imagem do projeto. Com deploy ativo vira um link para o site
- * (e mostra o cursor "Abrir"); sem deploy, mantém o comportamento de ampliar.
- */
-function ImageFrame({
-  project,
-  onZoom,
-  children,
-}: {
-  project: ProjectData
-  onZoom: () => void
-  children: React.ReactNode
-}) {
-  if (project.demo) {
-    return (
-      <a
-        className="project-browser project-image-button"
-        href={project.demo}
-        target="_blank"
-        rel="noreferrer"
-        data-cursor="open"
-        data-cursor-title={project.title}
-        aria-label={`Abrir o site de ${project.title} em nova aba`}
-      >
-        {children}
-      </a>
-    )
-  }
-  return (
-    <button
-      className="project-browser project-image-button"
-      type="button"
-      aria-label={
-        project.image ? `Ampliar captura do projeto ${project.title}` : undefined
-      }
-      disabled={!project.image}
-      onClick={() => project.image && onZoom()}
-    >
-      {children}
-    </button>
-  )
-}
 
 function SectionHeading({
   label,
@@ -305,31 +109,15 @@ function SectionHeading({
 
 export default function App() {
   const [menuOpen, setMenuOpen] = useState(false)
-  const [selectedTech, setSelectedTech] = useState("React")
   const [lightbox, setLightbox] = useState<{
     title: string
     images: LightboxImage[]
     index: number
   } | null>(null)
-  const openShots = (project: ProjectData, index: number) =>
-    setLightbox({
-      title: project.title,
-      images: project.images.map((src, i) => ({
-        src,
-        alt: `Captura ${i + 1} do projeto ${project.title}`,
-      })),
-      index,
-    })
   const menuButtonRef = useRef<HTMLButtonElement>(null)
   const mobileNavRef = useRef<HTMLElement>(null)
   const { activeSection, showBackToTop } = usePageExperience(sectionIds)
-
-  const activeTechGroup = stack.find(([, , , items]) =>
-    (items as readonly string[]).includes(selectedTech),
-  )
-  const selectedTechProjects = projects
-    .filter((project) => project.tech.includes(selectedTech))
-    .map((project) => project.title)
+  const effects = useEffectsPreference()
 
   useEffect(() => {
     const reducedMotion = window.matchMedia(
@@ -399,12 +187,12 @@ export default function App() {
       <div className="reading-progress" aria-hidden="true">
         <span />
       </div>
-      <AmbientOrbs sectionIds={sectionIds} />
+      <AmbientOrbs sectionIds={sectionIds} reduced={effects.reduced} />
       <a href="#conteudo" className="skip-link">
         Pular para o conteúdo
       </a>
       <header className="navbar">
-        <a href="#" className="brand" aria-label="Muryllo, início">
+        <a href="#inicio" className="brand" aria-label="Muryllo, início">
           <span className="brand-mark">M</span>
           <span>muryllo.dev</span>
         </a>
@@ -427,7 +215,29 @@ export default function App() {
             <GitBranch size={18} />
             <span className="sr-only">GitHub</span>
           </ExternalLink>
-          <a href="mailto:muryllodouglash.soares@gmail.com" className="nav-cta">
+          <button
+            type="button"
+            className="icon-link effects-toggle"
+            aria-pressed={effects.reduced}
+            aria-disabled={effects.locked}
+            title={
+              effects.locked
+                ? "Experiência simplificada ativada pela preferência de movimento reduzido do sistema"
+                : effects.reduced
+                  ? "Experiência simplificada ativada. Clique para voltar aos efeitos visuais"
+                  : "Reduzir efeitos visuais (esferas e animações)"
+            }
+            onClick={() => !effects.locked && effects.toggle()}
+          >
+            <Sparkles size={18} aria-hidden="true" />
+            <span className="sr-only">
+              Experiência simplificada
+              {effects.locked
+                ? " (ativada pela preferência de movimento reduzido do sistema)"
+                : ""}
+            </span>
+          </button>
+          <a href={`mailto:${email}`} className="nav-cta">
             Vamos conversar <ArrowUpRight size={16} />
           </a>
           <button
@@ -435,6 +245,7 @@ export default function App() {
             className="menu-button"
             onClick={() => setMenuOpen(!menuOpen)}
             aria-expanded={menuOpen}
+            aria-controls="menu-mobile"
             aria-label={menuOpen ? "Fechar menu" : "Abrir menu"}
           >
             {menuOpen ? <X /> : <Menu />}
@@ -443,6 +254,7 @@ export default function App() {
         {menuOpen && (
           <nav
             ref={mobileNavRef}
+            id="menu-mobile"
             className="mobile-nav"
             aria-label="Navegação mobile"
           >
@@ -460,12 +272,18 @@ export default function App() {
                 {label}
               </a>
             ))}
+            <ExternalLink href={github} onClick={() => setMenuOpen(false)}>
+              <span aria-hidden="true">
+                <ArrowUpRight size={14} />
+              </span>
+              GitHub
+            </ExternalLink>
           </nav>
         )}
       </header>
 
-      <main id="conteudo">
-        <Hero github={github} />
+      <main id="conteudo" tabIndex={-1}>
+        <Hero />
 
         <section id="sobre" className="section about">
           <div className="container">
@@ -527,127 +345,11 @@ export default function App() {
               title="Soluções, não apenas telas."
               intro="Projetos principais selecionados pela profundidade técnica, pelo problema resolvido e pelas decisões de engenharia."
             />
-            <div className="project-list">
-              {projects.map((project, index) => (
-                <article
-                  className={`project project-${project.accent} ${
-                    index % 2 ? "project-reverse" : ""
-                  }`}
-                  id={projectAnchor(project.title)}
-                  key={project.title}
-                >
-                  <div className="project-copy reveal-item">
-                    <div className="project-topline">
-                      <span>{project.index}</span>
-                      <span>{project.eyebrow}</span>
-                    </div>
-                    <h3>{project.title}</h3>
-                    <p className="project-description">{project.description}</p>
-                    <p className="project-detail">{project.detail}</p>
-                    <ul
-                      className="tech-list"
-                      aria-label={`Tecnologias de ${project.title}`}
-                    >
-                      {project.tech.map((item) => (
-                        <li key={item}>{item}</li>
-                      ))}
-                    </ul>
-                    <div className="project-links">
-                      <ExternalLink href={project.repo}>
-                        Repositório <GitBranch size={16} />
-                      </ExternalLink>
-                      {project.demo && (
-                        <ExternalLink href={project.demo}>
-                          Abrir demo <ArrowUpRight size={16} />
-                        </ExternalLink>
-                      )}
-                      {project.demo && project.images.length > 1 && (
-                        <a
-                          href="#projetos"
-                          onClick={(event) => {
-                            event.preventDefault()
-                            openShots(project, 0)
-                          }}
-                        >
-                          Ver capturas ({project.images.length})
-                        </a>
-                      )}
-                    </div>
-                  </div>
-                  <div className="project-visual reveal-item reveal-scale">
-                    <ImageFrame
-                      project={project}
-                      onZoom={() => openShots(project, 0)}
-                    >
-                      <div className="browser-bar">
-                        <div>
-                          <i />
-                          <i />
-                          <i />
-                        </div>
-                        <span>
-                          {project.title.toLowerCase().replace(/\s+/g, "-")}.app
-                        </span>
-                        <b />
-                      </div>
-                      {project.image ? (
-                        <img
-                          src={project.image}
-                          alt={`Captura real do projeto ${project.title}`}
-                          loading="lazy"
-                          decoding="async"
-                        />
-                      ) : (
-                        <div className="image-placeholder">
-                          <Code2 />
-                          <span>Captura real será adicionada</span>
-                          <small>
-                            O projeto já está disponível no repositório
-                          </small>
-                        </div>
-                      )}
-                      {project.image && !project.demo && (
-                        <span className="project-image-hint">
-                          Clique para ampliar
-                        </span>
-                      )}
-                    </ImageFrame>
-                    <div className="status-pill">
-                      <span />
-                      {project.status}
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </div>
-            <div className="complementary">
-              <div className="complementary-heading reveal-item">
-                <div>
-                  <span className="section-label">Projetos complementares</span>
-                  <h3>Outros experimentos e entregas</h3>
-                </div>
-                <p>
-                  Projetos que documentam a evolução em web, produto e robótica.
-                </p>
-              </div>
-              <div className="complementary-list reveal-item">
-                {complementary.map((project, index) => (
-                  <ExternalLink
-                    href={project[3]}
-                    className="mini-project"
-                    key={project[0]}
-                  >
-                    <span className="mini-index">0{index + 1}</span>
-                    <span>
-                      <strong>{project[0]}</strong>
-                      <small>{project[1]}</small>
-                    </span>
-                    <span className="mini-stack">{project[2]}</span>
-                    <ArrowUpRight />
-                  </ExternalLink>
-                ))}
-              </div>
-            </div>
+            <ProjectsExplorer
+              onOpenShots={(title, images, index) =>
+                setLightbox({ title, images, index })
+              }
+            />
           </div>
         </section>
 
@@ -658,45 +360,7 @@ export default function App() {
               title="Tecnologia com contexto."
               intro="Ferramentas que já utilizei em projetos, organizadas pelo papel que cumprem — não como uma coleção de logotipos."
             />
-            <div className="stack-table reveal-item">
-              {stack.map(([number, title, note, items]) => (
-                <div className="stack-row" key={title}>
-                  <span className="stack-number">{number}</span>
-                  <div className="stack-title">
-                    <h3>{title}</h3>
-                    <p>{note}</p>
-                  </div>
-                  <div
-                    className="stack-items"
-                    aria-label={`Tecnologias de ${title}`}
-                  >
-                    {items.map((item) => (
-                      <button
-                        key={item}
-                        type="button"
-                        data-selected={selectedTech === item}
-                        aria-pressed={selectedTech === item}
-                        onMouseEnter={() => setSelectedTech(item)}
-                        onFocus={() => setSelectedTech(item)}
-                        onClick={() => setSelectedTech(item)}
-                      >
-                        {item}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="tech-context reveal-item" aria-live="polite">
-              <span>Tecnologia selecionada</span>
-              <strong>{selectedTech}</strong>
-              <p>{activeTechGroup?.[2]}</p>
-              <small>
-                {selectedTechProjects.length
-                  ? `Utilizada em: ${selectedTechProjects.join(", ")}.`
-                  : "Tecnologia utilizada nos projetos e estudos documentados do portfólio."}
-              </small>
-            </div>
+            <StackExplorer />
             <div className="principles reveal-item">
               <span>Princípios de trabalho</span>
               <p>Interfaces claras</p>
@@ -718,7 +382,7 @@ export default function App() {
               intro="Uma trajetória guiada pela curiosidade, pela prática e pelo aumento progressivo da complexidade."
             />
             <div className="timeline">
-              {timeline.map(([year, title, text], index) => (
+              {timeline.map(([year, title, text, related], index) => (
                 <article className="timeline-item reveal-item" key={year}>
                   <div className="timeline-marker">
                     <span>{String(index + 1).padStart(2, "0")}</span>
@@ -727,6 +391,20 @@ export default function App() {
                     <span>{year}</span>
                     <h3>{title}</h3>
                     <p>{text}</p>
+                    {related && (
+                      <p className="timeline-links">
+                        Ver no portfólio:{" "}
+                        {related.map((slug, i) => (
+                          <span key={slug}>
+                            {i > 0 && ", "}
+                            <a href={`#${projectAnchor(slug)}`}>
+                              {featuredProjects.find((p) => p.slug === slug)
+                                ?.title ?? slug}
+                            </a>
+                          </span>
+                        ))}
+                      </p>
+                    )}
                   </div>
                 </article>
               ))}
@@ -768,7 +446,7 @@ export default function App() {
               </p>
               <a
                 className="button button-primary contact-button"
-                href="mailto:muryllodouglash.soares@gmail.com"
+                href={`mailto:${email}`}
               >
                 <Mail size={18} />
                 Entrar em contato <ArrowUpRight size={18} />
@@ -791,14 +469,17 @@ export default function App() {
                 </span>
                 <ArrowUpRight />
               </ExternalLink>
-              <a href="mailto:muryllodouglash.soares@gmail.com">
-                <span>
-                  <Mail />
-                  <small>Contato direto</small>
-                  <strong>E-mail</strong>
-                </span>
-                <ArrowUpRight />
-              </a>
+              <div className="contact-email">
+                <a href={`mailto:${email}`}>
+                  <span>
+                    <Mail />
+                    <small>Contato direto</small>
+                    <strong>{email}</strong>
+                  </span>
+                  <ArrowUpRight />
+                </a>
+                <CopyEmailButton email={email} />
+              </div>
             </div>
           </div>
         </section>
@@ -806,7 +487,7 @@ export default function App() {
 
       <footer className="footer">
         <div className="container">
-          <a href="#" className="brand">
+          <a href="#inicio" className="brand">
             <span className="brand-mark">M</span>
             <span>muryllo.dev</span>
           </a>
@@ -827,6 +508,7 @@ export default function App() {
           })
         }
         aria-label="Voltar ao início"
+        aria-hidden={!showBackToTop}
         tabIndex={showBackToTop ? 0 : -1}
       >
         <ArrowUp />

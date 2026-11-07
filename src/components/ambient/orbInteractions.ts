@@ -20,7 +20,7 @@ const TARGETS: Array<{ kind: Kind; selector: string }> = [
   { kind: "card", selector: "main .project-visual, main .tech-context, main .principles, main .robotics-note" },
   { kind: "button", selector: "main section:not(.hero) .button" },
   { kind: "tag", selector: "main .stack-items button, main .about-tags span, main .tech-list li" },
-  { kind: "line", selector: "main .section-heading, main .stack-row, main .mini-project, main .contact-links > a" },
+  { kind: "line", selector: "main .section-heading, main .stack-row, main .mini-project, main .contact-links > a, main .contact-email" },
   { kind: "marker", selector: "main .timeline-marker span" },
 ]
 
