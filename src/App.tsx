@@ -9,7 +9,6 @@ import {
   Menu,
   X,
 } from "lucide-react"
-import { AmbientFinalForm, AmbientOrbs } from "./components/ambient/AmbientOrbs"
 import { CopyEmailButton } from "./components/CopyEmailButton"
 import { ExternalLink } from "./components/ExternalLink"
 import { Hero } from "./components/Hero"
@@ -18,7 +17,7 @@ import {
   ProjectLightbox,
   type LightboxImage,
 } from "./components/ProjectLightbox"
-import { ProjectsExplorer } from "./components/projects/ProjectsExplorer"
+import { ProjectsGallery } from "./components/projects/ProjectsGallery"
 import {
   featuredProjects,
   github,
@@ -116,7 +115,7 @@ export default function App() {
   const menuButtonRef = useRef<HTMLButtonElement>(null)
   const mobileNavRef = useRef<HTMLElement>(null)
   const { activeSection, showBackToTop } = usePageExperience(sectionIds)
-  const effects = useEffectsPreference()
+  useEffectsPreference()
 
   useEffect(() => {
     const reducedMotion = window.matchMedia(
@@ -186,7 +185,6 @@ export default function App() {
       <div className="reading-progress" aria-hidden="true">
         <span />
       </div>
-      <AmbientOrbs sectionIds={sectionIds} reduced={effects.reduced} />
       <a href="#conteudo" className="skip-link">
         Pular para o conteúdo
       </a>
@@ -322,12 +320,12 @@ export default function App() {
               title="Soluções, não apenas telas."
               intro="Projetos principais selecionados pela profundidade técnica, pelo problema resolvido e pelas decisões de engenharia."
             />
-            <ProjectsExplorer
-              onOpenShots={(title, images, index) =>
-                setLightbox({ title, images, index })
-              }
-            />
           </div>
+          <ProjectsGallery
+            onOpenShots={(title, images, index) =>
+              setLightbox({ title, images, index })
+            }
+          />
         </section>
 
         <section id="engenharia" className="section engineering">
@@ -407,7 +405,6 @@ export default function App() {
 
         <section id="contato" className="contact">
           <div className="contact-grid" />
-          <AmbientFinalForm />
           <div className="container contact-inner">
             <div className="contact-copy reveal-item">
               <span className="section-label">05 / Contato</span>
