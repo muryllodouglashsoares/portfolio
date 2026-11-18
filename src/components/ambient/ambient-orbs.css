@@ -5,18 +5,18 @@
    ─────────────────────────────────────────────────────────────────────────── */
 
 /* Paleta de cada esfera (usada nas letras, na camada flutuante e no final). */
-[data-orb-tone="purple"] {
-  --o-solid: #8b5cf6; --o-overlap: #bda4ff;
-  /* Superfície: luz → meio-tom → sombra, mais um reflexo frio de retorno. */
-  --o-hi: #d6c8ff; --o-mid: #9266f4; --o-lo: #5a30c2; --o-edge: #2b1470;
-  --o-shade: 20 8 64; --o-bounce: 104 168 255;
+[data-orb-tone="red"] {
+  --o-solid: #e53935; --o-overlap: #ff8a85;
+  /* Superfície: luz → meio-tom → sombra, mais um reflexo quente de retorno. */
+  --o-hi: #ff9d97; --o-mid: #e53935; --o-lo: #a31616; --o-edge: #3d0709;
+  --o-shade: 44 4 6; --o-bounce: 255 120 110;
   /* Variação individual do movimento em repouso (ver seção 2b). */
   --i-orbit: 11s; --i-breathe: 7.3s; --i-sheen: 9.5s; --i-dx: 15px; --i-dy: 11px; --i-tilt: 22deg;
 }
 [data-orb-tone="white"] {
-  --o-solid: #f4f2f8; --o-overlap: #bda4ff;
-  --o-hi: #ffffff; --o-mid: #e6e0f3; --o-lo: #b5add2; --o-edge: #70689a;
-  --o-shade: 52 40 110; --o-bounce: 170 150 255;
+  --o-solid: #f5f5f5; --o-overlap: #ff8a85;
+  --o-hi: #ffffff; --o-mid: #ececec; --o-lo: #b0b0b0; --o-edge: #5a5a5a;
+  --o-shade: 40 40 40; --o-bounce: 210 210 210;
   --i-orbit: 13.5s; --i-breathe: 8.9s; --i-sheen: 12s; --i-dx: 12px; --i-dy: 16px; --i-tilt: -18deg;
 }
 /* Preenchimento esférico compartilhado (esferas flutuantes e discos finais):
@@ -289,33 +289,33 @@
 [data-orb-kind="card"]::after {
   inset: 0;
   border-radius: inherit;
-  background: radial-gradient(circle 280px at var(--lx, 50%) var(--ly, 50%), rgb(var(--tone, 189 164 255) / 0.17), transparent 70%);
-  box-shadow: inset 0 0 0 1px rgb(var(--tone, 189 164 255) / 0.26);
+  background: radial-gradient(circle 280px at var(--lx, 50%) var(--ly, 50%), rgb(var(--tone, 229 57 53) / 0.17), transparent 70%);
+  box-shadow: inset 0 0 0 1px rgb(var(--tone, 229 57 53) / 0.26);
 }
 [data-orb-kind="tag"]::after {
   inset: -1px;
   border-radius: inherit;
-  box-shadow: inset 0 0 0 1px rgb(var(--tone, 189 164 255) / 0.5), 0 0 14px rgb(var(--tone, 189 164 255) / 0.24);
+  box-shadow: inset 0 0 0 1px rgb(var(--tone, 229 57 53) / 0.5), 0 0 14px rgb(var(--tone, 229 57 53) / 0.24);
 }
 [data-orb-kind="button"]::after {
   inset: -1px;
   border-radius: inherit;
-  box-shadow: inset 0 0 0 1px rgb(var(--tone, 189 164 255) / 0.5), 0 0 24px rgb(var(--tone, 189 164 255) / 0.3);
+  box-shadow: inset 0 0 0 1px rgb(var(--tone, 229 57 53) / 0.5), 0 0 24px rgb(var(--tone, 229 57 53) / 0.3);
 }
 [data-orb-kind="line"]::after {
   left: 0;
   right: 0;
   bottom: -1px;
   height: 1px;
-  background: radial-gradient(ellipse 260px 1px at var(--lx, 50%) 50%, rgb(var(--tone, 189 164 255) / 0.9), transparent);
+  background: radial-gradient(ellipse 260px 1px at var(--lx, 50%) 50%, rgb(var(--tone, 229 57 53) / 0.9), transparent);
 }
 [data-orb-kind="marker"]::after {
   inset: -2px;
   border-radius: 50%;
-  box-shadow: inset 0 0 0 1px rgb(var(--tone, 189 164 255) / 0.5), 0 0 22px rgb(var(--tone, 189 164 255) / 0.5);
+  box-shadow: inset 0 0 0 1px rgb(var(--tone, 229 57 53) / 0.5), 0 0 22px rgb(var(--tone, 229 57 53) / 0.5);
 }
 [data-orb-kind="title"] {
-  text-shadow: 0 0 calc(var(--lit, 0) * 24px) rgb(var(--tone, 189 164 255) / calc(var(--lit, 0) * 0.2));
+  text-shadow: 0 0 calc(var(--lit, 0) * 24px) rgb(var(--tone, 229 57 53) / calc(var(--lit, 0) * 0.2));
 }
 
 /* ── Responsivo ──────────────────────────────────────────────────────────── */

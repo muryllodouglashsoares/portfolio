@@ -39,7 +39,7 @@ export function AmbientOrbs({
       data-motion="scrolling"
       aria-hidden="true"
     >
-      {(["purple", "white"] as const).map((tone) => (
+      {(["red", "white"] as const).map((tone) => (
         <div className="orb" data-orb={tone} data-orb-tone={tone} key={tone}>
           <span className="orb-drift">
             <span className="orb-body" />
@@ -56,9 +56,9 @@ export function AmbientOrbs({
  * "desenhar" seja só animar o stroke-dashoffset conforme a rolagem.
  */
 const UNITS = [
-  { tone: "purple", side: -1, k: -1.5, arc: -64, icon: "cursor" },
+  { tone: "red", side: -1, k: -1.5, arc: -64, icon: "cursor" },
   { tone: "white", side: 1, k: -0.5, arc: -48, icon: "chip" },
-  { tone: "purple", side: -1, k: 0.5, arc: 70, icon: "code" },
+  { tone: "red", side: -1, k: 0.5, arc: 70, icon: "code" },
   { tone: "white", side: 1, k: 1.5, arc: 52, icon: "nodes" },
 ] as const
 
@@ -109,7 +109,7 @@ export function AmbientFinalForm() {
   return (
     <div className="ambient-final" data-orb-final aria-hidden="true">
       <div className="af-stage">
-        <span className="af-marker" data-orb-final-sphere="purple" style={{ "--side": -1 } as React.CSSProperties} />
+        <span className="af-marker" data-orb-final-sphere="red" style={{ "--side": -1 } as React.CSSProperties} />
         <span className="af-marker" data-orb-final-sphere="white" style={{ "--side": 1 } as React.CSSProperties} />
         {UNITS.map((u) => (
           <span

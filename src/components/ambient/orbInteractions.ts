@@ -69,7 +69,7 @@ const smoothstep = (a: number, b: number, v: number) => {
 export function createInteractions() {
   let targets: Target[] = []
   let zones: Zone[] = []
-  const cover: Record<OrbId, number> = { purple: 0, white: 0 }
+  const cover: Record<OrbId, number> = { red: 0, white: 0 }
   const needsLocal = new Set<Kind>(["card", "line"])
 
   const reset = (t: Target) => {
@@ -176,7 +176,7 @@ export function createInteractions() {
     for (const t of targets) {
       const top = t.top - scrollY
       let goal = 0
-      let tone: OrbId = "purple"
+      let tone: OrbId = "red"
       let lx = 0
       let ly = 0
 

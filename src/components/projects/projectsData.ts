@@ -41,7 +41,7 @@ export type FeaturedProject = {
   image?: string
   repo: string
   demo?: string
-  accent: "violet" | "cyan" | "orange" | "blue"
+  accent: "red" | "white"
   categories: CategoryId[]
   problem: string
   features: string[]
@@ -64,7 +64,7 @@ export const featuredProjects: FeaturedProject[] = [
       "https://raw.githubusercontent.com/muryllodouglashsoares/law-contract-management/main/docs/screenshots/dashboard.webp",
     repo: `${github}/law-contract-management`,
     demo: "https://law-contract-management.pages.dev/",
-    accent: "violet",
+    accent: "red",
     categories: ["web"],
     problem:
       "Pequenos escritórios de advocacia acompanham contratos, cobranças e documentos espalhados entre e-mail, WhatsApp, planilhas e pastas físicas, sem rastreabilidade.",
@@ -91,7 +91,7 @@ export const featuredProjects: FeaturedProject[] = [
     image:
       "https://raw.githubusercontent.com/muryllodouglashsoares/evidence-finder/main/docs/screenshots/Dashboard.png",
     repo: `${github}/evidence-finder`,
-    accent: "cyan",
+    accent: "white",
     categories: ["desktop"],
     problem:
       "Encontrar uma informação específica em muitas capturas de tela, PDFs e conversas exige abrir arquivo por arquivo, e é difícil provar de onde veio cada trecho.",
@@ -117,7 +117,7 @@ export const featuredProjects: FeaturedProject[] = [
     tech: ["Tauri", "Rust", "React", "TypeScript", "Git CLI"],
     status: "Em desenvolvimento",
     repo: `${github}/gitflow`,
-    accent: "orange",
+    accent: "white",
     categories: ["desktop"],
     problem:
       "Operações do Git pelo terminal exigem comandos precisos, e um descuido pode incluir arquivos indesejados em um commit ou enviar alterações para o destino errado.",
@@ -146,7 +146,7 @@ export const featuredProjects: FeaturedProject[] = [
       "https://raw.githubusercontent.com/muryllodouglashsoares/Tekidu/main/docs/screenshots/landing-page.png",
     repo: `${github}/Tekidu`,
     demo: "https://tekidu.pages.dev/",
-    accent: "blue",
+    accent: "white",
     categories: ["web", "academico"],
     problem:
       "Informações acadêmicas ficam espalhadas entre planilhas e sistemas separados, sem um lugar único onde estudante, professor e administração enxerguem os mesmos dados.",

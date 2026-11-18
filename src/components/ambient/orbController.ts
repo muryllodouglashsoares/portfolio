@@ -378,7 +378,7 @@ export function createOrbController({
 
     for (const orb of orbs) {
       const id = orb.id
-      const sign = id === "purple" ? 1 : -1
+      const sign = id === "red" ? 1 : -1
       const wordGeo = g.words[id]
 
       // 1) Alvo livre: âncora da seção + deriva orgânica + arrasto de rolagem.
@@ -618,7 +618,7 @@ export function createOrbController({
   function renderStatic() {
     if (!geo) measure()
     const g = geo!
-    const fractions: Record<OrbId, number> = { purple: 0.58, white: 0.36 }
+    const fractions: Record<OrbId, number> = { red: 0.58, white: 0.36 }
     for (const id of ORB_IDS) {
       const wg = g.words[id]
       if (!wg) continue
