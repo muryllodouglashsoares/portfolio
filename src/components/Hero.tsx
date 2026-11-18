@@ -1,144 +1,91 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react"
-import { ArrowDown, ArrowDownRight, Compass } from "lucide-react"
-
-const FIRST_WORD = "MURYLLO"
-const SECOND_WORD = "DOUGLAS"
+import { useEffect, useRef, useState } from "react"
+import { preload } from "react-dom"
+import portrait from "../assets/muryllo-hero-editorial.webp"
+import portraitSmall from "../assets/muryllo-hero-editorial-820.webp"
+import antonUrl from "../assets/fonts/anton-subset.woff"
 
 /**
- * Deslocamento de DOUGLAS em relação a MURYLLO.
- *
- * - `anchor`: índice da letra de MURYLLO sob a qual DOUGLAS começa
- *   (0 = M … 6 = O final).
- * - `scale`: tamanho de DOUGLAS em relação a MURYLLO (1 = mesmo corpo).
- *
- * O corpo da fonte é calculado para que a composição inteira (a maior entre
- * a largura de MURYLLO e `deslocamento + largura de DOUGLAS`) ocupe
- * exatamente a largura disponível — sem cortes e sem rolagem horizontal,
- * seja qual for a fonte que estiver carregada.
+ * Cada letra é posicionada nas coordenadas da arte de referência (grade de
+ * 1672×941): `x` é a origem do glifo em u e `sx` o ajuste horizontal fino para
+ * casar a largura de cada letra com o desenho original. Assim os contornos do
+ * retrato (que cruzam o rosto) e as letras atrás da cabeça ficam alinhados.
  */
-type Stagger = { anchor: number; scale: number }
-
-const STAGGER_DESKTOP: Stagger = { anchor: 6, scale: 1 } // começa sob o "O"
-const STAGGER_TABLET: Stagger = { anchor: 5, scale: 1 } // começa sob o 2º "L"
-const STAGGER_PHONE: Stagger = { anchor: 3, scale: 1 } // começa sob o "Y"
-
-function pickStagger(): Stagger {
-  if (window.matchMedia("(max-width: 600px)").matches) return STAGGER_PHONE
-  if (window.matchMedia("(max-width: 899px)").matches) return STAGGER_TABLET
-  return STAGGER_DESKTOP
-}
+const LETTERS = [
+  { char: "M", x: 108.1, sx: 0.994 },
+  { char: "U", x: 411.3, sx: 1 },
+  { char: "R", x: 597.2, sx: 0.989 },
+  { char: "Y", x: 881.8, sx: 1.057 },
+  { char: "L", x: 1064.3, sx: 0.986 },
+  { char: "L", x: 1224.3, sx: 0.986 },
+  { char: "O", x: 1374.5, sx: 0.958 },
+] as const
+const PORTRAIT_SRCSET = `${portraitSmall} 820w, ${portrait} 1230w`
+const PORTRAIT_SIZES = "(max-width: 700px) 84vw, 74vw"
 
 const letterStyle = (index: number) =>
-  ({ "--n": index }) as React.CSSProperties
+  ({
+    "--n": index,
+    "--x": LETTERS[index].x,
+    "--sx": LETTERS[index].sx,
+  }) as React.CSSProperties
 
 const delay = (ms: number) => ({ "--d": ms }) as React.CSSProperties
 
-/** Mede a composição e grava `--name-size` / `--name-offset` no <h1>. */
-function useFittedName(onReady: () => void) {
-  const rootRef = useRef<HTMLHeadingElement>(null)
-  const firstRef = useRef<HTMLSpanElement>(null)
-  const secondRef = useRef<HTMLSpanElement>(null)
-  const onReadyRef = useRef(onReady)
-  onReadyRef.current = onReady
-
-  useLayoutEffect(() => {
-    const root = rootRef.current
-    const first = firstRef.current
-    const second = secondRef.current
-    if (!root || !first || !second) return
-
-    let lastWidth = -1
-    let disposed = false
-
-    const fit = () => {
-      const available = root.clientWidth
-      if (!available) return
-      lastWidth = available
-
-      const { anchor, scale } = pickStagger()
-      // Medição numa escala de referência (100px): as proporções não mudam.
-      root.style.setProperty("--name-size", "100px")
-      root.style.setProperty("--name-scale", String(scale))
-      root.style.setProperty("--name-offset", "0px")
-
-      const firstWidth = first.getBoundingClientRect().width
-      const secondWidth = second.getBoundingClientRect().width
-      const anchorLetter = first.children[anchor] as HTMLElement | undefined
-      const offset = anchorLetter?.offsetLeft ?? 0
-
-      const total = Math.max(firstWidth, offset + secondWidth)
-      if (!total) return
-      const size = (available / total) * 100
-
-      root.style.setProperty("--name-size", `${size.toFixed(2)}px`)
-      root.style.setProperty(
-        "--name-offset",
-        `${((offset * size) / 100).toFixed(2)}px`,
-      )
-    }
-
-    fit()
-
-    const observer = new ResizeObserver(() => {
-      // Só refaz o ajuste quando a largura muda (a altura muda junto com o corpo).
-      if (root.clientWidth !== lastWidth) fit()
-    })
-    observer.observe(root)
-
-    // A animação só começa com a fonte de exibição já carregada, para que o
-    // nome não "salte" de tamanho no meio da entrada.
-    const fonts = document.fonts
-    const fontLoaded: Promise<unknown> = fonts?.load
-      ? fonts.load("700 1em \"Clash Display\"").catch(() => undefined)
-      : Promise.resolve()
-    const timeout = new Promise((resolve) => window.setTimeout(resolve, 1600))
-    void Promise.race([fontLoaded, timeout]).then(() => {
-      if (disposed) return
-      fit()
-      onReadyRef.current()
-    })
-
-    const refit = () => fit()
-    fonts?.addEventListener?.("loadingdone", refit)
-
-    return () => {
-      disposed = true
-      observer.disconnect()
-      fonts?.removeEventListener?.("loadingdone", refit)
-    }
-  }, [])
-
-  return { rootRef, firstRef, secondRef }
-}
-
-function Letters({ text }: { text: string }) {
+/**
+ * Uma camada da palavra. As duas camadas (branca e vermelha) têm exatamente a
+ * mesma geometria e a mesma animação; a vermelha é apenas recortada com
+ * `clip-path` a partir do centro do rosto. Assim a cor muda "dentro" das
+ * letras, sem duas palavras e sem corte entre letras.
+ */
+function WordLayer({ tone }: { tone: "white" | "red" }) {
   return (
-    <>
-      {Array.from(text).map((letter, index) => (
-        <span
-          className="name-letter"
-          style={letterStyle(index)}
-          data-char={letter}
-          key={index}
-        >
-          {letter}
-        </span>
-      ))}
-    </>
+    <div className={`hero-word hero-word-${tone}`} aria-hidden="true">
+      <div className="hero-word-text">
+        {LETTERS.map(({ char }, index) => (
+          <span className="hero-glyph" style={letterStyle(index)} key={index}>
+            <span className="hero-letter">{char}</span>
+          </span>
+        ))}
+      </div>
+    </div>
   )
 }
 
 export function Hero() {
-  const [ready, setReady] = useState(false)
-  const { rootRef, firstRef, secondRef } = useFittedName(() => setReady(true))
+  const [fontReady, setFontReady] = useState(false)
+  const [imageReady, setImageReady] = useState(false)
+  const [timedOut, setTimedOut] = useState(false)
+  const imageRef = useRef<HTMLImageElement>(null)
 
-  // Sem JS para observar a fonte (ex.: navegador muito antigo) o conteúdo
-  // continua acessível: o hook sempre dispara `onReady` pelo timeout.
+  // O retrato é o elemento principal: carrega com prioridade máxima. A fonte
+  // também é pré-carregada, porque a palavra só entra com ela disponível.
+  preload(portrait, {
+    as: "image",
+    fetchPriority: "high",
+    imageSrcSet: PORTRAIT_SRCSET,
+    imageSizes: PORTRAIT_SIZES,
+  })
+  preload(antonUrl, { as: "font", type: "font/woff", crossOrigin: "anonymous" })
+
   useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      setReady(true)
+    if (imageRef.current?.complete) setImageReady(true)
+
+    // Sem JS para observar fonte/imagem, o conteúdo continua acessível: o
+    // timeout garante que a animação (ou o estado final) sempre aconteça.
+    const timeout = window.setTimeout(() => setTimedOut(true), 2200)
+    const fonts = document.fonts
+    if (fonts?.load) {
+      fonts
+        .load('400 100px "Hero Anton"', "MURYLLO")
+        .then(() => setFontReady(true))
+        .catch(() => setFontReady(true))
+    } else {
+      setFontReady(true)
     }
+    return () => window.clearTimeout(timeout)
   }, [])
+
+  const ready = (fontReady && imageReady) || timedOut
 
   return (
     <section
@@ -147,81 +94,50 @@ export function Hero() {
       aria-labelledby="hero-title"
       data-ready={ready}
     >
-      <div className="hero-grid" />
-      <div className="hero-glow" />
-      <div className="hero-glow hero-glow-alt" />
-
-      <div className="hero-inner">
-        <div className="hero-name-wrap">
-          <h1
-            id="hero-title"
-            className="hero-name"
-            ref={rootRef}
-            aria-label="Muryllo Douglas"
-          >
-            <span className="name-line">
-              <span
-                className="name-word name-word-first"
-                ref={firstRef}
-                data-orb-word="purple"
-                data-orb-tone="purple"
-                aria-hidden="true"
-              >
-                <Letters text={FIRST_WORD} />
-              </span>
-            </span>
-            <span className="name-line">
-              <span
-                className="name-word name-word-second"
-                ref={secondRef}
-                data-orb-word="white"
-                data-orb-tone="white"
-                aria-hidden="true"
-              >
-                <Letters text={SECOND_WORD} />
-              </span>
-            </span>
-          </h1>
-        </div>
-
-        <div className="hero-info">
-          <div className="hero-info-head">
-            <p className="hero-kicker hero-rise" style={delay(760)}>
-              Estudante — Desenvolvedor de software
-            </p>
-            <div className="availability hero-rise" style={delay(960)}>
-              <span />
-              Disponível para estágio e oportunidades iniciais
-            </div>
-          </div>
-
-          <div className="hero-info-body">
-            <p className="hero-description hero-rise" style={delay(860)}>
-              Sou estudante do Técnico em Informática no IFPB. Construo
-              aplicações web, soluções backend e ferramentas desktop, explorando
-              diferentes tecnologias para resolver problemas reais.
-            </p>
-            <div className="hero-actions hero-rise" style={delay(1060)}>
-              <a className="button button-primary" href="#projetos">
-                Explorar projetos <ArrowDownRight size={18} />
-              </a>
-              <a className="button button-secondary" href="#trajetoria">
-                <Compass size={18} aria-hidden="true" />
-                Conhecer minha trajetória
-              </a>
-            </div>
-          </div>
-        </div>
+      <div className="hero-stage hero-inner">
+        <h1 id="hero-title" className="sr-only">
+          Muryllo — Estudante de Informática e desenvolvedor em formação
+        </h1>
+        <WordLayer tone="white" />
+        <WordLayer tone="red" />
+        <img
+          ref={imageRef}
+          className="hero-portrait"
+          src={portrait}
+          srcSet={PORTRAIT_SRCSET}
+          sizes={PORTRAIT_SIZES}
+          width={1230}
+          height={941}
+          alt="Retrato de Muryllo: jovem de óculos sem armação e camiseta preta, olhando para a câmera, em estúdio escuro com luz vermelha lateral."
+          fetchPriority="high"
+          decoding="async"
+          onLoad={() => setImageReady(true)}
+        />
       </div>
 
-      <div className="hero-meta hero-rise" style={delay(1200)}>
-        <span className="hero-meta-place">PB · Brasil</span>
-        <span className="hero-meta-line" />
-        <a className="hero-scroll" href="#sobre">
-          Explore meu trabalho
-          <ArrowDown size={13} aria-hidden="true" />
-        </a>
+      <p className="hero-corner hero-tl hero-rise" style={delay(900)}>
+        Desenvolvedor em formação
+      </p>
+      <a
+        className="hero-corner hero-tr hero-arrow hero-rise"
+        style={delay(1000)}
+        href="#projetos"
+        aria-label="Explorar projetos"
+      >
+        <svg viewBox="0 0 116 16" aria-hidden="true" focusable="false">
+          <path d="M0 8h114.5M106.5 1l8 7-8 7" />
+        </svg>
+      </a>
+      <div className="hero-corner hero-bl hero-rise" style={delay(1100)}>
+        <p>Estudante de Informática</p>
+        <p className="hero-status">
+          <span aria-hidden="true" />
+          Disponível para estágio
+        </p>
       </div>
+      <p className="hero-corner hero-br hero-rise" style={delay(1200)}>
+        Brasil · Paraíba
+      </p>
     </section>
   )
 }
