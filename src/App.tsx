@@ -7,7 +7,6 @@ import {
   GitBranch,
   Mail,
   Menu,
-  Sparkles,
   X,
 } from "lucide-react"
 import { AmbientFinalForm, AmbientOrbs } from "./components/ambient/AmbientOrbs"
@@ -215,28 +214,6 @@ export default function App() {
             <GitBranch size={18} />
             <span className="sr-only">GitHub</span>
           </ExternalLink>
-          <button
-            type="button"
-            className="icon-link effects-toggle"
-            aria-pressed={effects.reduced}
-            aria-disabled={effects.locked}
-            title={
-              effects.locked
-                ? "Experiência simplificada ativada pela preferência de movimento reduzido do sistema"
-                : effects.reduced
-                  ? "Experiência simplificada ativada. Clique para voltar aos efeitos visuais"
-                  : "Reduzir efeitos visuais (esferas e animações)"
-            }
-            onClick={() => !effects.locked && effects.toggle()}
-          >
-            <Sparkles size={18} aria-hidden="true" />
-            <span className="sr-only">
-              Experiência simplificada
-              {effects.locked
-                ? " (ativada pela preferência de movimento reduzido do sistema)"
-                : ""}
-            </span>
-          </button>
           <a href={`mailto:${email}`} className="nav-cta">
             Vamos conversar <ArrowUpRight size={16} />
           </a>

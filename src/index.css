@@ -46,7 +46,10 @@
 .brand { display: inline-flex; align-items: center; gap: 10px; color: var(--text); font-size: 14px; font-weight: 700; text-decoration: none; letter-spacing: -.02em; }
 .brand-mark { display: grid; place-items: center; width: 30px; height: 30px; border: 1px solid rgba(139,92,246,.35); border-radius: 8px; background: rgba(139,92,246,.12); color: var(--purple-soft); font-family: var(--mono); font-size: 13px; }
 .desktop-nav { position: absolute; left: 50%; display: flex; gap: 30px; transform: translateX(-50%); }
-.desktop-nav a { position: relative; color: var(--muted); font-size: 13px; font-weight: 600; text-decoration: none; transition: color 180ms; }
+.desktop-nav a { position: relative; isolation: isolate; color: var(--muted); font-size: 13px; font-weight: 600; text-decoration: none; transition: color 180ms; }
+/* Sombreado de hover/foco: um halo suave (blur) que cresce ao redor do item, sem borda e sem mexer no layout (absoluto, pointer-events none). */
+.desktop-nav a::before { content: ""; position: absolute; z-index: -1; inset: -8px -14px; border-radius: 12px; pointer-events: none; background: radial-gradient(ellipse 90% 130% at 50% 0%, rgba(189,164,255,.2), rgba(189,164,255,.06) 55%, transparent 85%), rgba(255,255,255,.035); filter: blur(4px); opacity: 0; transform: scale(.86); transition: opacity 280ms ease, transform 420ms cubic-bezier(.16,1,.3,1); }
+.desktop-nav a:hover::before, .desktop-nav a:focus-visible::before { opacity: 1; transform: none; }
 .desktop-nav a::after { content: ""; position: absolute; left: 0; right: 100%; bottom: -10px; height: 1px; background: var(--purple-soft); transition: right 240ms cubic-bezier(.16,1,.3,1); }
 .desktop-nav a:hover { color: var(--text); }
 .desktop-nav a[data-active="true"] { color: var(--text); }
@@ -64,10 +67,12 @@
 .hero-inner { flex: 1; display: flex; flex-direction: column; }
 .hero-name-wrap { flex: 1; display: flex; align-items: center; padding-block: clamp(40px, 7vh, 96px); }
 .hero-name { --name-size: clamp(36px, 9.6vw, 180px); --name-scale: 1; --name-offset: 0px; width: 100%; margin: 0; font: 700 var(--name-size)/.84 var(--display); letter-spacing: -.03em; text-transform: uppercase; }
-.name-line { display: block; overflow: hidden; padding-block: .07em; margin-block: -.07em; }
+/* Padding lateral: o contorno preto das letras (.name-letter) passa um pouco da caixa do texto e não pode ser cortado pelo overflow. */
+.name-line { display: block; overflow: hidden; padding: .07em .08em; margin: -.07em -.08em; }
 .name-word { position: relative; display: flex; width: max-content; margin-left: -.04em; white-space: nowrap; color: var(--text); }
 .name-word-second { --base: 300ms; font-size: calc(var(--name-size) * var(--name-scale)); margin-left: calc(var(--name-offset) - .04em); color: var(--purple-soft); }
-.name-letter { display: inline-block; opacity: 0; transform: translateY(118%); }
+/* Contorno preto que acompanha a silhueta das letras. paint-order põe o traço ATRÁS do preenchimento: só a metade externa aparece, então a espessura das letras e a legibilidade não mudam. O pseudo-elemento da esfera (ambient-orbs.css) herda o mesmo traço. */
+.name-letter { display: inline-block; opacity: 0; transform: translateY(118%); -webkit-text-stroke: .045em #000; paint-order: stroke fill; }
 .hero[data-ready="true"] .name-letter { animation: name-in 900ms cubic-bezier(.16,1,.3,1) both; animation-delay: calc(var(--base, 0ms) + var(--n) * 48ms); }
 .hero-info { padding-top: 22px; border-top: 1px solid var(--line-strong); }
 .hero-info-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px 24px; }
@@ -190,8 +195,11 @@ a.project-image-button { text-decoration: none; }
 .complementary-heading h3 { margin: 12px 0 0; font-size: 28px; letter-spacing: -.04em; }
 .complementary-heading > p { max-width: 380px; margin: 0; color: var(--dim); font-size: 13px; }
 .complementary-list { border-top: 1px solid var(--line); }
-.mini-project { display: grid; grid-template-columns: 60px 1fr 1fr 24px; align-items: center; gap: 15px; padding-block: 23px; border-bottom: 1px solid var(--line); color: var(--text); text-decoration: none; transition: 180ms; }
-.mini-project:hover { padding-inline: 12px; background: rgba(255,255,255,.018); }
+.mini-project { position: relative; display: grid; grid-template-columns: 60px 1fr 1fr 24px; align-items: center; gap: 15px; padding-block: 23px; border-bottom: 1px solid var(--line); color: var(--text); text-decoration: none; }
+/* Retângulo desenhado em tempo real: um único traço (pathLength=1) que parte do canto superior esquerdo, corre pela borda de cima, desce pela direita, volta pela base e sobe pela esquerda. Só stroke-dashoffset/opacity mudam — nada de layout. O SVG é absoluto e sai 12px para os lados (a lista não se move). Ao sair, o traço esmaece e só depois "rebobina" (dashoffset volta a 1 sem transição visível). */
+.mini-outline { position: absolute; top: 0; left: -12px; width: calc(100% + 24px); height: 100%; overflow: visible; pointer-events: none; }
+.mini-outline rect { width: calc(100% - 1px); height: calc(100% - 1px); fill: none; stroke: rgba(189,164,255,.55); stroke-width: 1; stroke-dasharray: 1 1; stroke-dashoffset: 1; opacity: 0; transition: opacity 380ms ease, stroke-dashoffset 0s linear 380ms; }
+.mini-project:hover .mini-outline rect, .mini-project:focus-visible .mini-outline rect { stroke-dashoffset: 0; opacity: 1; transition: stroke-dashoffset 900ms cubic-bezier(.65,0,.35,1), opacity 140ms ease; }
 .mini-index { color: var(--dim); font: 11px var(--mono); }
 .mini-project > span:nth-child(2) { display: flex; align-items: baseline; gap: 12px; }
 .mini-project strong { font-size: 14px; }
@@ -412,8 +420,6 @@ a.project-image-button { text-decoration: none; }
 .copy-button[data-status="error"] { border-color: rgba(255,140,140,.55); background: rgba(255,120,120,.08); color: #ff9c9c; }
 
 /* Botão "experiência simplificada" */
-.effects-toggle[aria-pressed="true"] { border-color: rgba(139,92,246,.55); background: rgba(139,92,246,.12); color: var(--purple-soft); }
-.effects-toggle[aria-disabled="true"] { cursor: not-allowed; }
 
 /* Hero fora de vista: pausa o que anima sem parar (ver usePageExperience) */
 html[data-hero="away"] .hero-glow, html[data-hero="away"] .hero-scroll svg { animation-play-state: paused; }
@@ -429,8 +435,8 @@ html[data-hero="away"] .hero-glow, html[data-hero="away"] .hero-scroll svg { ani
   .contact-email { gap: 8px; }
 }
 
-/* Experiência simplificada (botão da navbar): mesmas regras do movimento
-   reduzido do sistema, acionadas por data-effects no <html>. */
+/* Movimento reduzido (preferência do sistema, via useEffectsPreference):
+   acionado por data-effects no <html>. */
 html[data-effects="reduced"] { scroll-behavior: auto; }
 html[data-effects="reduced"] *, html[data-effects="reduced"] *::before, html[data-effects="reduced"] *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .001ms !important; }
 html[data-effects="reduced"] .reveal-item { opacity: 1; transform: none; }

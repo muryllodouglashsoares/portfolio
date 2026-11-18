@@ -359,6 +359,10 @@ export function ProjectsExplorer({
               </span>
               <span className="mini-stack">{project.stack}</span>
               <ArrowUpRight aria-hidden="true" />
+              {/* Contorno desenhado no hover/foco (ver .mini-outline no CSS). */}
+              <svg className="mini-outline" aria-hidden="true" focusable="false">
+                <rect x=".5" y=".5" width="100%" height="100%" rx="6" pathLength={1} />
+              </svg>
             </ExternalLink>
           ))}
         </div>

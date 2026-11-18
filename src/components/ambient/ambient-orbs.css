@@ -22,6 +22,10 @@
 /* Preenchimento esférico compartilhado (esferas flutuantes e discos finais):
    só gradientes estáticos — sem blur, filtro ou sombra. */
 [data-orb-tone] {
+  /* Contorno preto: fração do raio (--orb-ring-k). A camada flutuante tem
+     200px e é escalada com a esfera, então o anel em px acompanha o raio. */
+  --orb-ring-k: 0.06;
+  --orb-ring: calc(var(--orb-ring-k) * 100px);
   --o-fill:
     radial-gradient(circle at 50% 50%, transparent 56%, rgb(var(--o-shade) / 0.5) 100%),
     radial-gradient(circle at 75% 83%, rgb(var(--o-bounce) / 0.34), transparent 44%),
@@ -66,7 +70,9 @@
   background-clip: text;
   background-repeat: no-repeat;
   /* Círculo de cor sólida, borda nítida. */
-  background-image: radial-gradient(circle var(--gr) at var(--gx) var(--gy), var(--o-hi) 0, var(--o-solid) calc(var(--gr) * 0.5), var(--o-lo) calc(var(--gr) - 1px), transparent var(--gr));
+  /* Disco de cor sólida + anel preto logo fora da borda (mesma proporção do
+     anel da esfera flutuante: --orb-ring-k × raio). */
+  background-image: radial-gradient(circle var(--gr) at var(--gx) var(--gy), var(--o-hi) 0, var(--o-solid) calc(var(--gr) * 0.5), var(--o-lo) calc(var(--gr) - 1px), #000 var(--gr), #000 calc(var(--gr) * (1 + var(--orb-ring-k))), transparent calc(var(--gr) * (1 + var(--orb-ring-k)) + 0.5px));
   opacity: var(--gi, 0);
 }
 
@@ -106,6 +112,8 @@
 }
 .orb-drift {
   opacity: var(--lg);
+  /* Contorno preto: acompanha a circunferência e o movimento da esfera. */
+  box-shadow: 0 0 0 var(--orb-ring) #000;
 }
 .orb-body {
   opacity: var(--a);
@@ -230,6 +238,7 @@
   inset: 0;
   border-radius: 50%;
   background: var(--o-fill);
+  box-shadow: 0 0 0 var(--orb-ring) #000;
   transform: scale(calc(1 - 0.92 * var(--m)));
   opacity: calc(1.15 - var(--m) * 1.3);
 }

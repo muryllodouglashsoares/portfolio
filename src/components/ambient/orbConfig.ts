@@ -46,8 +46,37 @@ export const HERO = {
   introFade: 0.9,
   /** Oscilação vertical (fração do raio) — dá volume ao percurso. */
   bob: 0.055,
+  /** Suavização (s) com a esfera nas letras: curta o bastante para acompanhar a travessia, longa o bastante para nunca haver salto. */
+  followTime: 0.05,
   /** Rolagem (fração da altura do Hero) necessária para as esferas saírem. */
   exitDistance: 0.55,
+}
+
+/**
+ * Saída do Hero: cada esfera faz um percurso próprio, contínuo, que a leva do
+ * nome até a parte baixa da tela antes de se fundir à trajetória livre (PATH).
+ *
+ * Tudo em função da rolagem, medida em alturas de viewport (u = rolagem / vh):
+ *  - 0 → release: a esfera ainda acompanha as letras (a carona na rolagem se
+ *    dissipa) e vai se soltando;
+ *  - 0 → span: percurso Hero → waypoint (queda em arco, com leve balanço);
+ *  - join[0] → join[1]: a trajetória própria se funde à trajetória livre.
+ * A esfera branca começa um pouco depois (delay), como se seguisse a roxa.
+ */
+export const DESCENT = {
+  release: 0.22,
+  span: 1.15,
+  join: [0.75, 1.9] as const,
+  delay: { purple: 0, white: 0.2 } as Record<OrbId, number>,
+  /** Ponto de chegada do percurso, em fração do viewport. */
+  waypoint: {
+    purple: { x: 0.84, y: 0.7 },
+    white: { x: 0.14, y: 0.86 },
+  } as Record<OrbId, { x: number; y: number }>,
+  /** Balanço lateral máximo do arco (fração da largura; sinal = lado). */
+  swing: { purple: 0.07, white: -0.06 } as Record<OrbId, number>,
+  /** >1 faz a queda acelerar no começo e assentar no fim. */
+  gravity: 1.35,
 }
 
 /** Aparência quando as esferas flutuam livres (atrás do conteúdo). */

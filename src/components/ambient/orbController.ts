@@ -22,6 +22,7 @@
 
 import {
   ANCHORS,
+  DESCENT,
   FOLLOW,
   HERO,
   IDLE_DELAY_MS,
@@ -92,6 +93,9 @@ type Orb = {
   vy: { v: number }
   vr: { v: number }
   phase: number
+  // Ponto do Hero (documento) onde a descida começa — fixado ao se soltar.
+  sx: number
+  sy: number
   // Cache do que já foi escrito no DOM (evita escritas repetidas).
   wT: string
   wO: number
@@ -128,6 +132,8 @@ export function createOrbController({
     vy: { v: 0 },
     vr: { v: 0 },
     phase: HERO.sweepPhase[id] * 2,
+    sx: NaN,
+    sy: NaN,
     wT: "",
     wO: -1,
     wA: -1,
@@ -433,8 +439,31 @@ export function createOrbController({
         const hx = wordGeo.left + e * wordGeo.width
         const hy =
           wordGeo.top - scrollY + wordGeo.height / 2 + Math.sin(time * 0.8 + sign) * hr * HERO.bob
-        tx = lerp(hx, tx, w)
-        ty = lerp(hy, ty, w)
+        // Percurso próprio de descida (ver DESCENT): contínuo e função só da
+        // rolagem — nunca há reposicionamento instantâneo.
+        const D = DESCENT
+        const sd = Math.max(0, u - D.delay[id])
+        // O desprendimento do nome não espera o atraso da esfera branca; e a
+        // "carona" que o texto dá à esfera ao subir some junto com ele.
+        const rel = smoothstep(0, D.release, u)
+        // Enquanto ainda está presa ao nome, o ponto de partida acompanha a
+        // varredura das letras; ao se soltar, ele fica fixo (sem vaivém).
+        if (rel < 0.02 || Number.isNaN(orb.sx)) {
+          orb.sx = hx
+          orb.sy = hy + scrollY
+        }
+        const q = clamp(sd / D.span)
+        const qx = q * q * (3 - 2 * q)
+        const qy = Math.pow(q, D.gravity)
+        const wp = D.waypoint[id]
+        const swing = Math.sin(Math.PI * q) * D.swing[id] * vw * ampScale
+        const curveX = lerp(orb.sx, vw * wp.x, qx) + swing
+        const curveY = lerp(orb.sy, vh * wp.y, qy * (2 - qy))
+        const k = smoothstep(D.join[0], D.join[1], sd)
+        const ownX = lerp(hx, curveX, rel)
+        const ownY = lerp(hy + scrollY * rel, curveY, rel)
+        tx = lerp(ownX, tx, k)
+        ty = lerp(ownY, ty, k)
         tr = lerp(hr, tr, w)
       }
 
@@ -456,11 +485,13 @@ export function createOrbController({
       }
 
       // 4) Inércia. Nas letras o acompanhamento é exato (sem atraso).
-      const smooth = lerp(0.02, MOTION.travelTime[id], smoothstep(0, 0.35, w)) * (1 - 0.35 * mm)
+      // Sem "snap" ao voltar para o Hero: um reposicionamento forçado seria um
+      // teleporte quando a rolagem sobe rápido; a suavização mínima o evita.
+      const smooth = lerp(HERO.followTime, MOTION.travelTime[id], smoothstep(0, 0.35, w)) * (1 - 0.35 * mm)
       const px = orb.x
       const py = orb.y
       const pr = orb.r
-      if (snap || (w < 0.003 && mm === 0)) {
+      if (snap) {
         orb.x = tx
         orb.y = ty
         orb.r = tr
