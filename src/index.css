@@ -509,3 +509,37 @@ a.pg-frame-action { cursor: pointer; }
   .pd-grid { grid-template-columns: 1fr; }
 }
 @media (max-width: 1100px) { .pg-hud-name { display: none; } }
+
+
+/* ═════════ Tech marquee (acima do título da seção Engenharia) ═════════
+   Absoluto dentro do respiro superior da seção: não altera a altura nem desloca
+   nada (sem layout shift). Direção esquerda → direita: a trilha vai de -50% a 0. */
+.engineering { position: relative; }
+.tech-marquee { --size: 40px; --gap: 72px; --dur: 80s; position: absolute; z-index: 0; top: 36px; left: 0; right: 0; height: var(--size); overflow: hidden; pointer-events: none; -webkit-mask-image: linear-gradient(90deg, transparent, #000 16%, #000 84%, transparent); mask-image: linear-gradient(90deg, transparent, #000 16%, #000 84%, transparent); }
+.tech-marquee-track { display: flex; width: max-content; animation: tech-marquee var(--dur) linear infinite; will-change: transform; }
+.tech-marquee[data-paused="true"] .tech-marquee-track { animation-play-state: paused; }
+.tech-marquee-group { display: flex; flex: none; align-items: center; padding: 0; margin: 0; list-style: none; }
+.tech-marquee-group li { flex: none; padding-right: var(--gap); color: var(--red); opacity: .8; }
+.tech-marquee-group li:nth-child(3n + 2) { color: var(--red-deep); opacity: .95; }
+.tech-marquee-group li:nth-child(4n) { opacity: .5; }
+.tech-marquee-group li:nth-child(5n + 1) { opacity: .65; }
+.tech-marquee svg { display: block; width: var(--size); height: var(--size); }
+@keyframes tech-marquee { from { transform: translate3d(-50%, 0, 0); } to { transform: translate3d(0, 0, 0); } }
+@media (max-width: 1050px) { .tech-marquee { --size: 34px; --gap: 60px; --dur: 70s; top: 32px; } }
+@media (max-width: 600px) { .tech-marquee { --size: 28px; --gap: 44px; --dur: 55s; top: 22px; } }
+
+/* Movimento reduzido: sem animação; os ícones ficam parados, uma vez cada, em linhas que quebram. */
+@media (prefers-reduced-motion: reduce) {
+  .engineering:has(.tech-marquee) { padding-top: 36px; }
+  .tech-marquee { position: relative; top: auto; height: auto; padding: 0 max(24px, calc((100vw - var(--container)) / 2)) 48px; -webkit-mask-image: none; mask-image: none; }
+  .tech-marquee-track { display: block; width: auto; animation: none !important; will-change: auto; }
+  .tech-marquee-group { flex: 0 1 auto; flex-wrap: wrap; gap: 20px 36px; }
+  .tech-marquee-group li { padding-right: 0; }
+  .tech-marquee-group li[data-dup="true"] { display: none; }
+}
+html[data-effects="reduced"] .engineering:has(.tech-marquee) { padding-top: 36px; }
+html[data-effects="reduced"] .tech-marquee { position: relative; top: auto; height: auto; padding: 0 max(24px, calc((100vw - var(--container)) / 2)) 48px; -webkit-mask-image: none; mask-image: none; }
+html[data-effects="reduced"] .tech-marquee-track { display: block; width: auto; animation: none !important; will-change: auto; }
+html[data-effects="reduced"] .tech-marquee-group { flex: 0 1 auto; flex-wrap: wrap; gap: 20px 36px; }
+html[data-effects="reduced"] .tech-marquee-group li { padding-right: 0; }
+html[data-effects="reduced"] .tech-marquee-group li[data-dup="true"] { display: none; }
