@@ -105,12 +105,58 @@
 /* Posição e escala horizontal ficam no invólucro; a entrada anima só a letra. */
 .hero-glyph { position: absolute; top: calc(var(--u) * 126.2); left: calc(var(--u) * var(--x)); transform: scaleX(var(--sx)); transform-origin: 0 0; }
 .hero-word-red .hero-word-text { color: var(--hero-red); }
-.hero-letter { display: block; opacity: 0; transform: translate3d(0, .16em, 0); }
+.hero-letter { display: block; transform: translate3d(0, .07em, 0); }
 .hero-portrait { position: absolute; left: calc(var(--u) * 230); top: 0; width: calc(var(--u) * 1230); height: calc(var(--u) * 941); max-width: none; opacity: 0; user-select: none; -webkit-user-drag: none; }
-.hero[data-ready="true"] .hero-portrait { animation: hero-fade 1100ms ease-out both; }
-.hero[data-ready="true"] .hero-letter { animation: hero-letter-in 900ms cubic-bezier(.16, 1, .3, 1) both; animation-delay: calc(420ms + var(--n) * 70ms); }
+.hero[data-ready="true"] .hero-portrait { animation: hero-fade 1100ms ease-out 380ms both; }
+.hero[data-ready="true"] .hero-letter { animation: hero-letter-in 1000ms cubic-bezier(.16, 1, .3, 1) both; animation-delay: calc(200ms + var(--n) * 90ms); }
 @keyframes hero-fade { from { opacity: 0; } to { opacity: 1; } }
-@keyframes hero-letter-in { from { opacity: 0; transform: translate3d(0, .16em, 0); } to { opacity: 1; transform: none; } }
+@keyframes hero-letter-in { from { transform: translate3d(0, .07em, 0); } to { transform: none; } }
+
+/* ═════════ Efeitos tipográficos do nome ═════════
+   1) Reveal: máscara (clip-path) da esquerda para a direita em cada camada.
+   2) Ghost: a mesma palavra em contorno fino, atrás das letras sólidas.
+   3) Sweep: faixa de luz vermelha mascarada pelas próprias letras.
+   4) Parallax: as duas "profundidades" (.hero-depth) recebem transform via JS
+      (useHeroTypography); a foto não participa e fica sempre parada.
+   Tudo fica ATRÁS do retrato (ordem no DOM), então nada passa sobre a foto. */
+.hero-depth { position: absolute; inset: 0; pointer-events: none; }
+.hero[data-parallax="on"] .hero-depth { will-change: transform; }
+
+/* Máscara de revelação: fechada pela direita (margens negativas deixam o
+   glifo respirar acima/abaixo e à direita quando aberta). */
+.hero-word-text { clip-path: inset(-20% 100% -20% 0); }
+.hero[data-ready="true"] .hero-word-text { animation: hero-word-reveal 1500ms cubic-bezier(.55, .05, .15, 1) 200ms both; }
+@keyframes hero-word-reveal { from { clip-path: inset(-20% 100% -20% 0); } to { clip-path: inset(-20% -6% -20% 0); } }
+
+/* Ghost: contorno discreto, levemente deslocado, chega um instante depois. */
+.hero-word-ghost .hero-word-text {
+  color: transparent;
+  -webkit-text-stroke: max(1px, calc(var(--u) * 1.3)) rgb(255 255 255 / .17);
+  transform: translate3d(calc(var(--u) * 16), calc(var(--u) * -12), 0);
+}
+.hero[data-ready="true"] .hero-word-ghost .hero-word-text { animation-delay: 520ms; }
+
+/* Sweep: a palavra em vermelho luminoso, revelada só por uma faixa que desliza
+   (mask-position). Fica oculta e sem animação até o hook ligar data-run. */
+.hero-word-sweep { opacity: 0; }
+.hero-word-sweep .hero-word-text,
+.hero[data-ready="true"] .hero-word-sweep .hero-word-text { clip-path: none; animation: none; color: var(--red-soft); }
+.hero-word-sweep .hero-letter,
+.hero[data-ready="true"] .hero-word-sweep .hero-letter { animation: none; transform: none; }
+.hero-word-sweep {
+  -webkit-mask-image: linear-gradient(100deg, transparent 0%, rgb(0 0 0 / .16) 26%, #000 50%, rgb(0 0 0 / .34) 74%, transparent 100%);
+  mask-image: linear-gradient(100deg, transparent 0%, rgb(0 0 0 / .16) 26%, #000 50%, rgb(0 0 0 / .34) 74%, transparent 100%);
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  -webkit-mask-size: calc(var(--u) * 520) 100%; mask-size: calc(var(--u) * 520) 100%;
+  -webkit-mask-position: calc(var(--u) * -520) 0; mask-position: calc(var(--u) * -520) 0;
+}
+.hero-word-sweep[data-run="true"] { animation: hero-sweep 2300ms cubic-bezier(.45, .05, .3, 1) both; }
+@keyframes hero-sweep {
+  0%   { opacity: 0;   -webkit-mask-position: calc(var(--u) * -520) 0; mask-position: calc(var(--u) * -520) 0; }
+  12%  { opacity: .9; }
+  82%  { opacity: .9; }
+  100% { opacity: 0;   -webkit-mask-position: calc(var(--u) * 1672) 0; mask-position: calc(var(--u) * 1672) 0; }
+}
 
 .hero-corner { position: absolute; z-index: 3; margin: 0; color: rgba(245, 245, 245, .9); font: 500 clamp(12px, .55vw + 8px, 16px) / 1.35 var(--sans); letter-spacing: .01em; }
 .hero-corner p { margin: 0; }
@@ -132,9 +178,20 @@
   .hero-corner { font-size: 12px; }
   .hero-tl, .hero-bl { left: 20px; } .hero-tr, .hero-br { right: 20px; }
   .hero-arrow { width: 52px; }
+  .hero[data-ready="true"] .hero-word-text { animation-duration: 1150ms; }
+  .hero-word-ghost .hero-word-text { -webkit-text-stroke-color: rgb(255 255 255 / .12); transform: translate3d(calc(var(--u) * 10), calc(var(--u) * -8), 0); }
+  .hero-word-sweep[data-run="true"] { animation-duration: 1800ms; }
+  @keyframes hero-sweep {
+    0%   { opacity: 0;  -webkit-mask-position: calc(var(--u) * -520) 0; mask-position: calc(var(--u) * -520) 0; }
+    12%  { opacity: .6; }
+    82%  { opacity: .6; }
+    100% { opacity: 0;  -webkit-mask-position: calc(var(--u) * 1672) 0; mask-position: calc(var(--u) * 1672) 0; }
+  }
 }
 @media (prefers-reduced-motion: reduce) {
   .hero-letter, .hero-portrait, .hero-rise { opacity: 1; transform: none; animation: none !important; }
+  .hero-word-text { clip-path: none; animation: none !important; }
+  .hero-word-sweep { display: none; }
 }
 .contact-grid { position: absolute; inset: 0; opacity: .36; background-image: linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px); background-size: 54px 54px; mask-image: linear-gradient(to bottom,black 10%,transparent 85%); }
 .robotics-note a { display: inline-flex; align-items: center; gap: 7px; color: var(--text); font-size: 13px; font-weight: 700; text-decoration: none; }
@@ -430,6 +487,8 @@ html[data-effects="reduced"] *, html[data-effects="reduced"] *::before, html[dat
 html[data-effects="reduced"] .reveal-item { opacity: 1; transform: none; }
 html[data-effects="reduced"] .scrub-item { opacity: 1; filter: none; transform: none; transition: none; }
 html[data-effects="reduced"] .hero-letter, html[data-effects="reduced"] .hero-portrait, html[data-effects="reduced"] .hero-rise { opacity: 1; transform: none; animation: none !important; }
+html[data-effects="reduced"] .hero-word-text { clip-path: none; animation: none !important; }
+html[data-effects="reduced"] .hero-word-sweep { display: none; }
 
 
 /* ═════════ Transição Hero → Sobre ═════════
