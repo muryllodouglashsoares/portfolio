@@ -242,15 +242,26 @@ html[data-effects="reduced"] .mini-wave { display: none; }
 .principles i { width: 3px; height: 3px; border-radius: 50%; background: var(--dim); }
 
 .journey { background: var(--raised); border-top: 1px solid var(--line); }
-.timeline { position: relative; display: grid; grid-template-columns: repeat(5,1fr); margin-top: 74px; }
-.timeline::before { content: ""; position: absolute; z-index: 2; top: 17px; left: 17px; width: calc((100% - 34px) * var(--timeline-progress)); max-width: calc(100% - 34px); height: 1px; background: linear-gradient(90deg,var(--red-deep),var(--red)); pointer-events: none; transition: width 80ms linear; }
+.timeline { position: relative; isolation: isolate; display: grid; grid-template-columns: repeat(5,1fr); margin-top: 74px; }
 .timeline-item { position: relative; padding-right: 25px; }
 .timeline-marker { position: relative; display: flex; align-items: center; margin-bottom: 30px; }
 .timeline-marker::after { content: ""; height: 1px; flex: 1; background: var(--line); }
-.timeline-marker span { display: grid; place-items: center; width: 34px; height: 34px; border: 1px solid var(--line-strong); border-radius: 50%; color: var(--dim); font: 11px var(--mono); }
-.timeline-item .timeline-marker span, .timeline-item .timeline-copy { transition: opacity 350ms,transform 350ms,border-color 350ms,background-color 350ms; }
+.timeline-marker span { display: grid; place-items: center; width: 34px; height: 34px; border: 1px solid var(--line-strong); border-radius: 50%; background: var(--raised); color: var(--dim); font: 11px var(--mono); }
+.timeline-item .timeline-marker span, .timeline-item .timeline-copy { transition: opacity 350ms,transform 350ms,border-color 350ms,background-color 350ms,box-shadow 350ms,color 250ms; }
 .timeline-item:not(.is-visible) .timeline-copy { opacity: .48; }
-.timeline-item.is-visible .timeline-marker span { border-color: var(--red); background: rgb(var(--red-rgb) / .14); color: var(--red-soft); box-shadow: 0 0 18px rgb(var(--red-rgb) / .16); }
+/* Marcos percorridos / com a esfera (useTimelineTrail): bidirecional, vem da rolagem. */
+.timeline-item .timeline-marker span.is-reached { border-color: var(--red); box-shadow: inset 0 0 0 17px rgb(var(--red-rgb) / .14), 0 0 18px rgb(var(--red-rgb) / .16); color: var(--red-soft); }
+.timeline-item .timeline-marker span.is-current { color: transparent; }
+
+/* Trilha da linha do tempo: o rastro (escala no eixo) cresce atrás da esfera.
+   Geometria e posição vêm do JS (medidas reais); aqui só a aparência. */
+.timeline-track { position: absolute; inset: 0; pointer-events: none; }
+.timeline-trail { position: absolute; left: 0; top: 0; z-index: -1; transform-origin: 0 0; border-radius: 2px; background: linear-gradient(90deg,var(--red-deep),var(--red)); will-change: transform; }
+.timeline-trail::before { content: ""; position: absolute; inset: -7px 0; background: linear-gradient(180deg,transparent,rgb(var(--red-rgb) / .28) 50%,transparent); }
+.timeline[data-axis="y"] .timeline-trail { background: linear-gradient(180deg,var(--red-deep),var(--red)); }
+.timeline[data-axis="y"] .timeline-trail::before { inset: 0 -7px; background: linear-gradient(90deg,transparent,rgb(var(--red-rgb) / .28) 50%,transparent); }
+.timeline-orb { position: absolute; left: 0; top: 0; z-index: 3; width: 12px; height: 12px; border-radius: 50%; background: radial-gradient(circle at 35% 30%,var(--red-soft),var(--red) 55%,var(--red-deep)); box-shadow: 0 0 0 4px rgb(var(--red-rgb) / .14), 0 0 12px rgb(var(--red-rgb) / .5); opacity: 0; transition: opacity 400ms; will-change: transform; }
+.timeline-item:first-child.is-visible ~ .timeline-track .timeline-orb { opacity: 1; }
 .timeline-copy > span { color: var(--red-soft); font: 11px var(--mono); letter-spacing: .06em; text-transform: uppercase; }
 .timeline-copy h3 { margin: 12px 0 10px; font-size: 15px; line-height: 1.35; letter-spacing: -.025em; }
 .timeline-copy p { margin: 0; color: var(--dim); font-size: 13px; line-height: 1.65; }
@@ -329,7 +340,6 @@ html[data-effects="reduced"] .mini-wave { display: none; }
   .section-heading-copy { align-items: start; flex-direction: column; gap: 20px; }
   .about-grid { grid-template-columns: 1fr; gap: 40px; }
   .timeline { grid-template-columns: 1fr; }
-  .timeline::before { top: 17px; left: 17px; width: 1px; max-width: none; height: calc((100% - 34px) * var(--timeline-progress)); transition: height 80ms linear; }
   .timeline-item { display: grid; grid-template-columns: 50px 1fr; padding: 0 0 36px; }
   .timeline-marker { align-items: start; flex-direction: column; height: 100%; margin: 0; }
   .timeline-marker::after { width: 1px; height: auto; flex: 1; margin-left: 17px; }
@@ -375,7 +385,6 @@ html[data-effects="reduced"] .mini-wave { display: none; }
   *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .001ms !important; }
   .reveal-item { opacity: 1; transform: none; }
   .scrub-item { opacity: 1; filter: none; transform: none; transition: none; }
-  .timeline::before { transition: none; }
 }
 
 /* ═════════ UX: projetos explorável, orientação e feedback ═════════ */
@@ -421,7 +430,6 @@ html[data-effects="reduced"] *, html[data-effects="reduced"] *::before, html[dat
 html[data-effects="reduced"] .reveal-item { opacity: 1; transform: none; }
 html[data-effects="reduced"] .scrub-item { opacity: 1; filter: none; transform: none; transition: none; }
 html[data-effects="reduced"] .hero-letter, html[data-effects="reduced"] .hero-portrait, html[data-effects="reduced"] .hero-rise { opacity: 1; transform: none; animation: none !important; }
-html[data-effects="reduced"] .timeline::before { transition: none; }
 
 
 /* ═════════ Transição Hero → Sobre ═════════
