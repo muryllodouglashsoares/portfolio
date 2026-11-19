@@ -3,6 +3,7 @@ import { preload } from "react-dom"
 import portrait from "../assets/muryllo-hero-editorial.webp"
 import portraitSmall from "../assets/muryllo-hero-editorial-820.webp"
 import antonUrl from "../assets/fonts/anton-subset.woff"
+import { useHeroParallax, useHeroSweep } from "../hooks/useHeroTypography"
 
 /**
  * Cada letra é posicionada nas coordenadas da arte de referência (grade de
@@ -32,14 +33,30 @@ const letterStyle = (index: number) =>
 const delay = (ms: number) => ({ "--d": ms }) as React.CSSProperties
 
 /**
- * Uma camada da palavra. As duas camadas (branca e vermelha) têm exatamente a
- * mesma geometria e a mesma animação; a vermelha é apenas recortada com
- * `clip-path` a partir do centro do rosto. Assim a cor muda "dentro" das
- * letras, sem duas palavras e sem corte entre letras.
+ * Uma camada da palavra. As camadas branca e vermelha têm exatamente a mesma
+ * geometria e a mesma animação; a vermelha é apenas recortada com `clip-path`
+ * a partir do centro do rosto. Assim a cor muda "dentro" das letras, sem duas
+ * palavras e sem corte entre letras.
+ *
+ * Duas camadas decorativas reaproveitam a mesma geometria (todas `aria-hidden`;
+ * o nome acessível continua sendo só o <h1> .sr-only):
+ * - "ghost": a mesma palavra apenas em contorno, atrás das letras sólidas;
+ * - "sweep": a mesma palavra em vermelho luminoso, visível só dentro de uma
+ *   máscara em faixa que atravessa as letras (reflexo de luz).
  */
-function WordLayer({ tone }: { tone: "white" | "red" }) {
+function WordLayer({
+  tone,
+  ref,
+}: {
+  tone: "white" | "red" | "ghost" | "sweep"
+  ref?: React.Ref<HTMLDivElement>
+}) {
   return (
-    <div className={`hero-word hero-word-${tone}`} aria-hidden="true">
+    <div
+      ref={ref}
+      className={`hero-word hero-word-${tone}`}
+      aria-hidden="true"
+    >
       <div className="hero-word-text">
         {LETTERS.map(({ char }, index) => (
           <span className="hero-glyph" style={letterStyle(index)} key={index}>
@@ -56,6 +73,10 @@ export function Hero() {
   const [imageReady, setImageReady] = useState(false)
   const [timedOut, setTimedOut] = useState(false)
   const imageRef = useRef<HTMLImageElement>(null)
+  const sectionRef = useRef<HTMLElement>(null)
+  const mainDepthRef = useRef<HTMLDivElement>(null)
+  const ghostDepthRef = useRef<HTMLDivElement>(null)
+  const sweepRef = useRef<HTMLDivElement>(null)
 
   // O retrato é o elemento principal: carrega com prioridade máxima. A fonte
   // também é pré-carregada, porque a palavra só entra com ela disponível.
@@ -87,8 +108,13 @@ export function Hero() {
 
   const ready = (fontReady && imageReady) || timedOut
 
+  // Parallax do mouse (desktop) e reflexo de luz ocasional: ver o hook.
+  useHeroParallax(sectionRef, mainDepthRef, ghostDepthRef)
+  useHeroSweep(sectionRef, sweepRef, ready)
+
   return (
     <section
+      ref={sectionRef}
       id="inicio"
       className="hero"
       aria-labelledby="hero-title"
@@ -98,8 +124,14 @@ export function Hero() {
         <h1 id="hero-title" className="sr-only">
           Muryllo — Estudante de Informática e desenvolvedor em formação
         </h1>
-        <WordLayer tone="white" />
-        <WordLayer tone="red" />
+        <div className="hero-depth hero-depth-ghost" ref={ghostDepthRef}>
+          <WordLayer tone="ghost" />
+        </div>
+        <div className="hero-depth hero-depth-main" ref={mainDepthRef}>
+          <WordLayer tone="white" />
+          <WordLayer tone="red" />
+          <WordLayer tone="sweep" ref={sweepRef} />
+        </div>
         <img
           ref={imageRef}
           className="hero-portrait"
