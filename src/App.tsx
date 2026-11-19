@@ -28,6 +28,7 @@ import { TechMarquee } from "./components/TechMarquee"
 import { useEffectsPreference } from "./hooks/useEffectsPreference"
 import { useScrollReveal } from "./hooks/useScrollReveal"
 import { usePageExperience } from "./hooks/usePageExperience"
+import { useTimelineTrail } from "./hooks/useTimelineTrail"
 
 const links = [
   ["Sobre", "#sobre"],
@@ -124,6 +125,7 @@ export default function App() {
   const { activeSection, showBackToTop } = usePageExperience(sectionIds)
   useEffectsPreference()
   useScrollReveal()
+  useTimelineTrail()
 
   useEffect(() => {
     const reducedMotion = window.matchMedia(
@@ -396,6 +398,10 @@ export default function App() {
                   </div>
                 </article>
               ))}
+              <div className="timeline-track" aria-hidden="true">
+                <span className="timeline-trail" />
+                <span className="timeline-orb" />
+              </div>
             </div>
             <div className="robotics-note reveal-item">
               <div className="robotics-icon">
