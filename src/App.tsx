@@ -24,7 +24,9 @@ import {
   projectAnchor,
 } from "./components/projects/projectsData"
 import { StackExplorer } from "./components/StackExplorer"
+import { TechMarquee } from "./components/TechMarquee"
 import { useEffectsPreference } from "./hooks/useEffectsPreference"
+import { useScrollReveal } from "./hooks/useScrollReveal"
 import { usePageExperience } from "./hooks/usePageExperience"
 
 const links = [
@@ -86,13 +88,18 @@ function SectionHeading({
   label,
   title,
   intro,
+  scrub = false,
 }: {
   label: string
   title: string
   intro?: string
+  /** Revelação guiada pela rolagem (useScrollReveal) em vez de disparo único. */
+  scrub?: boolean
 }) {
   return (
-    <div className="section-heading reveal-item">
+    <div
+      className={`section-heading ${scrub ? "scrub-item" : "reveal-item"}`}
+    >
       <div className="section-label">
         <span />
         {label}
@@ -116,6 +123,7 @@ export default function App() {
   const mobileNavRef = useRef<HTMLElement>(null)
   const { activeSection, showBackToTop } = usePageExperience(sectionIds)
   useEffectsPreference()
+  useScrollReveal()
 
   useEffect(() => {
     const reducedMotion = window.matchMedia(
@@ -262,9 +270,13 @@ export default function App() {
 
         <section id="sobre" className="section about">
           <div className="container">
-            <SectionHeading label="01 / Sobre" title="Aprender construindo." />
+            <SectionHeading
+              label="01 / Sobre"
+              title="Aprender construindo."
+              scrub
+            />
             <div className="about-grid">
-              <div className="about-lead reveal-item">
+              <div className="about-lead scrub-item" data-scrub-delay="0.03">
                 <p>
                   Não estou tentando parecer alguém com anos de experiência que
                   não tenho.
@@ -274,7 +286,7 @@ export default function App() {
                   </strong>
                 </p>
               </div>
-              <div className="about-body reveal-item">
+              <div className="about-body scrub-item" data-scrub-delay="0.08">
                 <p>
                   Sou estudante do Ensino Médio Integrado ao Técnico em
                   Informática no IFPB — Campus Itaporanga e desenvolvedor em
@@ -296,7 +308,7 @@ export default function App() {
                 </div>
               </div>
             </div>
-            <div className="fact-strip reveal-item">
+            <div className="fact-strip scrub-item" data-scrub-delay="0.03">
               <div>
                 <span className="fact-value">IFPB</span>
                 <span>Técnico em Informática</span>
@@ -329,6 +341,7 @@ export default function App() {
         </section>
 
         <section id="engenharia" className="section engineering">
+          <TechMarquee />
           <div className="container">
             <SectionHeading
               label="03 / Engenharia"

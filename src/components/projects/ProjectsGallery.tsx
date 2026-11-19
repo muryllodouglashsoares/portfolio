@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { ArrowUpRight, Code2, GitBranch, Info } from "lucide-react"
 import { ExternalLink } from "../ExternalLink"
 import type { LightboxImage } from "../ProjectLightbox"
+import { useRedWave } from "../../hooks/useRedWave"
 import { useScrollGallery } from "../../hooks/useScrollGallery"
 import { ProjectDetailsDialog } from "./ProjectDetailsDialog"
 import {
@@ -237,8 +238,10 @@ export function ProjectsGallery({
   const mode = useGalleryMode()
   const outerRef = useRef<HTMLDivElement>(null)
   const stageRef = useRef<HTMLDivElement>(null)
+  const complementaryRef = useRef<HTMLDivElement>(null)
   const [detailsSlug, setDetailsSlug] = useState<string | null>(null)
   const total = resolved.length
+  useRedWave(complementaryRef)
   const slugAnchors = useMemo(() => anchors, [])
 
   const { active, goTo } = useScrollGallery({
@@ -315,7 +318,7 @@ export function ProjectsGallery({
             </div>
             <p>Projetos que documentam a evolução em web, produto e robótica.</p>
           </div>
-          <div className="complementary-list reveal-item">
+          <div className="complementary-list reveal-item" ref={complementaryRef}>
             {complementaryProjects.map((project, index) => (
               <ExternalLink
                 href={project.href}
@@ -328,7 +331,12 @@ export function ProjectsGallery({
                   <small>{project.kind}</small>
                 </span>
                 <span className="mini-stack">{project.stack}</span>
-                <ArrowUpRight aria-hidden="true" />
+                <ArrowUpRight className="mini-arrow" aria-hidden="true" />
+                {/* Onda vermelha sob o conteúdo, nascida no cursor (useRedWave). */}
+                <span className="mini-wave" aria-hidden="true">
+                  <i />
+                  <i />
+                </span>
                 {/* Contorno desenhado no hover/foco (ver .mini-outline no CSS). */}
                 <svg className="mini-outline" aria-hidden="true" focusable="false">
                   <rect
