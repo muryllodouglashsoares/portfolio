@@ -24,6 +24,7 @@ import {
   projectAnchor,
 } from "./components/projects/projectsData"
 import { StackExplorer } from "./components/StackExplorer"
+import { TechMarquee } from "./components/TechMarquee"
 import { useEffectsPreference } from "./hooks/useEffectsPreference"
 import { usePageExperience } from "./hooks/usePageExperience"
 
@@ -329,6 +330,7 @@ export default function App() {
         </section>
 
         <section id="engenharia" className="section engineering">
+          <TechMarquee />
           <div className="container">
             <SectionHeading
               label="03 / Engenharia"
