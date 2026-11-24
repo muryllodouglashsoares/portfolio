@@ -4,6 +4,9 @@ import { ExternalLink } from "../ExternalLink"
 import type { LightboxImage } from "../ProjectLightbox"
 import { useRedWave } from "../../hooks/useRedWave"
 import { useScrollGallery } from "../../hooks/useScrollGallery"
+import { REDUCED_QUERY } from "../../motion/prefs"
+import { useTilt } from "../../motion/useTilt"
+import { BrowserChrome } from "./BrowserChrome"
 import { ProjectDetailsDialog } from "./ProjectDetailsDialog"
 import {
   complementaryProjects,
@@ -63,15 +66,7 @@ function ProjectShot({
 
   const content = (
     <>
-      <div className="browser-bar">
-        <div>
-          <i />
-          <i />
-          <i />
-        </div>
-        <span>{project.title.toLowerCase().replace(/\s+/g, "-")}.app</span>
-        <b />
-      </div>
+      <BrowserChrome title={project.title} />
       {hasImage ? (
         <img
           src={project.cover}
@@ -101,34 +96,61 @@ function ProjectShot({
     </>
   )
 
+  /*
+   * Cena do mockup (3.1 e 3.2): planos separados em profundidade.
+   *   fundo   · moldura deslocada, atrás da captura
+   *   meio    · a captura (única parte que recebe clique)
+   *   frente  · numeração e marcas de canto, fora da área da captura
+   * Só a captura é conteúdo; o resto é decorativo (aria-hidden). A inclinação
+   * vem de useTilt (variáveis --rx/--ry); a máscara de entrada fica em
+   * `.pg-shot-mask`, separada, para o recorte não cortar a inclinação.
+   */
   return (
     <div className="pg-shot">
-      {project.demo ? (
-        <a
-          className="pg-frame pg-frame-action"
-          href={project.demo}
-          target="_blank"
-          rel="noreferrer"
-          data-cursor="open"
-          data-cursor-title={project.title}
-          data-cursor-url={project.demo}
-          aria-label={`Abrir o site de ${project.title} em nova aba`}
-        >
-          {content}
-        </a>
-      ) : (
-        <button
-          className="pg-frame pg-frame-action"
-          type="button"
-          disabled={!hasImage}
-          aria-label={
-            hasImage ? `Ampliar captura do projeto ${project.title}` : undefined
-          }
-          onClick={onZoom}
-        >
-          {content}
-        </button>
-      )}
+      <div className="pg-scene">
+        <span className="pg-shadow" aria-hidden="true" />
+        <div className="pg-tilt">
+          <span className="pg-plane" aria-hidden="true" />
+          <div className="pg-shot-mask">
+            {project.demo ? (
+              <a
+                className="pg-frame pg-frame-action"
+                href={project.demo}
+                target="_blank"
+                rel="noreferrer"
+                data-cursor="open"
+                data-cursor-title={project.title}
+                data-cursor-url={project.demo}
+                aria-label={`Abrir o site de ${project.title} em nova aba`}
+              >
+                {content}
+              </a>
+            ) : (
+              <button
+                className="pg-frame pg-frame-action"
+                type="button"
+                disabled={!hasImage}
+                aria-label={
+                  hasImage ? `Ampliar captura do projeto ${project.title}` : undefined
+                }
+                data-cursor-label={hasImage ? "Ampliar" : undefined}
+                onClick={onZoom}
+              >
+                {content}
+              </button>
+            )}
+          </div>
+          <span className="pg-tag" aria-hidden="true">
+            {project.index}
+          </span>
+          <span className="pg-corners" aria-hidden="true">
+            <i />
+            <i />
+            <i />
+            <i />
+          </span>
+        </div>
+      </div>
     </div>
   )
 }
@@ -197,6 +219,7 @@ function ProjectPanel({
             <ExternalLink
               href={project.demo}
               className="button button-primary pg-btn"
+              cursorLabel="Visitar"
             >
               Demonstração <ArrowUpRight size={16} />
             </ExternalLink>
@@ -206,6 +229,7 @@ function ProjectPanel({
             className="button button-secondary pg-btn"
             onClick={onOpenDetails}
             aria-haspopup="dialog"
+            data-cursor-label="Explorar"
           >
             <Info size={16} aria-hidden="true" />
             Mais informações
@@ -214,6 +238,7 @@ function ProjectPanel({
           <ExternalLink
             href={project.repo}
             className="button button-secondary pg-btn pg-btn-icon"
+            cursorLabel="Repositório"
           >
             <GitBranch size={16} aria-hidden="true" />
             <span className="pg-btn-label">GitHub</span>
@@ -239,9 +264,12 @@ export function ProjectsGallery({
   const outerRef = useRef<HTMLDivElement>(null)
   const stageRef = useRef<HTMLDivElement>(null)
   const complementaryRef = useRef<HTMLDivElement>(null)
+  const pgRef = useRef<HTMLDivElement>(null)
   const [detailsSlug, setDetailsSlug] = useState<string | null>(null)
+  const [origin, setOrigin] = useState<DOMRect | null>(null)
   const total = resolved.length
   useRedWave(complementaryRef)
+  useTilt(pgRef)
   const slugAnchors = useMemo(() => anchors, [])
 
   const { active, goTo } = useScrollGallery({
@@ -255,16 +283,69 @@ export function ProjectsGallery({
   const closeDetails = useCallback(() => setDetailsSlug(null), [])
   const detailsProject = resolved.find((p) => p.slug === detailsSlug)
 
+  // Um único estado de projeto selecionado. A origem da animação é a captura
+  // do próprio card, medida no momento do clique.
+  const openDetails = (slug: string) => {
+    const frame = document.querySelector(`#${projectAnchor(slug)} .pg-frame`)
+    setOrigin(frame ? frame.getBoundingClientRect() : null)
+    setDetailsSlug(slug)
+  }
+
+  // 3.3  Revelação por máscara no modo em sequência (celular, movimento
+  // reduzido não entra): uma vez por entrada na tela. Sem JS, sem
+  // IntersectionObserver ou em movimento reduzido, a captura já aparece inteira.
+  useEffect(() => {
+    if (mode !== "stacked" || !("IntersectionObserver" in window)) return
+    if (window.matchMedia(REDUCED_QUERY).matches) return
+    const masks = Array.from(
+      pgRef.current?.querySelectorAll<HTMLElement>(".pg-shot-mask") ?? [],
+    )
+    masks.forEach((mask) => (mask.dataset.reveal = "pending"))
+    // Observa o contêiner (a própria máscara está recortada e não "intersecta").
+    const observer = new IntersectionObserver(
+      (entries) =>
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return
+          const mask = entry.target.querySelector<HTMLElement>(".pg-shot-mask")
+          if (mask) mask.dataset.reveal = "done"
+          observer.unobserve(entry.target)
+        }),
+      { threshold: 0.15 },
+    )
+    masks.forEach((mask) => {
+      const shot = mask.closest(".pg-shot")
+      if (shot) observer.observe(shot)
+    })
+    return () => {
+      observer.disconnect()
+      masks.forEach((mask) => delete mask.dataset.reveal)
+    }
+  }, [mode])
+
+  // 3.6  Setas Esquerda/Direita movem o projeto ativo a partir do HUD.
+  const onHudKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {
+    const step = event.key === "ArrowRight" ? 1 : event.key === "ArrowLeft" ? -1 : 0
+    if (!step) return
+    event.preventDefault()
+    const next = Math.min(Math.max(active + step, 0), total - 1)
+    goTo(next)
+    event.currentTarget
+      .querySelectorAll<HTMLButtonElement>("button")
+      [next]?.focus({ preventScroll: true })
+  }
+
   return (
     <>
       <div
         className="pg"
+        ref={pgRef}
         data-mode={mode}
         style={{ "--n": total, "--m": total - 1 } as React.CSSProperties}
       >
         <div className="pg-outer" ref={outerRef}>
           <div
             className="pg-stage"
+            data-trail
             ref={stageRef}
             role="region"
             aria-label="Galeria de projetos"
@@ -277,12 +358,12 @@ export function ProjectsGallery({
                   position={position}
                   total={total}
                   onOpenShots={onOpenShots}
-                  onOpenDetails={() => setDetailsSlug(project.slug)}
+                  onOpenDetails={() => openDetails(project.slug)}
                 />
               ))}
             </div>
             {mode === "scroll" && (
-              <nav className="pg-hud" aria-label="Projetos">
+              <nav className="pg-hud" aria-label="Projetos" onKeyDown={onHudKeyDown}>
                 <ol>
                   {resolved.map((project, i) => (
                     <li key={project.slug}>
@@ -302,7 +383,21 @@ export function ProjectsGallery({
                 </ol>
                 <div className="pg-bar" aria-hidden="true">
                   <i />
+                  {resolved.map((project, i) => (
+                    <b
+                      key={project.slug}
+                      style={{ "--k": i } as React.CSSProperties}
+                      data-reached={active >= i}
+                    />
+                  ))}
                 </div>
+                <span className="pg-count" aria-hidden="true">
+                  {pad(active + 1)} / {pad(total)}
+                </span>
+                {/* Posição para leitores de tela, anunciada só quando muda. */}
+                <p className="sr-only" role="status">
+                  Projeto {active + 1} de {total}: {resolved[active]?.title}
+                </p>
               </nav>
             )}
           </div>
@@ -323,6 +418,7 @@ export function ProjectsGallery({
               <ExternalLink
                 href={project.href}
                 className="mini-project"
+                cursorLabel="Repositório"
                 key={project.name}
               >
                 <span className="mini-index">{pad(index + 1)}</span>
@@ -355,7 +451,12 @@ export function ProjectsGallery({
       </div>
 
       {detailsProject && (
-        <ProjectDetailsDialog project={detailsProject} onClose={closeDetails} />
+        <ProjectDetailsDialog
+          project={detailsProject}
+          cover={detailsProject.cover}
+          origin={origin}
+          onClose={closeDetails}
+        />
       )}
     </>
   )

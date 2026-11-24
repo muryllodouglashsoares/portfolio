@@ -1,0 +1,521 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Sistema de movimento (carregado depois de index.css)
+
+   FASE 1  tokens · linha condutora · transições entre seções · textura
+   FASE 2  Hero e Sobre
+   FASE 3  Projetos
+   FASE 4  Engenharia e Trajetória
+   FASE 5  Contato e acabamento
+
+   Regra de ouro: só transform, opacity e stroke-dashoffset animam. Tudo que se
+   move lê estes tokens; `--mi` (intensidade 0–1) escala todos os deslocamentos
+   e é zerado em movimento reduzido, no CSS e no JS (motion/config.ts).
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── 1.4  Tokens ─────────────────────────────────────────────────────────── */
+:root {
+  --mi: 1;
+  /* durações: curta (hover/foco/clique), média (estados), longa (entradas) */
+  --dur-fast: 150ms;
+  --dur-base: 300ms;
+  --dur-slow: 600ms;
+  /* exceção documentada (.ux-profile.md): travessias de linha e de título */
+  --dur-cine: 900ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-io: cubic-bezier(0.65, 0, 0.35, 1);
+  /* deslocamentos */
+  --dist-s: calc(6px * var(--mi));
+  --dist-m: calc(14px * var(--mi));
+  --dist-l: calc(28px * var(--mi));
+  --tilt: calc(5deg * var(--mi));
+  --stagger: 70ms;
+}
+html[data-effects="reduced"] { --mi: 0; }
+@media (prefers-reduced-motion: reduce) { :root { --mi: 0; } }
+
+/* Barra de rolagem estável: abrir um diálogo (que trava a rolagem) não desloca a página. */
+html { scrollbar-gutter: stable; }
+
+/* ── 1.3  Indicador global: marcas de seção sobre a barra de leitura ─────── */
+.reading-progress i {
+  position: absolute; top: 0; width: 1px; height: 6px;
+  background: var(--line-strong);
+  transition: background-color var(--dur-base) var(--ease-out);
+}
+.reading-progress i[data-reached="true"] { background: var(--red); }
+
+/* ── 1.2  Transições entre seções ────────────────────────────────────────────
+   O título da seção seguinte entra por recorte (palavra a palavra), guiado
+   pela rolagem (--p do .scrub-item): descer revela, subir recolhe, sem
+   disparo repetido e sem prender a rolagem. Um traço vermelho curto acompanha
+   a revelação sobre a linha do título; a seção que ficou para trás perde
+   destaque. */
+.kw {
+  display: inline-block; vertical-align: top; overflow: clip;
+  padding: .1em .06em .14em; margin: -.1em -.06em -.14em;
+}
+.kw-i {
+  display: inline-block;
+  transform: translate3d(0, calc((1 - var(--q, 1)) * 110% * var(--mi)), 0);
+}
+/* --wc = índice da última palavra; garante q = 1 para todas em p = 1 */
+.section-heading h2,
+.about-lead p { --wc: 3; --s: .2; }
+.section-heading .kw-i,
+.about-lead .kw-i {
+  --q: clamp(0, calc(var(--p, 1) * (1 + var(--wc) * var(--s)) - var(--w, 0) * var(--s)), 1);
+}
+.about-lead p { --wc: 20; --s: .07; }
+.scrub-item.is-heading, .scrub-item.is-heading[data-scrub="done"] { filter: none; transform: none; }
+.about-lead.scrub-item, .about-lead.scrub-item[data-scrub="done"] { filter: none; transform: none; }
+
+.section-heading { position: relative; }
+.section-heading::after {
+  content: ""; position: absolute; left: 0; bottom: -1px; width: 220px; height: 1px;
+  background: var(--red); transform: scaleX(var(--p, 1)); transform-origin: left; pointer-events: none;
+}
+.engineering .section-heading::after { display: none; }
+.section-heading-copy { transition: opacity var(--dur-base) var(--ease-out); }
+[data-state="past"] .section-heading-copy { opacity: .55; }
+
+@media (max-width: 699px) {
+  /* celular: sem recorte, só a revelação em opacidade que já existe */
+  .kw { display: inline; overflow: visible; padding: 0; margin: 0; }
+  .kw-i { display: inline; transform: none; }
+  .section-heading::after { display: none; }
+  [data-state="past"] .section-heading-copy { opacity: 1; }
+}
+
+/* ── 1.1  Linha condutora (ver Thread.tsx) ───────────────────────────────── */
+.site-shell { position: relative; }
+.thread { position: absolute; inset: 0; z-index: 4; pointer-events: none; }
+.thread[hidden] { display: none; }
+.thread svg { position: absolute; left: 0; top: 0; overflow: visible; }
+.thread path { fill: none; stroke: var(--red); stroke-width: 1.25; stroke-linecap: round; stroke-linejoin: round; stroke-opacity: .9; }
+.thread-stop line[data-off] { display: none; }
+.thread-stop line { stroke: var(--red); stroke-width: 1; opacity: 0; transition: opacity var(--dur-base) var(--ease-out); }
+.thread-stop circle {
+  fill: var(--red); stroke: var(--red); stroke-width: 1.25;
+  transform-box: fill-box; transform-origin: center; transform: scale(0);
+  transition: transform var(--dur-base) var(--ease-out);
+}
+.thread-stop[data-stop^="cap"] circle { fill: var(--bg); }
+.thread-stop[data-on="true"] circle { transform: scale(1); }
+.thread-stop[data-on="true"] line { opacity: .55; }
+
+/* 5.1  Convergência: o ramo final fecha no botão principal, uma única vez. */
+.thread [data-seg="hook"] { stroke-dashoffset: var(--thread-hook, 0px); transition: stroke-dashoffset var(--dur-cine) var(--ease-io) 200ms; }
+.thread[data-converged="true"] [data-seg="hook"] { stroke-dashoffset: 0; }
+.thread [data-seg="pulse"] { stroke: var(--red-soft); stroke-width: 2; stroke-dasharray: 70px var(--thread-len, 0px); stroke-dashoffset: 70px; opacity: 0; }
+.thread[data-converged="true"] [data-seg="pulse"] { animation: thread-pulse 1400ms var(--ease-io) 1 both; }
+.thread-focus { opacity: 0; transition: opacity var(--dur-base) var(--ease-out) 1000ms; }
+.thread[data-converged="true"] .thread-focus { opacity: 1; }
+.thread-focus-dot { fill: var(--red); }
+.thread-focus-ring { fill: none; stroke: var(--red); stroke-width: 1; transform-box: fill-box; transform-origin: center; opacity: 0; }
+.thread[data-converged="true"] .thread-focus-ring { animation: thread-ring 1300ms var(--ease-out) 1100ms 1 both; }
+@keyframes thread-pulse {
+  0%   { opacity: 0;  stroke-dashoffset: 70px; }
+  10%  { opacity: .9; }
+  90%  { opacity: .9; }
+  100% { opacity: 0;  stroke-dashoffset: calc(var(--thread-len, 0px) * -1); }
+}
+@keyframes thread-ring {
+  from { opacity: .8; transform: scale(1); }
+  to   { opacity: 0;  transform: scale(4.5); }
+}
+.thread[data-static="true"] [data-seg="pulse"], .thread[data-static="true"] .thread-focus-ring { display: none; }
+
+/* ── B  Textura cinematográfica ──────────────────────────────────────────────
+   Granulação fina, estática: um ladrilho SVG de 160px (rasterizado uma vez,
+   sem JavaScript e sem filtro em tela cheia), a 5% de opacidade. Fica abaixo
+   da barra de navegação e dos diálogos. */
+body::before {
+  content: ""; position: fixed; inset: 0; z-index: 45; pointer-events: none; opacity: .05;
+  background-size: 160px 160px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+@media (max-width: 699px) { body::before { opacity: .04; } }
+
+/* ── Movimento reduzido: tudo parado e legível ───────────────────────────── */
+html[data-effects="reduced"] .kw, 
+html[data-effects="reduced"] .kw-i { transform: none; }
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   FASE 2 — Hero e Sobre
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* 2.3  Iluminação interativa: halo vermelho atrás da palavra e do retrato.
+   Só opacidade e transform; some quando o cursor sai; não existe em toque. */
+.hero-light {
+  position: absolute; z-index: 1; left: 0; top: 0; width: min(70cqw, 760px); aspect-ratio: 1;
+  border-radius: 50%; pointer-events: none; opacity: 0;
+  background: radial-gradient(closest-side, rgb(var(--red-rgb) / .2), rgb(var(--red-rgb) / .07) 50%, transparent 100%);
+  transition: opacity var(--dur-slow) var(--ease-out);
+}
+.hero[data-light="on"] .hero-light { opacity: 1; }
+.hero[data-parallax="on"] .hero-light, .hero[data-parallax="on"] .hero-portrait { will-change: transform; }
+@media (hover: none), (pointer: coarse), (prefers-reduced-motion: reduce) { .hero-light { display: none; } }
+html[data-effects="reduced"] .hero-light { display: none; }
+
+/* 2.4  Botões magnéticos: o conteúdo interno acompanha o ponteiro (useMagnetic).
+   O hover do CTA do Hero passa para o desenho da seta (propriedade `translate`),
+   porque o `transform` do conteúdo é do hook. */
+.mag-inner { display: inline-flex; align-items: center; gap: 10px; will-change: auto; }
+.hero-arrow .mag-inner { display: block; width: 100%; }
+.hero-arrow:hover { transform: none; }
+.hero-arrow svg { transition: translate var(--dur-base) var(--ease-out); }
+.hero-arrow:hover svg, .hero-arrow:focus-visible svg { translate: calc(6px * var(--mi)) 0; }
+.hero-arrow::after { content: ""; position: absolute; inset: -16px -10px; } /* área de toque de 44px */
+.hero-arrow:active .mag-inner { scale: .94; }
+.hero-arrow .mag-inner { transition: scale var(--dur-fast) var(--ease-out); }
+
+/* 2.5  Indicador de rolagem: o traço onde a linha condutora nasce.
+   Um ponto desce devagar; some ao primeiro movimento de rolagem e para de
+   animar quando o Hero sai de vista. */
+.hero-scroll { position: absolute; z-index: 3; left: calc(50% - 22px); bottom: 0; display: block; width: 44px; height: 88px; }
+.hero-scroll span {
+  position: absolute; left: 50%; bottom: 0; width: 1px; height: 64px; background: linear-gradient(to bottom, transparent, var(--red));
+  transition: opacity var(--dur-base) var(--ease-out);
+}
+.hero-scroll i {
+  position: absolute; left: -2px; top: 0; width: 5px; height: 5px; border-radius: 50%; background: var(--red-soft); opacity: 0;
+  animation: hero-scroll-dot 2800ms var(--ease-io) infinite;
+}
+@keyframes hero-scroll-dot {
+  0%   { opacity: 0; transform: translate3d(0, 0, 0); }
+  18%  { opacity: 1; }
+  78%  { opacity: 1; }
+  100% { opacity: 0; transform: translate3d(0, 58px, 0); }
+}
+html[data-scrolled="true"] .hero-scroll { visibility: hidden; transition: visibility 0s linear var(--dur-base); }
+html[data-scrolled="true"] .hero-scroll span { opacity: 0; }
+html[data-scrolled="true"] .hero-scroll i, html[data-hero="away"] .hero-scroll i { animation-play-state: paused; }
+@media (max-width: 700px) { .hero-scroll { height: 72px; } .hero-scroll span { height: 48px; } }
+@media (prefers-reduced-motion: reduce) { .hero-scroll i { display: none; } }
+html[data-effects="reduced"] .hero-scroll i { display: none; }
+
+/* 2.1 / 2.6  Sobre: frase de destaque por palavras (ver .kw) e tags */
+.about-tags a {
+  position: relative; padding: 7px 10px; border: 1px solid var(--line); border-radius: 7px; background: rgba(255, 255, 255, .018);
+  color: var(--muted); font: 11px var(--mono); text-decoration: none;
+  transition: transform var(--dur-fast) var(--ease-out), border-color var(--dur-fast), color var(--dur-fast), background-color var(--dur-fast);
+}
+.about-tags a::after { content: ""; position: absolute; inset: -8px -2px; } /* área de toque maior, sem mexer no layout */
+.about-tags a:hover, .about-tags a:focus-visible {
+  transform: translate3d(0, calc(-2px * var(--mi)), 0); border-color: var(--red-line); background: var(--red-wash); color: var(--text);
+  text-decoration: underline; text-decoration-color: var(--red-line); text-underline-offset: 4px;
+}
+.about-tags a:active { scale: .96; }
+
+/* 2.6  Camadas decorativas de Sobre: duas velocidades de parallax (--sp vem de
+   useScrollDepth). Ficam atrás do texto e não carregam informação. */
+.about-deco { position: absolute; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+.about-deco-glyph {
+  position: absolute; right: -1vw; top: 16%; color: transparent; -webkit-text-stroke: 1px rgb(255 255 255 / .06);
+  font: 400 clamp(260px, 38vw, 560px) / 1 "Hero Anton", Impact, "Arial Narrow", sans-serif; user-select: none;
+  transform: translate3d(0, calc(var(--sp, 0) * -48px * var(--mi)), 0);
+}
+.about-deco-glow {
+  position: absolute; right: 4%; top: 28%; width: 46vw; aspect-ratio: 1; border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(var(--red-deep-rgb) / .1), transparent);
+  transform: translate3d(0, calc(var(--sp, 0) * 96px * var(--mi)), 0);
+}
+@media (max-width: 699px) { .about-deco-glyph { top: 8%; opacity: .7; } }
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   FASE 3 — Projetos
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* 3.1 / 3.2  Mockup em planos: fundo (moldura), meio (captura), frente
+   (numeração e marcas de canto). A inclinação (--rx/--ry, graus) vem de
+   useTilt; a sombra usa as mesmas variáveis e se afasta da inclinação.
+   A máscara de entrada fica em .pg-shot-mask para não cortar a inclinação. */
+.pg-scene { position: relative; perspective: 1100px; }
+.pg-tilt {
+  position: relative; transform-style: preserve-3d;
+  transform: rotateX(calc(var(--rx, 0) * 1deg)) rotateY(calc(var(--ry, 0) * 1deg));
+  transition: transform var(--dur-base) var(--ease-out);
+}
+.pg-scene[data-tilt="on"] .pg-tilt { will-change: transform; }
+.pg-shot-mask { position: relative; display: block; min-width: 0; }
+.pg-plane {
+  position: absolute; inset: 12px -12px -12px 12px; pointer-events: none; transform: translateZ(-26px);
+  border: 1px solid rgb(var(--red-rgb) / .28); border-radius: 4px; background: rgb(var(--red-rgb) / .04);
+}
+.pg-panel[data-accent="white"] .pg-plane { border-color: var(--line-strong); background: rgba(255, 255, 255, .02); }
+.pg-shadow {
+  position: absolute; inset: 8% 6% -6%; pointer-events: none;
+  background: radial-gradient(closest-side, rgba(0, 0, 0, .65), transparent 92%);
+  transform: translate3d(calc(var(--ry, 0) * -2.5px), calc(var(--rx, 0) * 2.5px + 14px), 0);
+  transition: transform var(--dur-base) var(--ease-out);
+}
+.pg-tag {
+  position: absolute; left: 2px; top: -24px; color: var(--accent); font: 11px var(--mono); letter-spacing: .08em;
+  transform: translateZ(40px); pointer-events: none;
+}
+.pg-corners { position: absolute; inset: -10px; pointer-events: none; transform: translateZ(24px); opacity: .75; }
+.pg-corners i { position: absolute; width: 14px; height: 14px; border: 0 solid var(--accent); }
+.pg-corners i:nth-child(1) { top: 0; left: 0; border-width: 1px 0 0 1px; }
+.pg-corners i:nth-child(2) { top: 0; right: 0; border-width: 1px 1px 0 0; }
+.pg-corners i:nth-child(3) { bottom: 0; left: 0; border-width: 0 0 1px 1px; }
+.pg-corners i:nth-child(4) { bottom: 0; right: 0; border-width: 0 1px 1px 0; }
+
+/* 3.3  Revelação por máscara. Modo galeria: o recorte já era guiado pela
+   posição (--r); agora vive na máscara. Modo em sequência: abre uma vez ao
+   entrar na tela. Sem o atributo (sem JS, sem observer, movimento reduzido)
+   a captura aparece inteira. */
+.pg[data-mode="scroll"] .pg-shot { clip-path: none; }
+.pg[data-mode="scroll"] .pg-shot-mask { clip-path: inset(0 calc((1 - var(--r)) * 100%) 0 0); }
+.pg[data-mode="scroll"] :is(.pg-plane, .pg-shadow, .pg-tag, .pg-corners) { opacity: var(--r); }
+.pg-shot-mask[data-reveal="pending"] { clip-path: inset(0 100% 0 0); }
+.pg-shot-mask[data-reveal="done"] { clip-path: inset(0 0 0 0); transition: clip-path var(--dur-cine) var(--ease-io); }
+.pg[data-mode="stacked"] :is(.pg-plane, .pg-shadow, .pg-tag, .pg-corners) { transition: opacity var(--dur-slow) var(--ease-out) 300ms; }
+.pg[data-mode="stacked"]:has([data-reveal="pending"]) .pg-shot:has([data-reveal="pending"]) :is(.pg-plane, .pg-shadow, .pg-tag, .pg-corners) { opacity: 0; }
+@media (max-width: 767px) { .pg-plane { inset: 8px -8px -8px 8px; } .pg-corners { inset: -8px; } }
+
+/* 3.5  Cursor contextual: rótulo curto ao lado do cursor nativo (OpenCursor). */
+.cursor-tag {
+  position: fixed; z-index: 91; left: 0; top: 0; padding: 6px 10px; border-radius: 6px; background: #fff; color: var(--bg);
+  font: 700 11px / 1 var(--mono); letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; pointer-events: none;
+  opacity: 0; transition: opacity var(--dur-fast) var(--ease-out); will-change: transform;
+}
+.cursor-tag[data-visible="true"] { opacity: 1; }
+@media (hover: none), (pointer: coarse) { .cursor-tag { display: none; } }
+
+/* 3.6  Indicador de posição: marcas por projeto na barra e contador. */
+.pg-bar { overflow: visible; }
+.pg-bar b {
+  position: absolute; top: -4px; width: 1px; height: 9px; left: calc(var(--k) / var(--m) * 100%);
+  background: var(--line-strong); transition: background-color var(--dur-base) var(--ease-out);
+}
+.pg-bar b[data-reached="true"] { background: var(--red); }
+.pg-count { flex: none; min-width: 6ch; color: var(--dim); font: 11px var(--mono); letter-spacing: .06em; text-align: right; }
+
+/* 3.4  Apresentação ampliada: a captura é a mesma do card (FLIP em
+   ProjectDetailsDialog). O painel só faz fade, para a medida do FLIP não
+   incluir o movimento de entrada. */
+.pd-panel { animation: lightbox-in 220ms var(--ease-out) both; }
+.pd-hero { display: grid; gap: clamp(20px, 3vw, 36px); }
+.pd-hero[data-has-image="true"] { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); align-items: start; }
+.pd-shot { margin: 0; overflow: hidden; border: 1px solid var(--line-strong); border-radius: 4px; background: #0d0d0d; transform-origin: top left; }
+.pd-shot img { display: block; width: 100%; aspect-ratio: 16 / 10; object-fit: cover; object-position: top left; }
+.pd-intro { display: grid; align-content: start; gap: 16px; }
+.pd-status { display: flex; align-items: center; gap: 9px; margin: 0; color: var(--muted); font: 11px var(--mono); letter-spacing: .04em; text-transform: uppercase; }
+.pd-status span { width: 6px; height: 6px; border-radius: 50%; background: var(--red); box-shadow: 0 0 8px rgb(var(--red-rgb) / .6); }
+.pd-links { display: flex; flex-wrap: wrap; gap: 10px; }
+@media (max-width: 767px) { .pd-hero[data-has-image="true"] { grid-template-columns: 1fr; } }
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   FASE 4 — Engenharia e Trajetória
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* 4.1–4.3  Rede de tecnologias (ver StackExplorer.tsx).
+   Em telas largas, nós (tabela) à esquerda, projetos à direita e as linhas
+   entre eles; em telas estreitas, sem linhas e com a coluna de projetos
+   abaixo. As linhas ficam ATRÁS dos nós (nós com fundo sólido). */
+.net { --net-lines: off; position: relative; display: grid; gap: 28px; }
+@media (min-width: 1100px) {
+  .net { --net-lines: on; grid-template-columns: minmax(0, 1fr) 230px; column-gap: 88px; align-items: start; }
+}
+.net-lines { position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+.net-lines path { fill: none; stroke-linecap: round; }
+.net-line-selected { stroke: var(--red); stroke-width: 1.25; opacity: .85; stroke-dasharray: 1; animation: net-draw var(--dur-slow) var(--ease-out) both; }
+.net-line-hover { stroke: var(--dim); stroke-width: 1; stroke-dasharray: 3 5; opacity: .7; }
+.net-pulse { stroke: var(--red-soft); stroke-width: 2.25; stroke-dasharray: .1 1; opacity: 0; animation: net-pulse 900ms var(--ease-io) 120ms 1 both; }
+@keyframes net-draw  { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes net-pulse {
+  0%   { opacity: 0;  stroke-dashoffset: .1; }
+  15%  { opacity: .95; }
+  85%  { opacity: .95; }
+  100% { opacity: 0;  stroke-dashoffset: -1; }
+}
+@media (prefers-reduced-motion: reduce) { .net-pulse { display: none; } .net-line-selected { animation: none; } }
+html[data-effects="reduced"] .net-pulse { display: none; }
+html[data-effects="reduced"] .net-line-selected { animation: none; }
+
+.net .stack-table, .net .net-projects { position: relative; z-index: 1; }
+
+/* Nós: estados distintos entre si.
+   hover      → contorno e texto mais claros (pré-visualiza)
+   selecionado→ fundo vermelho, texto vermelho e sublinhado interno (forma, não só cor)
+   relacionado→ destaque secundário (contorno)
+   demais     → menos intensidade, continuam legíveis */
+.net .stack-items button {
+  position: relative; background: var(--bg); border-color: var(--line); color: var(--muted);
+  transform: translate3d(calc(var(--nx, 0) * 2px), calc(var(--ny, 0) * 2px), 0);
+  transition: transform var(--dur-fast) var(--ease-out), border-color var(--dur-fast), color var(--dur-fast), opacity var(--dur-base) var(--ease-out), background-color var(--dur-fast);
+}
+.net .stack-items button::before { /* anel de proximidade */
+  content: ""; position: absolute; inset: -1px; border: 1px solid var(--red); border-radius: 7px; pointer-events: none;
+  opacity: calc(var(--near, 0) * .7);
+}
+.net .stack-items button[data-rel="false"] { opacity: .55; }
+.net .stack-items button[data-rel="true"] { border-color: var(--line-strong); color: var(--text); }
+.net .stack-items button:hover:not([data-selected="true"]) { border-color: var(--line-strong); color: var(--text); background: var(--bg); opacity: 1; }
+.net .stack-items button[data-selected="true"] {
+  border-color: var(--red); color: var(--red-soft); opacity: 1; box-shadow: inset 0 -2px 0 var(--red);
+  background: linear-gradient(var(--red-wash), var(--red-wash)), var(--bg);
+}
+.net .stack-items button:active { scale: .96; }
+
+/* Coluna de projetos: pontos onde as linhas terminam. */
+.net-projects { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--line); }
+.net-projects li {
+  display: grid; grid-template-columns: 14px 1fr; column-gap: 12px; align-items: center; padding: 14px 0;
+  border-bottom: 1px solid var(--line); transition: opacity var(--dur-base) var(--ease-out);
+}
+.net-projects li[data-related="false"] { opacity: .55; }
+.net-dot { grid-row: 1 / span 2; align-self: center; width: 9px; height: 9px; border: 1px solid var(--line-strong); border-radius: 50%; background: var(--bg); transition: background-color var(--dur-base), border-color var(--dur-base), transform var(--dur-base) var(--ease-out); }
+.net-projects li[data-related="true"] .net-dot { border-color: var(--red); background: var(--red); transform: scale(1.25); }
+.net-link { grid-column: 2; color: var(--text); font-size: 14px; font-weight: 600; letter-spacing: -.01em; text-decoration: none; }
+.net-link:hover { text-decoration: underline; text-decoration-color: var(--red-line); text-underline-offset: 4px; }
+.net-projects small { grid-column: 2; color: var(--dim); font: 10px var(--mono); letter-spacing: .06em; text-transform: uppercase; }
+.net-projects li[data-related="true"] small { color: var(--red-soft); }
+.tech-context-count { color: var(--dim); }
+@media (max-width: 1099px) {
+  .net-projects { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); column-gap: 28px; border-top: 0; }
+  .net-projects li { border-top: 1px solid var(--line); border-bottom: 0; }
+}
+
+/* 4.4 / 4.5  Marcos e cartões da Trajetória.
+   O "cartão" é uma superfície atrás do texto (pseudo-elemento) que se levanta
+   no hover/foco/abertura, sem mudar o layout. */
+.timeline-copy { position: relative; isolation: isolate; }
+.timeline-copy::before {
+  content: ""; position: absolute; z-index: -1; inset: -14px -12px -14px -12px; border: 1px solid var(--line); border-radius: 10px;
+  background: var(--surface); box-shadow: 0 18px 40px rgba(0, 0, 0, .35); opacity: 0; transform: translate3d(0, calc(6px * var(--mi)), 0);
+  transition: opacity var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out); pointer-events: none;
+}
+.timeline-item:hover .timeline-copy::before, .timeline-item:focus-within .timeline-copy::before, .timeline-item[data-open="true"] .timeline-copy::before { opacity: 1; transform: none; }
+.timeline-item[data-open="true"] .timeline-copy::before { border-color: var(--red-line); }
+
+.timeline-toggle {
+  display: inline; padding: 0; border: 0; background: none; color: inherit; font: inherit; letter-spacing: inherit; text-align: left; cursor: pointer;
+  text-decoration: underline; text-decoration-color: var(--line-strong); text-underline-offset: 4px; transition: text-decoration-color var(--dur-fast);
+}
+.timeline-toggle:hover, .timeline-toggle:focus-visible { text-decoration-color: var(--red); }
+.timeline-toggle svg { display: inline-block; margin-left: 6px; vertical-align: -2px; color: var(--red-soft); transition: transform var(--dur-base) var(--ease-out); }
+.timeline-toggle[aria-expanded="true"] svg { transform: rotate(180deg); }
+.timeline-more { display: grid; gap: 16px; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line); animation: timeline-more-in var(--dur-base) var(--ease-out) both; }
+.timeline-more[hidden] { display: none; }
+@keyframes timeline-more-in { from { opacity: 0; transform: translate3d(0, calc(-6px * var(--mi)), 0); } }
+.timeline-project strong { display: block; color: var(--text); font-size: 13px; }
+.timeline-project small { display: block; margin-top: 2px; color: var(--red-soft); font: 10px var(--mono); letter-spacing: .05em; text-transform: uppercase; }
+.timeline-project p { margin: 8px 0 0; }
+.timeline-project ul { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 0; padding: 0; list-style: none; }
+.timeline-project li { padding: 4px 8px; border: 1px solid var(--line); border-radius: 6px; color: var(--muted); font: 10px var(--mono); }
+.timeline-close { justify-self: start; padding: 6px 0; border: 0; background: none; color: var(--muted); font: 11px var(--mono); letter-spacing: .04em; text-decoration: underline; text-underline-offset: 4px; cursor: pointer; }
+.timeline-close:hover { color: var(--text); }
+.timeline-bot { display: inline-flex; align-items: center; gap: 7px; margin-top: 12px; color: var(--red-soft); font: 11px var(--mono); letter-spacing: .04em; text-decoration: underline; text-decoration-color: rgb(var(--red-rgb) / .45); text-underline-offset: 4px; }
+.timeline-bot:hover { color: var(--text); }
+
+/* resposta breve ao abrir um marco: anel que se expande uma vez */
+.timeline-item .timeline-marker span { position: relative; }
+.timeline-item[data-pulse="true"] .timeline-marker span::after {
+  content: ""; position: absolute; inset: -1px; border: 1px solid var(--red); border-radius: 50%; pointer-events: none;
+  animation: marker-ring 700ms var(--ease-out) 1 both;
+}
+@keyframes marker-ring { from { opacity: .9; transform: scale(1); } to { opacity: 0; transform: scale(2.2); } }
+@media (max-width: 899px) { .timeline-copy::before { inset: -10px -8px; } }
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   FASE 5 — Contato e acabamento
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* 5.2  Tipografia de encerramento: a mesma linguagem do Hero (palavras
+   recortadas), com menos deslocamento (72% contra 110%) e disparo único ao
+   entrar na tela (.is-visible). A frase de apoio entra depois do título. */
+.contact-copy .kw-i {
+  --q: 0;
+  transform: translate3d(0, calc((1 - var(--q)) * 72% * var(--mi)), 0);
+  transition: transform var(--dur-cine) var(--ease-out) calc(120ms + var(--w, 0) * 60ms);
+}
+.contact-copy.is-visible .kw-i { --q: 1; }
+.contact-copy > p {
+  transition: opacity var(--dur-slow) var(--ease-out) 420ms, transform var(--dur-slow) var(--ease-out) 420ms;
+}
+.contact-copy:not(.is-visible) > p { opacity: 0; transform: translate3d(0, var(--dist-s), 0); }
+@media (max-width: 699px) { .contact-copy .kw-i { transform: none; transition: none; } }
+
+/* 5.1  Convergência: quando a linha condutora chega ao botão (Thread.tsx
+   marca html[data-converged]), a luz de fundo sobe uma vez em direção ao
+   ponto focal. Nada anima depois. */
+.contact::before {
+  transition: transform 1400ms var(--ease-io) 200ms;
+}
+html[data-converged="true"] .contact::before {
+  transform: translate3d(calc(70px * var(--mi)), calc(-170px * var(--mi)), 0);
+}
+
+/* 5.3  Botão principal: pressão (propriedade `scale`, que convive com o
+   `transform` magnético) e estado de abertura. */
+.contact-button { position: relative; overflow: hidden; }
+.contact-button:active { scale: .97; }
+.contact-button::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0;
+  background: linear-gradient(100deg, transparent 20%, rgb(255 255 255 / .28) 50%, transparent 80%); transform: translateX(-100%);
+}
+.contact-button[data-state="opening"]::after { animation: contact-open 900ms var(--ease-io) 1 both; }
+.contact-button[data-state="opening"] svg:last-child { transform: translate(3px, -3px) rotate(8deg); }
+@keyframes contact-open {
+  0%   { opacity: 1; transform: translateX(-100%); }
+  100% { opacity: 1; transform: translateX(100%); }
+}
+.contact-button:hover { transform: none; } /* o `transform` é do hook magnético */
+
+/* 5.4  Links sociais: um traço vermelho cresce sob o item e o ícone avança.
+   Só transform e opacidade; o foco usa o mesmo traço (mais o contorno global). */
+.contact-links > a, .contact-email > a { position: relative; }
+.contact-links > a::after, .contact-email > a::after {
+  content: ""; position: absolute; left: 0; bottom: -1px; width: 100%; height: 1px; background: var(--red);
+  transform: scaleX(0); transform-origin: left; transition: transform var(--dur-base) var(--ease-out); pointer-events: none;
+}
+.contact-email > a::after { bottom: -1px; }
+.contact-links > a:hover::after, .contact-links > a:focus-visible::after,
+.contact-email > a:hover::after, .contact-email > a:focus-visible::after { transform: scaleX(1); }
+.contact-links > a > span > svg:first-child, .contact-email > a > span > svg:first-child { transition: transform var(--dur-base) var(--ease-out), color var(--dur-base); }
+.contact-links > a:hover > span > svg:first-child, .contact-links > a:focus-visible > span > svg:first-child,
+.contact-email > a:hover > span > svg:first-child, .contact-email > a:focus-visible > span > svg:first-child { color: var(--text); transform: translateX(calc(3px * var(--mi))); }
+.contact-links > a:focus-visible > svg:last-child, .contact-email > a:focus-visible > svg:last-child { color: var(--red-soft); transform: translate(2px, -2px); }
+
+/* Rodapé: o traço vermelho do título volta a aparecer sobre a linha do rodapé
+   quando a convergência acontece, e a linha se dissolve nas pontas, para o
+   rodapé ler como continuação do Contato e não como uma seção nova. */
+.footer { position: relative; border-top: 0; }
+.footer::before {
+  content: ""; position: absolute; left: 0; right: 0; top: 0; height: 1px; pointer-events: none;
+  background: linear-gradient(90deg, transparent, var(--line-strong) 18%, var(--line-strong) 82%, transparent);
+}
+.footer .container { position: relative; }
+.footer .container::before {
+  content: ""; position: absolute; left: 0; top: -28px; width: 220px; height: 1px; background: var(--red);
+  transform: scaleX(0); transform-origin: left; transition: transform var(--dur-cine) var(--ease-io) 600ms;
+}
+html[data-converged="true"] .footer .container::before { transform: scaleX(1); }
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Acabamento global
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* A  Rastro do cursor (CursorTrail.tsx): 4 pontos, só no Hero e no palco de
+   Projetos, só com mouse; some parado e nunca cobre links. */
+.cursor-trail { position: fixed; inset: 0; z-index: 46; pointer-events: none; opacity: 0; transition: opacity var(--dur-base) var(--ease-out); }
+.cursor-trail[data-on="true"] { opacity: 1; }
+.cursor-trail span {
+  position: absolute; left: -4px; top: -4px; width: calc(8px - var(--i) * 1.5px); height: calc(8px - var(--i) * 1.5px); border-radius: 50%;
+  background: var(--red-soft); opacity: calc(.5 - var(--i) * .11); will-change: transform;
+}
+@media (hover: none), (pointer: coarse), (prefers-reduced-motion: reduce) { .cursor-trail { display: none; } }
+html[data-effects="reduced"] .cursor-trail { display: none; }
+
+/* C  Estados compartilhados: hover indica, foco-visível localiza, clique
+   confirma, desabilitado se distingue por forma (opacidade + cursor), não só
+   por cor. Os componentes novos já usam estas mesmas durações e curvas. */
+:where(button, [role="button"], a.button):disabled, :where(button):disabled { cursor: not-allowed; }
+.pg-frame-action:disabled { cursor: default; }

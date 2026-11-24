@@ -1,78 +1,75 @@
 # Muryllo Douglas — Portfólio
 
-Estudante do Ensino Médio Integrado ao Técnico em Informática no **IFPB — Campus Itaporanga** e desenvolvedor em formação. Este repositório é o código-fonte do meu portfólio pessoal e também um retrato de como venho aumentando a complexidade dos projetos: de landing pages para sistemas com API própria, banco relacional, autorização no servidor, testes e deploy automatizado.
+Estudante de Informática (Ensino Médio Integrado ao Técnico) no **IFPB Campus Itaporanga** e desenvolvedor em formação. Este repositório é o código-fonte do meu portfólio pessoal — e também um retrato de como venho evoluindo de landing pages para sistemas com autenticação, banco de dados e regras de autorização reais.
 
 **[Ver portfólio ao vivo →](https://portfolio-c1u.pages.dev/)**
-
-> Não estou tentando parecer alguém com anos de experiência que não tenho. Estou mostrando o que consigo construir agora, e procuro um **estágio ou posição inicial** para continuar evoluindo em um time.
 
 ---
 
 ## Sobre mim
 
-Construo projetos próprios porque acredito que a melhor forma de aprender é fazendo. Meu foco é desenvolvimento web e engenharia de software, e nos últimos projetos ampliei o alcance: do front-end para **APIs com banco relacional, autorização, testes e CI/CD** e, mais recentemente, para **aplicações desktop com núcleo em Rust**. Também me interesso por automação, segurança, estruturas de dados e robótica.
+Sou estudante do 2º ano do Técnico em Informática no IFPB Itaporanga, construindo projetos reais como forma prática de aprender desenvolvimento de software. Meu foco está em desenvolvimento web (front-end e back-end), automação e, mais recentemente, arquitetura e estruturas de dados — a base para sistemas mais complexos do que os que eu conseguia construir há um ano.
+
+Não é um portfólio de "faço sites". É o histórico de alguém aumentando a complexidade técnica projeto a projeto: de landing pages estáticas para uma plataforma com quatro perfis de usuário, Firestore e regras de segurança testadas.
+
+## O que estou construindo
+
+A progressão dos meus projetos segue um caminho direto:
 
 ```
-Landing pages  →  Autenticação e dados  →  Backend próprio e banco relacional  →  Desktop com Rust
+Landing Pages  →  Interfaces com lógica  →  Autenticação e dados  →  Autorização e arquitetura
 ```
+
+Comecei com páginas e interfaces para fixar HTML, CSS, JavaScript e responsividade. De lá, passei para aplicações com lógica de negócio real — e hoje trabalho no **Tekidu**, onde autenticação, banco de dados, papéis de usuário e regras de segurança deixaram de ser conceito e passaram a ser código em produção.
 
 ## Projetos em destaque
 
-Projetos principais, escolhidos pela profundidade técnica e pelo problema que resolvem. Cada um tem página de detalhes no portfólio (problema, solução, arquitetura e limitações declaradas).
-
-### ⚖️ [LexContract](https://github.com/muryllodouglashsoares/law-contract-management) — em desenvolvimento
-
-Sistema de gestão de contratos jurídicos para advogados autônomos e pequenos escritórios: centraliza clientes, modelos, contratos, documentos, pagamentos e auditoria. É o projeto com maior amplitude técnica do portfólio.
-
-- **Segurança:** login com JWT; permissões por papel (`ADMIN`, `LAWYER`, `ASSISTANT`) verificadas **no backend**, não só escondidas na interface; isolamento de dados entre escritórios (multi-tenant) em toda leitura e escrita.
-- **Contratos:** modelos com variáveis, criação em etapas, versionamento do conteúdo, transições de status controladas e aceite eletrônico por link público de uso único (assinatura eletrônica simples, não ICP-Brasil).
-- **Qualidade e entrega:** testes no backend com PostgreSQL real no CI, 4 fluxos E2E em Playwright e pipeline no GitHub Actions que só publica após typecheck, build, testes, E2E e build das imagens Docker passarem.
-- **Stack:** React 19 · TypeScript · Vite · Tailwind CSS 4 · Node.js · Fastify · PostgreSQL · Prisma · Zod · Vitest · Playwright · Docker · GitHub Actions
-- 🔗 [Demo](https://law-contract-management.pages.dev/) · [Repositório](https://github.com/muryllodouglashsoares/law-contract-management)
-
-### 🔎 [Evidence Finder](https://github.com/muryllodouglashsoares/evidence-finder) — em desenvolvimento
-
-Aplicativo desktop que organiza e pesquisa PDFs, imagens, textos e conversas, sempre com referência à fonte e exportação de evidências. Processamento 100% local: o código não tem cliente de rede nem telemetria.
-
-- **Pesquisa:** exata (SQLite FTS5), por significado (embeddings locais) e híbrida, com OCR local via Tesseract.
-- **Exportação:** relatório em PDF e `manifest.json`, com SHA-256 para verificar se a fonte continua a mesma.
-- **Stack:** Tauri 2 · Rust · React 19 · TypeScript · SQLite (FTS5) · Tesseract · Vitest
-- **Estado atual:** versão 0.1.0, testada em Linux. Validação no Windows, instalador e release para download ainda estão pendentes.
-- 🔗 [Repositório](https://github.com/muryllodouglashsoares/evidence-finder)
-
-### 🌿 [GitFlow Desktop](https://github.com/muryllodouglashsoares/gitflow) — em desenvolvimento
-
-Interface desktop para operar repositórios Git locais: branches, revisão de diff, commit seletivo e sincronização remota com bloqueios de segurança.
-
-- **Como:** o núcleo em Rust executa o Git sem shell e só reporta sucesso quando o Git comprova o resultado (HEAD avançou, push sem linhas rejeitadas).
-- **Segurança:** push sem `--force`; `main` e `master` exigem segunda confirmação, validada também no backend; o app não armazena credenciais.
-- **Stack:** Tauri · Rust · React · TypeScript · Git CLI
-- **Estado atual:** fases 1 a 3 (leitura, operações locais e sincronização remota) implementadas. Ainda sem instalador: hoje roda em modo de desenvolvimento.
-- 🔗 [Repositório](https://github.com/muryllodouglashsoares/gitflow)
-
 ### 🎓 [Tekidu](https://github.com/muryllodouglashsoares/Tekidu) — em desenvolvimento
 
-Plataforma de gestão acadêmica com quatro experiências separadas: administrador, professor, estudante e responsável.
+O projeto de maior complexidade do portfólio. Uma plataforma de gestão e acompanhamento acadêmico com quatro experiências separadas — administrador, professor, estudante e responsável — cada uma com telas e permissões próprias.
 
-- **O que resolve:** notas, frequência, boletim e avisos espalhados entre planilhas e sistemas separados.
-- **Como:** Firebase Auth (login, primeiro acesso, recuperação de senha), dados no Cloud Firestore, exportação em PDF e Excel, justificativas de falta com anexo, interface mobile dedicada, PWA instalável e painel de acessibilidade.
-- **Detalhe técnico:** a autorização por perfil é garantida pelas **Firestore Security Rules**, com suíte de testes própria (Vitest + Firebase Emulator).
-- **Stack:** React · TypeScript · Tailwind CSS · Firebase Auth · Cloud Firestore · Vitest
+- **O que resolve:** informações acadêmicas (notas, frequência, boletim, avisos) espalhadas entre planilhas e sistemas dispersos.
+- **Como:** autenticação completa com Firebase Auth (login, primeiro acesso, recuperação de senha), dados acadêmicos no Cloud Firestore, e autorização por perfil garantida via **Firestore Security Rules** — não apenas escondida na interface.
+- **Stack:** React 18 · TypeScript · Vite · Tailwind CSS · Framer Motion · Firebase Auth · Cloud Firestore · Vitest
+- **Detalhe técnico:** as regras de segurança têm suíte de testes própria com Vitest + Firebase Emulator, e a maior parte das rotas usa `React.lazy` agrupado por perfil — um estudante não baixa o código do painel administrativo.
+- **Aprendizado:** marcou a transição de interfaces isoladas para uma aplicação com persistência de dados e autorização validada no banco.
 - 🔗 [Demo](https://tekidu.pages.dev/) · [Repositório](https://github.com/muryllodouglashsoares/Tekidu)
 
-## Outros projetos
+### 💬 [IFConnect](https://github.com/muryllodouglashsoares/IFConnect) — concluído
 
-| Projeto | Tipo | Stack | Status |
-| --- | --- | --- | --- |
-| [**IFConnect**](https://github.com/muryllodouglashsoares/plataforma-comunicacao) | Rede social acadêmica: feed, chat em tempo real e painel de moderação, em JavaScript puro | JavaScript · Firebase Auth · Realtime Database | Concluído |
-| [**Savora**](https://github.com/muryllodouglashsoares/savora-landing-page) · [demo](https://savora-landing-page.muryllodouglash-soares.workers.dev/) | Landing page e cardápio digital, com reservas ponta a ponta (formulário → server function → webhook → Google Sheets → PDF) | React 19 · TanStack Start · Tailwind CSS 4 · Motion · Cloudflare Workers | Concluído |
-| [**FORJA Training Studio**](https://github.com/muryllodouglashsoares/gym-landing-page) · [demo](https://gym-landing-page.muryllodouglash-soares.workers.dev/) | Landing page com validação de formulário no cliente e no servidor, honeypot anti-bot e SEO técnico | TanStack Start · React 19 · TypeScript · Zod | Concluído |
-| [**OdontoPrime**](https://github.com/muryllodouglashsoares/clinica-landing-page) · [demo](https://clinica-landing-page.muryllodouglash-soares.workers.dev/) | Landing page de clínica odontológica com SSR e dados estruturados JSON-LD | TanStack Start · React 19 · TypeScript | Concluído |
-| [**Mini Olimpíada de Robótica**](https://github.com/muryllodouglashsoares/mini-robotics-competition) | Seguidor de linha em LEGO Spike Prime para competição do IFPB, em blocos e em Python | LEGO Spike Prime · Python | Concluído |
+Rede social acadêmica com feed, chat em tempo real e painel de moderação, em **JavaScript puro** (sem framework de front-end).
+
+- **Stack:** JavaScript · Firebase Auth · Realtime Database
+- **Aprendizado:** veio antes do Tekidu — foi onde autenticação, tempo real e controle de acesso por cargo apareceram por conta própria, sem um framework organizando o crescimento do código.
+
+### 🍽️ [Savora](https://github.com/muryllodouglashsoares/savora-landing-page) — concluído
+
+Landing page e cardápio digital de um restaurante fictício, com animação autoral na hero e reservas ponta a ponta (React Hook Form → server function → webhook → Google Sheets → PDF).
+
+- **Stack:** React 19 · TypeScript · TanStack Start · Tailwind CSS 4 · Motion · Cloudflare Workers
+- 🔗 [Demo](https://savora-landing-page.muryllodouglash-soares.workers.dev/)
+
+### 🏋️ [FORJA Training Studio](https://github.com/muryllodouglashsoares/gym-landing-page) — concluído
+
+Landing page de alta conversão com validação dupla de formulário (cliente + servidor), campo honeypot anti-bot e SEO técnico completo (JSON-LD, Open Graph, sitemap).
+
+- **Stack:** TanStack Start · React 19 · TypeScript · Tailwind CSS 4 · React Hook Form · Zod
+- 🔗 [Demo](https://gym-landing-page.muryllodouglash-soares.workers.dev/)
+
+### 🦷 [OdontoPrime](https://github.com/muryllodouglashsoares/clinica-landing-page) — concluído
+
+Landing page de clínica odontológica renderizada via SSR, a partir de um design de referência, com dados estruturados para SEO.
+
+- **Stack:** TanStack Start · React 19 · TypeScript · Tailwind CSS
+- 🔗 [Demo](https://clinica-landing-page.muryllodouglash-soares.workers.dev/)
+
+### 🤖 [Mini Olimpíada de Robótica](https://github.com/muryllodouglashsoares/mini-robotics-competition) — concluído
+
+Robô seguidor de linha em LEGO Spike Prime para competição do IFPB, com duas abordagens comparadas: programação em blocos com dois sensores, e Python com um único sensor.
+
+- **Stack:** LEGO Spike Prime · Python · Programação em blocos
 
 ## Stack / Tecnologias
-
-Só o que já usei em projetos, e onde.
 
 **Front-end**
 ![HTML5](https://img.shields.io/badge/-HTML5-E34F26?style=flat-square&logo=html5&logoColor=white)
@@ -83,55 +80,47 @@ Só o que já usei em projetos, e onde.
 ![Tailwind CSS](https://img.shields.io/badge/-Tailwind_CSS-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)
 ![TanStack Start](https://img.shields.io/badge/-TanStack_Start-FF4154?style=flat-square)
 
-**Back-end / Dados**
-![Node.js](https://img.shields.io/badge/-Node.js-339933?style=flat-square&logo=nodedotjs&logoColor=white)
-![Fastify](https://img.shields.io/badge/-Fastify-000000?style=flat-square&logo=fastify&logoColor=white)
-![PostgreSQL](https://img.shields.io/badge/-PostgreSQL-4169E1?style=flat-square&logo=postgresql&logoColor=white)
-![Prisma](https://img.shields.io/badge/-Prisma-2D3748?style=flat-square&logo=prisma&logoColor=white)
-![SQLite](https://img.shields.io/badge/-SQLite-003B57?style=flat-square&logo=sqlite&logoColor=white)
+**Back-end / BaaS**
 ![Firebase](https://img.shields.io/badge/-Firebase-FFCA28?style=flat-square&logo=firebase&logoColor=black)
 ![Firestore](https://img.shields.io/badge/-Firestore-FFA000?style=flat-square)
 ![Zod](https://img.shields.io/badge/-Zod-3E67B1?style=flat-square)
 
-**Desktop**
-![Rust](https://img.shields.io/badge/-Rust-000000?style=flat-square&logo=rust&logoColor=white)
-![Tauri](https://img.shields.io/badge/-Tauri-24C8D8?style=flat-square&logo=tauri&logoColor=white)
-
-**Qualidade / Deploy**
-![Vitest](https://img.shields.io/badge/-Vitest-6E9F18?style=flat-square&logo=vitest&logoColor=white)
-![Playwright](https://img.shields.io/badge/-Playwright-2EAD33?style=flat-square&logo=playwright&logoColor=white)
-![Docker](https://img.shields.io/badge/-Docker-2496ED?style=flat-square&logo=docker&logoColor=white)
-![GitHub Actions](https://img.shields.io/badge/-GitHub_Actions-2088FF?style=flat-square&logo=githubactions&logoColor=white)
-![Git](https://img.shields.io/badge/-Git-F05032?style=flat-square&logo=git&logoColor=white)
+**Infraestrutura**
 ![Cloudflare](https://img.shields.io/badge/-Cloudflare-F38020?style=flat-square&logo=cloudflare&logoColor=white)
 ![Vite](https://img.shields.io/badge/-Vite-646CFF?style=flat-square&logo=vite&logoColor=white)
 
-**Robótica**
+**Ferramentas**
+![Git](https://img.shields.io/badge/-Git-F05032?style=flat-square&logo=git&logoColor=white)
+![Vitest](https://img.shields.io/badge/-Vitest-6E9F18?style=flat-square&logo=vitest&logoColor=white)
+
+**Robótica / Automação**
 ![Python](https://img.shields.io/badge/-Python-3776AB?style=flat-square&logo=python&logoColor=white)
 ![LEGO SPIKE Prime](https://img.shields.io/badge/-LEGO_SPIKE_Prime-E3000B?style=flat-square)
 
-## Atualmente estudando
+*Este portfólio em si (o código deste repositório) é construído com React 19, TypeScript, TanStack Start e Tailwind CSS 4, hospedado na Cloudflare Pages.*
 
-Sem projeto publicado ainda:
+## Atualmente estudando
 
 - Estruturas de dados e algoritmos
 - Arquitetura de software
+- Programação competitiva
+- Backend e regras de autorização
 - Robótica autônoma e automação
 
 ## Objetivos
 
-- Conquistar minha primeira oportunidade profissional na área de TI (estágio ou posição inicial)
-- Evoluir LexContract, Evidence Finder, GitFlow Desktop e Tekidu até versões estáveis, com release para download nos apps desktop
+- Aprofundar backend e modelagem de dados além do Firebase, incluindo bancos relacionais
+- Evoluir o Tekidu com mais recursos acadêmicos e melhor cobertura de testes
 - Aplicar estruturas de dados e arquitetura de software em projetos de maior escala
 - Ganhar experiência prática em automação e robótica autônoma
+- Conquistar minha primeira oportunidade profissional como desenvolvedor (estágio ou trainee)
 
 ## Contato
 
 - **Portfólio:** [portfolio-c1u.pages.dev](https://portfolio-c1u.pages.dev/)
-- **E-mail:** [muryllodouglash.soares@gmail.com](mailto:muryllodouglash.soares@gmail.com)
 - **GitHub:** [github.com/muryllodouglashsoares](https://github.com/muryllodouglashsoares)
 - **LinkedIn:** [linkedin.com/in/muryllo-douglas-henrique-soares-7a8416416](https://www.linkedin.com/in/muryllo-douglas-henrique-soares-7a8416416/)
 
 ---
 
-<sub>Este portfólio é construído com React 19, TypeScript, Vite e Tailwind CSS 4, e hospedado na Cloudflare Pages.</sub>
+<sub>Construído com React 19, TypeScript, TanStack Start e Tailwind CSS 4. Hospedado na Cloudflare Pages.</sub>

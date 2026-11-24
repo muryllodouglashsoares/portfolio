@@ -1,4 +1,6 @@
 import { useEffect, type RefObject } from "react"
+import { MOTION, intensity } from "../motion/config"
+import { CURSOR_FX_QUERY, MOTION_QUERY } from "../motion/prefs"
 
 /**
  * Efeitos tipográficos do Hero que precisam de JS. O restante (revelação e
@@ -10,27 +12,39 @@ import { useEffect, type RefObject } from "react"
  */
 
 /** Mouse real, tela grande e sem movimento reduzido. Celular/tablet = estático. */
-const PARALLAX_QUERY =
-  "(hover: hover) and (pointer: fine) and (min-width: 768px) and (prefers-reduced-motion: no-preference)"
-const MOTION_QUERY = "(prefers-reduced-motion: no-preference)"
+const PARALLAX_QUERY = CURSOR_FX_QUERY
 
 /** Deslocamento máximo (px) de cada camada. Direções opostas criam profundidade. */
-const MAIN_SHIFT = { x: 4, y: 2.5 }
-const GHOST_SHIFT = { x: -6, y: -4 }
+const MAIN_SHIFT = MOTION.heroMain
+const GHOST_SHIFT = MOTION.heroGhost
 /** Fração do caminho percorrida por quadro (interpolação suave). */
-const FOLLOW = 0.08
+const FOLLOW = MOTION.follow
+const LIGHT_FOLLOW = MOTION.lightFollow
 const EPSILON = 0.001
 
+/**
+ * Parallax do Hero em três camadas e a iluminação interativa, no mesmo laço:
+ * - `main` (palavra) e `portrait` (retrato) se movem juntos, para o contorno
+ *   do retrato continuar casado com as letras;
+ * - `ghost` (contorno) vai no sentido oposto: é ele que cria a profundidade;
+ * - `light` é um halo vermelho que segue o ponteiro com atraso maior. Fica
+ *   atrás da palavra e do retrato, então não altera o contraste do texto.
+ * O laço de quadros só roda enquanto há movimento a interpolar.
+ */
 export function useHeroParallax(
   sectionRef: RefObject<HTMLElement | null>,
   mainRef: RefObject<HTMLElement | null>,
   ghostRef: RefObject<HTMLElement | null>,
+  portraitRef: RefObject<HTMLElement | null>,
+  lightRef: RefObject<HTMLElement | null>,
 ) {
   useEffect(() => {
     const section = sectionRef.current
     const main = mainRef.current
     const ghost = ghostRef.current
-    if (!section || !main || !ghost) return
+    const portrait = portraitRef.current
+    const light = lightRef.current
+    if (!section || !main || !ghost || !portrait || !light) return
 
     const query = window.matchMedia(PARALLAX_QUERY)
     let attached = false
@@ -42,25 +56,44 @@ export function useHeroParallax(
     let ty = 0
     let cx = 0
     let cy = 0
+    // halo: alvo e posição atuais em px, relativos ao Hero
+    let lx = 0
+    let ly = 0
+    let lcx = 0
+    let lcy = 0
+    let lightOn = false
+    let k = 1 // intensidade global (--mi), lida a cada interação
 
     const paint = () => {
-      main.style.transform = `translate3d(${(cx * MAIN_SHIFT.x).toFixed(2)}px, ${(cy * MAIN_SHIFT.y).toFixed(2)}px, 0)`
-      ghost.style.transform = `translate3d(${(cx * GHOST_SHIFT.x).toFixed(2)}px, ${(cy * GHOST_SHIFT.y).toFixed(2)}px, 0)`
+      const mx = (cx * MAIN_SHIFT.x * k).toFixed(2)
+      const my = (cy * MAIN_SHIFT.y * k).toFixed(2)
+      main.style.transform = `translate3d(${mx}px, ${my}px, 0)`
+      portrait.style.transform = `translate3d(${mx}px, ${my}px, 0)`
+      ghost.style.transform = `translate3d(${(cx * GHOST_SHIFT.x * k).toFixed(2)}px, ${(cy * GHOST_SHIFT.y * k).toFixed(2)}px, 0)`
+      light.style.transform = `translate3d(${lcx.toFixed(1)}px, ${lcy.toFixed(1)}px, 0)`
     }
 
     // O loop só existe enquanto há movimento a interpolar; ao assentar, para.
     const tick = () => {
       cx += (tx - cx) * FOLLOW
       cy += (ty - cy) * FOLLOW
-      const settled = Math.abs(tx - cx) < EPSILON && Math.abs(ty - cy) < EPSILON
+      lcx += (lx - lcx) * LIGHT_FOLLOW
+      lcy += (ly - lcy) * LIGHT_FOLLOW
+      const settled =
+        Math.abs(tx - cx) < EPSILON &&
+        Math.abs(ty - cy) < EPSILON &&
+        Math.abs(lx - lcx) < 0.2 &&
+        Math.abs(ly - lcy) < 0.2
       if (settled) {
         cx = tx
         cy = ty
+        lcx = lx
+        lcy = ly
       }
       paint()
       if (settled) {
         raf = 0
-        if (tx === 0 && ty === 0) delete section.dataset.parallax
+        if (tx === 0 && ty === 0 && !lightOn) delete section.dataset.parallax
         return
       }
       raf = requestAnimationFrame(tick)
@@ -72,14 +105,29 @@ export function useHeroParallax(
     // Normaliza pela janela (sem ler layout a cada movimento).
     const onMove = (event: PointerEvent) => {
       if (event.pointerType !== "mouse") return
+      k = intensity()
       tx = Math.max(-1, Math.min(1, (event.clientX / vw) * 2 - 1))
       ty = Math.max(-1, Math.min(1, (event.clientY / vh) * 2 - 1))
+      // Halo centrado no ponteiro (o raio vem do tamanho do elemento).
+      const box = section.getBoundingClientRect()
+      const half = light.offsetWidth / 2
+      lx = event.clientX - box.left - half
+      ly = event.clientY - box.top - half
+      if (!lightOn) {
+        // Primeira entrada: nasce sob o cursor, sem deslizar do canto.
+        lightOn = true
+        lcx = lx
+        lcy = ly
+        section.dataset.light = "on"
+      }
       section.dataset.parallax = "on" // liga will-change só durante a interação
       kick()
     }
     const onLeave = () => {
       tx = 0
       ty = 0
+      lightOn = false
+      delete section.dataset.light // o halo some por transição de opacidade
       kick()
     }
     const onResize = () => {
@@ -105,6 +153,10 @@ export function useHeroParallax(
       tx = ty = cx = cy = 0
       main.style.transform = ""
       ghost.style.transform = ""
+      portrait.style.transform = ""
+      light.style.transform = ""
+      lightOn = false
+      delete section.dataset.light
       delete section.dataset.parallax
     }
     const sync = () => (query.matches ? attach() : detach())

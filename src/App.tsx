@@ -11,7 +11,11 @@ import {
 } from "lucide-react"
 import { CopyEmailButton } from "./components/CopyEmailButton"
 import { ExternalLink } from "./components/ExternalLink"
+import { ContactButton } from "./components/ContactButton"
+import { CursorTrail } from "./components/CursorTrail"
 import { Hero } from "./components/Hero"
+import { Words, wordCount } from "./components/KineticText"
+import { SELECT_TECH_EVENT } from "./data/techNetwork"
 import { OpenCursor } from "./components/OpenCursor"
 import {
   ProjectLightbox,
@@ -25,10 +29,13 @@ import {
 } from "./components/projects/projectsData"
 import { StackExplorer } from "./components/StackExplorer"
 import { TechMarquee } from "./components/TechMarquee"
+import { Thread } from "./components/Thread"
+import { Timeline } from "./components/Timeline"
 import { useEffectsPreference } from "./hooks/useEffectsPreference"
 import { useScrollReveal } from "./hooks/useScrollReveal"
 import { usePageExperience } from "./hooks/usePageExperience"
 import { useTimelineTrail } from "./hooks/useTimelineTrail"
+import { useScrollDepth } from "./motion/useScrollDepth"
 
 const links = [
   ["Sobre", "#sobre"],
@@ -47,66 +54,46 @@ const sectionIds = [
   "contato",
 ]
 
-/** [fase, título, texto, projetos relacionados (slugs dos principais)] */
-type TimelineItem = readonly [
-  phase: string,
-  title: string,
-  text: string,
-  related?: readonly string[],
-]
+const leadA =
+  "Não estou tentando parecer alguém com anos de experiência que não tenho."
+const leadB = "Estou mostrando o que consigo construir agora."
 
-const timeline: readonly TimelineItem[] = [
-  [
-    "Fundamentos",
-    "A curiosidade vira código",
-    "Primeiros passos em lógica de programação, HTML, CSS e JavaScript.",
-  ],
-  [
-    "Exploração",
-    "Do navegador para sistemas completos",
-    "Experimentos com Python, React, frameworks e ferramentas de desenvolvimento.",
-  ],
-  [
-    "Construção",
-    "Problemas reais, projetos próprios",
-    "IFConnect e Tekidu marcam a transição para produtos com autenticação e persistência.",
-    ["tekidu"],
-  ],
-  [
-    "Engenharia",
-    "Mais profundidade técnica",
-    "LexContract, Evidence Finder e GitFlow ampliam o trabalho para APIs, bancos relacionais, Rust, testes e CI/CD.",
-    ["lexcontract", "evidence-finder", "gitflow-desktop"],
-  ],
-  [
-    "Agora",
-    "Próximo passo",
-    "Aprofundando estruturas de dados, arquitetura de software e robótica autônoma.",
-  ],
+/** [tag, destino, tecnologia a selecionar na rede de Engenharia (se for uma)] */
+const aboutTags: readonly (readonly [string, string, string?])[] = [
+  ["React", "#engenharia", "React"],
+  ["TypeScript", "#engenharia", "TypeScript"],
+  ["Rust", "#engenharia", "Rust"],
+  ["Backend", "#engenharia"],
+  ["Robótica", "#robotica"],
 ]
 
 function SectionHeading({
   label,
   title,
   intro,
-  scrub = false,
+  scrub = true,
 }: {
   label: string
   title: string
   intro?: string
-  /** Revelação guiada pela rolagem (useScrollReveal) em vez de disparo único. */
+  /**
+   * Revelação guiada pela rolagem (useScrollReveal), reversível: descer revela
+   * o título palavra a palavra e subir o recolhe. `false` usa disparo único.
+   */
   scrub?: boolean
 }) {
   return (
     <div
-      className={`section-heading ${scrub ? "scrub-item" : "reveal-item"}`}
+      className={`section-heading ${scrub ? "scrub-item is-heading" : "reveal-item"}`}
     >
       <div className="section-label">
         <span />
         {label}
       </div>
       <div className="section-heading-copy">
-        <h2>{title}</h2>
+        <h2 style={{ "--wc": wordCount(title) - 1 } as React.CSSProperties}>
+          <Words text={title} />
+        </h2>
         {intro && <p>{intro}</p>}
       </div>
     </div>
@@ -126,6 +113,7 @@ export default function App() {
   useEffectsPreference()
   useScrollReveal()
   useTimelineTrail()
+  useScrollDepth()
 
   useEffect(() => {
     const reducedMotion = window.matchMedia(
@@ -194,6 +182,9 @@ export default function App() {
     <div className="site-shell">
       <div className="reading-progress" aria-hidden="true">
         <span />
+        {sectionIds.slice(1).map((id) => (
+          <i key={id} data-tick={id} data-reached="false" />
+        ))}
       </div>
       <a href="#conteudo" className="skip-link">
         Pular para o conteúdo
@@ -270,21 +261,23 @@ export default function App() {
       <main id="conteudo" tabIndex={-1}>
         <Hero />
 
-        <section id="sobre" className="section about">
+        <section id="sobre" className="section about" data-depth>
+          {/* Camadas decorativas: movem-se em velocidades diferentes na rolagem. */}
+          <div className="about-deco" aria-hidden="true">
+            <span className="about-deco-glow" />
+            <span className="about-deco-glyph">M</span>
+          </div>
           <div className="container">
             <SectionHeading
               label="01 / Sobre"
               title="Aprender construindo."
-              scrub
             />
             <div className="about-grid">
               <div className="about-lead scrub-item" data-scrub-delay="0.03">
                 <p>
-                  Não estou tentando parecer alguém com anos de experiência que
-                  não tenho.
+                  <Words text={leadA} />{" "}
                   <strong>
-                    {" "}
-                    Estou mostrando o que consigo construir agora.
+                    <Words text={leadB} start={wordCount(leadA)} />
                   </strong>
                 </p>
               </div>
@@ -302,11 +295,22 @@ export default function App() {
                   desktop em Rust.
                 </p>
                 <div className="about-tags">
-                  {["React", "TypeScript", "Rust", "Backend", "Robótica"].map(
-                    (tag) => (
-                      <span key={tag}>{tag}</span>
-                    ),
-                  )}
+                  {aboutTags.map(([tag, href, tech]) => (
+                    <a
+                      key={tag}
+                      href={href}
+                      onClick={() => {
+                        // Leva ao trecho do portfólio onde o tema aparece e, quando
+                        // é uma tecnologia, já a seleciona na rede de Engenharia.
+                        if (tech)
+                          window.dispatchEvent(
+                            new CustomEvent(SELECT_TECH_EVENT, { detail: tech }),
+                          )
+                      }}
+                    >
+                      {tag}
+                    </a>
+                  ))}
                 </div>
               </div>
             </div>
@@ -372,38 +376,13 @@ export default function App() {
               intro="Uma trajetória guiada pela curiosidade, pela prática e pelo aumento progressivo da complexidade."
             />
             <div className="timeline">
-              {timeline.map(([year, title, text, related], index) => (
-                <article className="timeline-item reveal-item" key={year}>
-                  <div className="timeline-marker">
-                    <span>{String(index + 1).padStart(2, "0")}</span>
-                  </div>
-                  <div className="timeline-copy">
-                    <span>{year}</span>
-                    <h3>{title}</h3>
-                    <p>{text}</p>
-                    {related && (
-                      <p className="timeline-links">
-                        Ver no portfólio:{" "}
-                        {related.map((slug, i) => (
-                          <span key={slug}>
-                            {i > 0 && ", "}
-                            <a href={`#${projectAnchor(slug)}`}>
-                              {featuredProjects.find((p) => p.slug === slug)
-                                ?.title ?? slug}
-                            </a>
-                          </span>
-                        ))}
-                      </p>
-                    )}
-                  </div>
-                </article>
-              ))}
+              <Timeline />
               <div className="timeline-track" aria-hidden="true">
                 <span className="timeline-trail" />
                 <span className="timeline-orb" />
               </div>
             </div>
-            <div className="robotics-note reveal-item">
+            <div className="robotics-note reveal-item" id="robotica">
               <div className="robotics-icon">
                 <Code2 />
               </div>
@@ -428,25 +407,22 @@ export default function App() {
             <div className="contact-copy reveal-item">
               <span className="section-label">05 / Contato</span>
               <h2>
-                Vamos construir
+                <Words text="Vamos construir" />
                 <br />
-                algo <em>relevante?</em>
+                <Words text="algo" start={2} trailingSpace />
+                <em>
+                  <Words text="relevante?" start={3} />
+                </em>
               </h2>
               <p>
                 Busco minha primeira oportunidade na área de TI — estágio ou
                 posição inicial. Se o meu trabalho combina com o que você
                 procura, vamos conversar.
               </p>
-              <a
-                className="button button-primary contact-button"
-                href={`mailto:${email}`}
-              >
-                <Mail size={18} />
-                Entrar em contato <ArrowUpRight size={18} />
-              </a>
+              <ContactButton email={email} />
             </div>
             <div className="contact-links reveal-item">
-              <ExternalLink href={github}>
+              <ExternalLink href={github} cursorLabel="Visitar">
                 <span>
                   <GitBranch />
                   <small>Código e projetos</small>
@@ -454,7 +430,10 @@ export default function App() {
                 </span>
                 <ArrowUpRight />
               </ExternalLink>
-              <ExternalLink href="https://www.linkedin.com/in/muryllo-douglas-henrique-soares-7a8416416/">
+              <ExternalLink
+                href="https://www.linkedin.com/in/muryllo-douglas-henrique-soares-7a8416416/"
+                cursorLabel="Visitar"
+              >
                 <span>
                   <BriefcaseBusiness />
                   <small>Perfil profissional</small>
@@ -477,6 +456,8 @@ export default function App() {
           </div>
         </section>
       </main>
+      <Thread />
+      <CursorTrail />
 
       <footer className="footer">
         <div className="container">

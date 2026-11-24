@@ -1,6 +1,13 @@
 import { useEffect, useRef } from "react"
 
 /**
+ * Cursor contextual. Dois estados, ambos lidos de atributos do elemento (nada
+ * de seletores frágeis) e só para mouse/caneta:
+ * - `data-cursor="open"`: o cartão abaixo, que substitui o cursor nativo;
+ * - `data-cursor-label="Explorar"`: um rótulo curto ao lado do cursor nativo,
+ *   que continua visível (não esconde nada). O texto diz a ação real do
+ *   elemento: Explorar, Ampliar, Visitar, Repositório.
+ *
  * Pop-up "Abrir site": enquanto o ponteiro está sobre um elemento com
  * `data-cursor="open"`, o cursor nativo some e um cartão compacto o substitui,
  * mostrando o nome da aplicação (`data-cursor-title`) e o endereço do deploy
@@ -24,12 +31,14 @@ export function OpenCursor() {
   const pillRef = useRef<HTMLDivElement>(null)
   const titleRef = useRef<HTMLSpanElement>(null)
   const urlRef = useRef<HTMLSpanElement>(null)
+  const tagRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const pill = pillRef.current
     const titleEl = titleRef.current
     const urlEl = urlRef.current
-    if (!pill || !titleEl || !urlEl) return
+    const tag = tagRef.current
+    if (!pill || !titleEl || !urlEl || !tag) return
     const fine = window.matchMedia("(hover: hover) and (pointer: fine)")
     if (!fine.matches) return
 
@@ -39,10 +48,22 @@ export function OpenCursor() {
     let current: Element | null = null
     let halfW = 100
     let halfH = 30
+    let tagVisible = false
+    let tagText = ""
     const setVisible = (next: boolean) => {
       if (next === visible) return
       visible = next
       pill.dataset.visible = String(next)
+    }
+    const setTag = (text: string | null) => {
+      const next = text !== null
+      if (text !== null && text !== tagText) {
+        tagText = text
+        tag.textContent = text
+      }
+      if (next === tagVisible) return
+      tagVisible = next
+      tag.dataset.visible = String(next)
     }
     const onMove = (event: PointerEvent) => {
       if (event.pointerType !== "mouse" && event.pointerType !== "pen") return
@@ -50,8 +71,17 @@ export function OpenCursor() {
       const hit = target?.closest?.('[data-cursor="open"]') ?? null
       if (!hit) {
         setVisible(false)
+        const labelled = target?.closest?.("[data-cursor-label]")
+        const text = labelled?.getAttribute("data-cursor-label")
+        // O rótulo fica à direita e abaixo do ponteiro; vira à esquerda perto da borda.
+        if (text) {
+          const flip = event.clientX > window.innerWidth - 150
+          tag.style.transform = `translate3d(${event.clientX + (flip ? -16 : 18)}px, ${event.clientY + 20}px, 0)${flip ? " translateX(-100%)" : ""}`
+          setTag(text)
+        } else setTag(null)
         return
       }
+      setTag(null)
       if (hit !== current) {
         current = hit
         titleEl.textContent = hit.getAttribute("data-cursor-title") ?? "Abrir site"
@@ -68,14 +98,19 @@ export function OpenCursor() {
     const hide = () => {
       current = null
       setVisible(false)
+      setTag(null)
     }
 
+    // Um clique abre algo (diálogo, nova aba): o rótulo sai e só volta com o próximo movimento.
+    const onDown = () => setTag(null)
+    document.addEventListener("pointerdown", onDown, { passive: true })
     document.addEventListener("pointermove", onMove, { passive: true })
     document.addEventListener("pointerleave", hide)
     window.addEventListener("blur", hide)
     window.addEventListener("scroll", hide, { passive: true })
     return () => {
       root.classList.remove("has-open-cursor")
+      document.removeEventListener("pointerdown", onDown)
       document.removeEventListener("pointermove", onMove)
       document.removeEventListener("pointerleave", hide)
       window.removeEventListener("blur", hide)
@@ -84,6 +119,8 @@ export function OpenCursor() {
   }, [])
 
   return (
+    <>
+    <div ref={tagRef} className="cursor-tag" data-visible="false" aria-hidden="true" />
     <div ref={pillRef} className="open-cursor" data-visible="false" aria-hidden="true">
       <span className="open-cursor-icon">
         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" focusable="false">
@@ -96,5 +133,6 @@ export function OpenCursor() {
         <span ref={urlRef} className="open-cursor-url" />
       </span>
     </div>
+    </>
   )
 }

@@ -4,6 +4,7 @@ import portrait from "../assets/muryllo-hero-editorial.webp"
 import portraitSmall from "../assets/muryllo-hero-editorial-820.webp"
 import antonUrl from "../assets/fonts/anton-subset.woff"
 import { useHeroParallax, useHeroSweep } from "../hooks/useHeroTypography"
+import { useMagnetic } from "../motion/useMagnetic"
 
 /**
  * Cada letra é posicionada nas coordenadas da arte de referência (grade de
@@ -77,6 +78,8 @@ export function Hero() {
   const mainDepthRef = useRef<HTMLDivElement>(null)
   const ghostDepthRef = useRef<HTMLDivElement>(null)
   const sweepRef = useRef<HTMLDivElement>(null)
+  const lightRef = useRef<HTMLDivElement>(null)
+  const arrowRef = useRef<HTMLAnchorElement>(null)
 
   // O retrato é o elemento principal: carrega com prioridade máxima. A fonte
   // também é pré-carregada, porque a palavra só entra com ela disponível.
@@ -109,8 +112,11 @@ export function Hero() {
   const ready = (fontReady && imageReady) || timedOut
 
   // Parallax do mouse (desktop) e reflexo de luz ocasional: ver o hook.
-  useHeroParallax(sectionRef, mainDepthRef, ghostDepthRef)
+  useHeroParallax(sectionRef, mainDepthRef, ghostDepthRef, imageRef, lightRef)
   useHeroSweep(sectionRef, sweepRef, ready)
+  // CTA do Hero: o conteúdo interno acompanha o ponteiro (o link em si fica
+  // parado, porque a animação de entrada ocupa o `transform` dele).
+  useMagnetic(arrowRef, { moveSelf: false })
 
   return (
     <section
@@ -119,7 +125,10 @@ export function Hero() {
       className="hero"
       aria-labelledby="hero-title"
       data-ready={ready}
+      data-trail
     >
+      {/* Iluminação interativa: halo atrás da palavra e do retrato (ver useHeroParallax). */}
+      <div className="hero-light" ref={lightRef} aria-hidden="true" />
       <div className="hero-stage hero-inner">
         <h1 id="hero-title" className="sr-only">
           Muryllo — Estudante de Informática e desenvolvedor em formação
@@ -151,14 +160,17 @@ export function Hero() {
         Desenvolvedor em formação
       </p>
       <a
+        ref={arrowRef}
         className="hero-corner hero-tr hero-arrow hero-rise"
         style={delay(1000)}
         href="#projetos"
         aria-label="Explorar projetos"
       >
-        <svg viewBox="0 0 116 16" aria-hidden="true" focusable="false">
-          <path d="M0 8h114.5M106.5 1l8 7-8 7" />
-        </svg>
+        <span className="mag-inner">
+          <svg viewBox="0 0 116 16" aria-hidden="true" focusable="false">
+            <path d="M0 8h114.5M106.5 1l8 7-8 7" />
+          </svg>
+        </span>
       </a>
       <div className="hero-corner hero-bl hero-rise" style={delay(1100)}>
         <p>Estudante de Informática</p>
@@ -170,6 +182,17 @@ export function Hero() {
       <p className="hero-corner hero-br hero-rise" style={delay(1200)}>
         Brasil · Paraíba
       </p>
+      {/* Indicador de rolagem: o traço que a linha condutora continua depois do Hero. */}
+      <a
+        className="hero-scroll hero-rise"
+        style={delay(1400)}
+        href="#sobre"
+        aria-label="Rolar para a seção Sobre"
+      >
+        <span aria-hidden="true">
+          <i />
+        </span>
+      </a>
     </section>
   )
 }

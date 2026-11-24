@@ -9,11 +9,14 @@ export function ExternalLink({
   children,
   className = "",
   onClick,
+  cursorLabel,
 }: {
   href: string
   children: ReactNode
   className?: string
   onClick?: () => void
+  /** Rótulo do cursor contextual (ex.: "Visitar", "Repositório"). */
+  cursorLabel?: string
 }) {
   return (
     <a
@@ -22,6 +25,7 @@ export function ExternalLink({
       target="_blank"
       rel="noreferrer"
       onClick={onClick}
+      data-cursor-label={cursorLabel}
     >
       {children}
       <span className="sr-only"> (abre em nova aba)</span>

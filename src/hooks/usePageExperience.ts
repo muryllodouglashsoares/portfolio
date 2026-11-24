@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { subscribeScroll } from "../motion/scrollBus"
 
 type PageExperience = {
   activeSection: string
@@ -15,7 +16,12 @@ type PageExperience = {
  * - a altura rolável é medida só quando o corpo da página muda de tamanho;
  * - o retângulo da linha do tempo só é lido enquanto ela está perto da tela;
  * - o Hero avisa o CSS (`data-hero`) quando sai de vista, para pausar as
- *   animações decorativas infinitas dele.
+ *   animações decorativas infinitas dele;
+ * - cada seção recebe `data-state` (past | current | next) e o <html> recebe
+ *   `data-section` e `data-scrolled`: é o que as transições entre seções, a
+ *   linha condutora e o indicador de rolagem do Hero leem no CSS;
+ * - a rolagem chega pelo barramento compartilhado (motion/scrollBus), que
+ *   também alimenta a linha condutora, em vez de um listener próprio.
  */
 export function usePageExperience(sectionIds: string[]): PageExperience {
   const [experience, setExperience] = useState<PageExperience>({
@@ -32,8 +38,18 @@ export function usePageExperience(sectionIds: string[]): PageExperience {
     const timelineSection = document.getElementById("trajetoria")
     const timelineEl = timelineSection?.querySelector<HTMLElement>(".timeline")
     const heroEl = document.getElementById("inicio")
+    // Marcas de seção sobre a barra de leitura (uma por seção, menos a primeira).
+    const ticks = Array.from(
+      progressEl?.querySelectorAll<HTMLElement>("[data-tick]") ?? [],
+    ).map((el) => ({
+      el,
+      section: document.getElementById(el.dataset.tick ?? ""),
+      at: 0,
+      reached: false,
+    }))
 
     let frame = 0
+    let scrolled = false
     let scrollRange = Math.max(doc.scrollHeight - window.innerHeight, 0)
     let timelineNear = false
     let lastProgress = -1
@@ -57,6 +73,19 @@ export function usePageExperience(sectionIds: string[]): PageExperience {
       if (rounded !== lastProgress) {
         lastProgress = rounded
         progressEl?.style.setProperty("--reading-progress", String(rounded))
+        for (const tick of ticks) {
+          const reached = rounded + 0.0005 >= tick.at
+          if (reached !== tick.reached) {
+            tick.reached = reached
+            tick.el.dataset.reached = String(reached)
+          }
+        }
+      }
+
+      const isScrolled = scrollY > 24
+      if (isScrolled !== scrolled) {
+        scrolled = isScrolled
+        doc.dataset.scrolled = String(isScrolled)
       }
 
       if (timelineNear && timelineSection) {
@@ -93,6 +122,13 @@ export function usePageExperience(sectionIds: string[]): PageExperience {
         // Sem seção na faixa (ex.: rodapé): mantém a anterior.
         if (!next) return
         const id = next
+        const activeIndex = sections.findIndex((section) => section.id === id)
+        sections.forEach((section, index) => {
+          const state =
+            index < activeIndex ? "past" : index === activeIndex ? "current" : "next"
+          if (section.dataset.state !== state) section.dataset.state = state
+        })
+        doc.dataset.section = id
         setExperience((current) =>
           current.activeSection === id ? current : { ...current, activeSection: id },
         )
@@ -131,23 +167,39 @@ export function usePageExperience(sectionIds: string[]): PageExperience {
 
     // Altura rolável: remedida só quando o corpo muda de tamanho (filtros,
     // detalhes expandidos, fontes) ou a janela é redimensionada.
+    const measureTicks = () => {
+      for (const tick of ticks) {
+        const top = tick.section
+          ? tick.section.getBoundingClientRect().top + window.scrollY
+          : 0
+        tick.at = scrollRange > 0 ? Math.min(top / scrollRange, 1) : 1
+        tick.el.style.left = `${(tick.at * 100).toFixed(3)}%`
+        tick.reached = false
+      }
+      lastProgress = -1
+    }
     const bodyObserver = new ResizeObserver(() => {
       scrollRange = Math.max(doc.scrollHeight - window.innerHeight, 0)
+      measureTicks()
       requestUpdate()
     })
     bodyObserver.observe(document.body)
 
     const onResize = () => {
       scrollRange = Math.max(doc.scrollHeight - window.innerHeight, 0)
+      measureTicks()
       requestUpdate()
     }
 
+    measureTicks()
     update()
-    window.addEventListener("scroll", requestUpdate, { passive: true })
+    const unsubscribeScroll = subscribeScroll(() => {
+      if (!frame) update()
+    })
     window.addEventListener("resize", onResize)
 
     return () => {
-      window.removeEventListener("scroll", requestUpdate)
+      unsubscribeScroll()
       window.removeEventListener("resize", onResize)
       if (frame) window.cancelAnimationFrame(frame)
       sectionObserver.disconnect()
@@ -155,6 +207,9 @@ export function usePageExperience(sectionIds: string[]): PageExperience {
       heroObserver?.disconnect()
       bodyObserver.disconnect()
       delete doc.dataset.hero
+      delete doc.dataset.section
+      delete doc.dataset.scrolled
+      sections.forEach((section) => delete section.dataset.state)
     }
   }, [sectionIds])
 
