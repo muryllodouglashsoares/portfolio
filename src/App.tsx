@@ -27,6 +27,7 @@ import {
   github,
   projectAnchor,
 } from "./components/projects/projectsData"
+import { SectionSeam } from "./components/SectionSeam"
 import { StackExplorer } from "./components/StackExplorer"
 import { TechMarquee } from "./components/TechMarquee"
 import { Thread } from "./components/Thread"
@@ -36,6 +37,7 @@ import { useScrollReveal } from "./hooks/useScrollReveal"
 import { usePageExperience } from "./hooks/usePageExperience"
 import { useTimelineTrail } from "./hooks/useTimelineTrail"
 import { useScrollDepth } from "./motion/useScrollDepth"
+import { useSectionSeams } from "./motion/useSectionSeams"
 
 const links = [
   ["Sobre", "#sobre"],
@@ -114,6 +116,7 @@ export default function App() {
   useScrollReveal()
   useTimelineTrail()
   useScrollDepth()
+  useSectionSeams()
 
   useEffect(() => {
     const reducedMotion = window.matchMedia(
@@ -260,6 +263,7 @@ export default function App() {
 
       <main id="conteudo" tabIndex={-1}>
         <Hero />
+        <SectionSeam kind="light" />
 
         <section id="sobre" className="section about" data-depth>
           {/* Camadas decorativas: movem-se em velocidades diferentes na rolagem. */}
@@ -331,6 +335,8 @@ export default function App() {
           </div>
         </section>
 
+        <SectionSeam kind="word" word="construindo" />
+
         <section id="projetos" className="section projects-section">
           <div className="container">
             <SectionHeading
@@ -345,6 +351,8 @@ export default function App() {
             }
           />
         </section>
+
+        <SectionSeam kind="layers" />
 
         <section id="engenharia" className="section engineering">
           <TechMarquee />
@@ -367,6 +375,8 @@ export default function App() {
             </div>
           </div>
         </section>
+
+        <SectionSeam kind="rule" />
 
         <section id="trajetoria" className="section journey">
           <div className="container">
@@ -400,6 +410,8 @@ export default function App() {
             </div>
           </div>
         </section>
+
+        <SectionSeam kind="slide" />
 
         <section id="contato" className="contact">
           <div className="contact-grid" />

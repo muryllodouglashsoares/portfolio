@@ -1,0 +1,81 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Transições entre seções (ver useSectionSeams.ts / SectionSeam.tsx)
+
+   Uma linguagem só: o traço vermelho de 1px (o mesmo que fecha os títulos), o
+   contorno tipográfico e a luz vermelha difusa. Tudo guiado pela rolagem
+   (--s, --b, --d, --leave, --arrive), só transform e opacity, escalado por
+   --mi (zero em movimento reduzido) e por --seam-k (menor no celular).
+   Sem JavaScript ou em movimento reduzido: --leave = 0, --arrive = 1 e as
+   marcas somem; as seções ficam exatamente como eram.
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root { --seam-k: 1; }
+@media (max-width: 699px) { :root { --seam-k: .5; } }
+
+/* leave/arrive viram uma rampa que só começa depois que o conteúdo saiu de
+   vista (0 até .2, 1 em 1): o texto em leitura nunca perde contraste. */
+.hero, .about, .projects-section, .engineering, .journey {
+  --lk: clamp(0, calc((var(--leave, 0) - .2) * 1.25), 1);
+}
+
+.seam { position: relative; z-index: 1; height: 0; pointer-events: none; }
+.seam-inner { position: absolute; left: 50%; top: 0; height: 0; transform: translateX(-50%); }
+.seam-rule { position: absolute; left: 0; top: 0; width: 220px; height: 1px; background: var(--red); transform-origin: left; }
+
+/* 1 · Hero → Sobre — luz que atravessa; o Hero perde presença sem sumir
+   (o degradê inferior do Hero, .hero::after em index.css, já existia e fica como está) */
+.seam-glow {
+  position: absolute; left: 50%; top: 0; width: min(92vw, 1100px); height: min(60vw, 520px); border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(var(--red-deep-rgb) / .16), transparent);
+  opacity: var(--b, 0);
+  transform: translate3d(-50%, calc(-50% + (.5 - var(--s, .5)) * 120px * var(--seam-k) * var(--mi)), 0);
+}
+.hero .hero-stage {
+  opacity: calc(1 - var(--leave, 0) * .4);
+  transform: translate3d(0, calc(var(--leave, 0) * 36px * var(--seam-k) * var(--mi)), 0);
+}
+.about-deco-glow { opacity: var(--arrive, 1); }
+
+/* 2 · Sobre → Projetos — tipografia: a palavra do título da Sobre cruza a fronteira */
+.seam-word {
+  position: absolute; left: 50%; top: 0; white-space: nowrap; color: transparent;
+  -webkit-text-stroke: 1px rgb(255 255 255 / .14);
+  font: 800 clamp(52px, 12vw, 176px) / 1 var(--sans); letter-spacing: -.06em;
+  opacity: var(--b, 0);
+  transform: translate3d(calc(-50% + (.5 - var(--s, .5)) * 16vw * var(--seam-k) * var(--mi)), -50%, 0);
+}
+.about > .container {
+  opacity: calc(1 - var(--lk) * .3);
+}
+
+/* 3 · Projetos → Engenharia — camadas: o que fica para trás recua; a Engenharia sobe por cima */
+.seam-shade {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 160px;
+  background: linear-gradient(to top, rgb(0 0 0 / .55), transparent);
+  opacity: var(--b, 0);
+}
+.projects-section .complementary {
+  transform-origin: 50% 100%;
+  transform: translate3d(0, calc(var(--lk) * -16px * var(--seam-k) * var(--mi)), 0)
+    scale(calc(1 - var(--lk) * .03 * var(--seam-k) * var(--mi)));
+  opacity: calc(1 - var(--lk) * .5);
+}
+[data-seam="layers"] .seam-rule { transform: scaleX(var(--d, 1)); }
+.tech-marquee { opacity: var(--arrive, 1); }
+
+/* 4 · Engenharia → Trajetória — continuidade: o traço percorre a borda da Trajetória */
+[data-seam="rule"] .seam-rule { width: 100%; transform: scaleX(var(--d, 1)); }
+.engineering > .container { opacity: calc(1 - var(--lk) * .35); }
+
+/* 5 · Trajetória → Contato — encerramento: o traço desliza, a Trajetória se simplifica, a grade emerge */
+[data-seam="slide"] .seam-inner { width: min(calc(100% - 48px), var(--container)); }
+[data-seam="slide"] .seam-rule {
+  width: calc(100% - 220px); background: none; opacity: calc(.25 + var(--b, 0) * .75);
+  transform: translate3d(calc(var(--d, 1) * 100%), 0, 0);
+}
+[data-seam="slide"] .seam-rule::after { content: ""; position: absolute; left: 0; top: 0; width: 220px; height: 1px; background: var(--red); }
+.journey > .container { opacity: calc(1 - var(--lk) * .35); }
+.contact-grid { opacity: calc(.36 * (.4 + var(--arrive, 1) * .6)); }
+
+/* Movimento reduzido: sem marcas e sem efeitos de saída (tudo parado e legível) */
+@media (prefers-reduced-motion: reduce) { .seam { display: none; } }
+html[data-effects="reduced"] .seam { display: none; }
