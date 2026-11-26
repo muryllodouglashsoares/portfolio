@@ -11,6 +11,7 @@ import {
 } from "lucide-react"
 import { CopyEmailButton } from "./components/CopyEmailButton"
 import { ExternalLink } from "./components/ExternalLink"
+import { GithubMark } from "./components/GithubMark"
 import { ContactButton } from "./components/ContactButton"
 import { CursorTrail } from "./components/CursorTrail"
 import { Hero } from "./components/Hero"
@@ -230,7 +231,7 @@ export default function App() {
         </nav>
         <div className="nav-actions">
           <ExternalLink href={github} className="icon-link desktop-only">
-            <GitBranch size={18} />
+            <GithubMark size={18} />
             <span className="sr-only">GitHub</span>
           </ExternalLink>
           <a href={`mailto:${email}`} className="nav-cta">
@@ -424,14 +425,18 @@ export default function App() {
           <div className="container contact-inner">
             <div className="contact-copy reveal-item">
               <span className="section-label">05 / Contato</span>
-              <h2>
-                <Words text="Vamos construir" />
-                <br />
-                <Words text="algo" start={2} trailingSpace />
-                <em>
-                  <Words text="relevante?" start={3} />
-                </em>
-              </h2>
+              {/* Revelação guiada pela rolagem (useScrollReveal): descer forma o
+                  título palavra a palavra e subir o desfaz na ordem inversa. */}
+              <div className="contact-title scrub-item is-heading">
+                <h2>
+                  <Words text="Vamos construir" />
+                  <br />
+                  <Words text="algo" start={2} trailingSpace />
+                  <em>
+                    <Words text="relevante?" start={3} />
+                  </em>
+                </h2>
+              </div>
               <p>
                 Busco minha primeira oportunidade na área de TI — estágio ou
                 posição inicial. Se o meu trabalho combina com o que você
