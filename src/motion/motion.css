@@ -362,17 +362,14 @@ html[data-effects="reduced"] .hero-scroll i { display: none; }
 /* 5.2  Tipografia de encerramento: a mesma linguagem do Hero (palavras
    recortadas), com menos deslocamento (72% contra 110%) e disparo único ao
    entrar na tela (.is-visible). A frase de apoio entra depois do título. */
-.contact-copy .kw-i {
-  --q: 0;
-  transform: translate3d(0, calc((1 - var(--q)) * 72% * var(--mi)), 0);
-  transition: transform var(--dur-cine) var(--ease-out) calc(120ms + var(--w, 0) * 60ms);
+.contact-title h2 { --wc: 3; --s: .2; }
+.contact-title .kw-i {
+  --q: clamp(0, calc(var(--p, 1) * (1 + var(--wc) * var(--s)) - var(--w, 0) * var(--s)), 1);
 }
-.contact-copy.is-visible .kw-i { --q: 1; }
 .contact-copy > p {
   transition: opacity var(--dur-slow) var(--ease-out) 420ms, transform var(--dur-slow) var(--ease-out) 420ms;
 }
 .contact-copy:not(.is-visible) > p { opacity: 0; transform: translate3d(0, var(--dist-s), 0); }
-@media (max-width: 699px) { .contact-copy .kw-i { transform: none; transition: none; } }
 
 /* 5.1  Convergência: quando a linha condutora chega ao botão (Thread.tsx
    marca html[data-converged]), a luz de fundo sobe uma vez em direção ao
@@ -435,9 +432,8 @@ html[data-converged="true"] .contact::before {
 .contact-copy h2 em { position: relative; display: inline-block; }
 .contact-copy h2 em::after {
   content: ""; position: absolute; left: 0; right: .06em; bottom: .04em; height: 2px; background: var(--red); opacity: .8; pointer-events: none;
-  transform: scaleX(0); transform-origin: left; transition: transform var(--dur-cine) var(--ease-io) 700ms;
+  transform: scaleX(clamp(0, calc((var(--p, 1) - .7) * 3.4), 1)); transform-origin: left;
 }
-.contact-copy.is-visible h2 em::after { transform: scaleX(1); }
 .contact-cta > * { transition: opacity var(--dur-slow) var(--ease-out) 560ms; }
 .contact-cta > .contact-status { transition-delay: 700ms; }
 .contact-copy:not(.is-visible) .contact-cta > * { opacity: 0; }
