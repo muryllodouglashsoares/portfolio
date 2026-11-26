@@ -15,7 +15,6 @@ import { ContactButton } from "./components/ContactButton"
 import { CursorTrail } from "./components/CursorTrail"
 import { Hero } from "./components/Hero"
 import { Words, wordCount } from "./components/KineticText"
-import { SELECT_TECH_EVENT } from "./data/techNetwork"
 import { OpenCursor } from "./components/OpenCursor"
 import {
   ProjectLightbox,
@@ -61,10 +60,10 @@ const leadA =
 const leadB = "Estou mostrando o que consigo construir agora."
 
 /** [tag, destino, tecnologia a selecionar na rede de Engenharia (se for uma)] */
-const aboutTags: readonly (readonly [string, string, string?])[] = [
-  ["React", "#engenharia", "React"],
-  ["TypeScript", "#engenharia", "TypeScript"],
-  ["Rust", "#engenharia", "Rust"],
+const aboutTags: readonly (readonly [string, string])[] = [
+  ["React", "#engenharia"],
+  ["TypeScript", "#engenharia"],
+  ["Rust", "#engenharia"],
   ["Backend", "#engenharia"],
   ["Robótica", "#robotica"],
 ]
@@ -299,19 +298,8 @@ export default function App() {
                   desktop em Rust.
                 </p>
                 <div className="about-tags">
-                  {aboutTags.map(([tag, href, tech]) => (
-                    <a
-                      key={tag}
-                      href={href}
-                      onClick={() => {
-                        // Leva ao trecho do portfólio onde o tema aparece e, quando
-                        // é uma tecnologia, já a seleciona na rede de Engenharia.
-                        if (tech)
-                          window.dispatchEvent(
-                            new CustomEvent(SELECT_TECH_EVENT, { detail: tech }),
-                          )
-                      }}
-                    >
+                  {aboutTags.map(([tag, href]) => (
+                    <a key={tag} href={href}>
                       {tag}
                     </a>
                   ))}

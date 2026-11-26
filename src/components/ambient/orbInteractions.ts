@@ -17,9 +17,9 @@ type Kind = "title" | "card" | "button" | "tag" | "line" | "marker"
 /** Seletores por tipo — todos fora do Hero (as letras têm a própria máscara). */
 const TARGETS: Array<{ kind: Kind; selector: string }> = [
   { kind: "title", selector: "main .section-heading h2, main .project h3, main .contact-copy h2, main .complementary-heading h3, main .about-lead p" },
-  { kind: "card", selector: "main .project-visual, main .tech-context, main .principles, main .robotics-note" },
+  { kind: "card", selector: "main .project-visual, main .principles, main .robotics-note" },
   { kind: "button", selector: "main section:not(.hero) .button" },
-  { kind: "tag", selector: "main .stack-items button, main .about-tags span, main .tech-list li" },
+  { kind: "tag", selector: "main .stack-items li, main .about-tags span, main .tech-list li" },
   { kind: "line", selector: "main .section-heading, main .stack-row, main .mini-project, main .contact-links > a, main .contact-email" },
   { kind: "marker", selector: "main .timeline-marker span" },
 ]
@@ -55,7 +55,7 @@ type Target = {
 
 /** Blocos de texto que as esferas nunca podem prejudicar (fora do Hero). */
 const TEXT_SELECTOR =
-  ":is(main section:not(.hero), footer) :is(h2, h3, h4, p, li, dt, dd, blockquote, figcaption, .section-label, .button, .stack-items button, .about-tags span, .contact-links a)"
+  ":is(main section:not(.hero), footer) :is(h2, h3, h4, p, li, dt, dd, blockquote, figcaption, .section-label, .button, .stack-items li, .about-tags span, .contact-links a)"
 
 type Zone = { left: number; top: number; right: number; bottom: number }
 

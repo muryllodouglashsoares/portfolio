@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { ArrowUpRight, Code2, GitBranch, Info } from "lucide-react"
 import { ExternalLink } from "../ExternalLink"
 import type { LightboxImage } from "../ProjectLightbox"
-import { useRedWave } from "../../hooks/useRedWave"
 import { useScrollGallery } from "../../hooks/useScrollGallery"
 import { REDUCED_QUERY } from "../../motion/prefs"
 import { useTilt } from "../../motion/useTilt"
@@ -263,12 +262,10 @@ export function ProjectsGallery({
   const mode = useGalleryMode()
   const outerRef = useRef<HTMLDivElement>(null)
   const stageRef = useRef<HTMLDivElement>(null)
-  const complementaryRef = useRef<HTMLDivElement>(null)
   const pgRef = useRef<HTMLDivElement>(null)
   const [detailsSlug, setDetailsSlug] = useState<string | null>(null)
   const [origin, setOrigin] = useState<DOMRect | null>(null)
   const total = resolved.length
-  useRedWave(complementaryRef)
   useTilt(pgRef)
   const slugAnchors = useMemo(() => anchors, [])
 
@@ -413,7 +410,7 @@ export function ProjectsGallery({
             </div>
             <p>Projetos que documentam a evolução em web, produto e robótica.</p>
           </div>
-          <div className="complementary-list reveal-item" ref={complementaryRef}>
+          <div className="complementary-list reveal-item">
             {complementaryProjects.map((project, index) => (
               <ExternalLink
                 href={project.href}
@@ -428,11 +425,6 @@ export function ProjectsGallery({
                 </span>
                 <span className="mini-stack">{project.stack}</span>
                 <ArrowUpRight className="mini-arrow" aria-hidden="true" />
-                {/* Onda vermelha sob o conteúdo, nascida no cursor (useRedWave). */}
-                <span className="mini-wave" aria-hidden="true">
-                  <i />
-                  <i />
-                </span>
                 {/* Contorno desenhado no hover/foco (ver .mini-outline no CSS). */}
                 <svg className="mini-outline" aria-hidden="true" focusable="false">
                   <rect

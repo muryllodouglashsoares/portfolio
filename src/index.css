@@ -267,17 +267,6 @@
 .mini-project strong { font-size: 14px; }
 .mini-project small, .mini-stack { color: var(--dim); font-size: 12px; } .mini-stack { font-family: var(--mono); }
 
-/* Onda vermelha (useRedWave). A camada ocupa exatamente a caixa do contorno
-   (.mini-outline), é recortada pelo mesmo raio e fica ABAIXO do conteúdo: texto,
-   numeração, stack e seta sobem para z-index 1. Opacidade máxima ≈ .22 sobre
-   #101010: o cinza de apoio (#9c9c9c) mantém ≥ 5:1 durante todo o ciclo.
-   Só transform e opacity animam (WAAPI, sem layout). */
-.mini-wave { position: absolute; top: 0; bottom: 0; left: -12px; right: -12px; z-index: 0; border-radius: 7px; clip-path: inset(0 round 7px); contain: paint; pointer-events: none; }
-.mini-wave i { position: absolute; top: 0; left: 0; border-radius: 50%; opacity: 0; transform-origin: 50% 50%; background: radial-gradient(closest-side, rgb(var(--red-rgb) / .05) 0%, rgb(var(--red-rgb) / .1) 52%, rgb(var(--red-rgb) / .22) 80%, rgb(var(--red-rgb) / .06) 92%, rgb(var(--red-rgb) / 0) 100%); }
-.mini-project > :is(.mini-index, .mini-stack, .mini-arrow, span:nth-child(2)) { position: relative; z-index: 1; }
-.mini-outline { z-index: 2; }
-@media (hover: none), (prefers-reduced-motion: reduce) { .mini-wave { display: none; } }
-html[data-effects="reduced"] .mini-wave { display: none; }
 
 .engineering .section-heading { border-bottom: 0; }
 .stack-table { border-top: 1px solid var(--line); }
@@ -286,13 +275,7 @@ html[data-effects="reduced"] .mini-wave { display: none; }
 .stack-title h3 { margin: 0 0 8px; font-size: 20px; letter-spacing: -.03em; }
 .stack-title p { margin: 0; color: var(--dim); font-size: 12px; line-height: 1.5; }
 .stack-items { display: flex; flex-wrap: wrap; gap: 8px; }
-.stack-items button { padding: 9px 12px; min-height: 36px; border: 1px solid var(--line); border-radius: 7px; background: transparent; color: var(--muted); font: 11px var(--mono); transition: 180ms; }
-.stack-items button:hover, .stack-items button[data-selected="true"] { border-color: var(--red-line); color: var(--red-soft); background: var(--red-wash); transform: translateY(-1px); }
-.tech-context { display: grid; grid-template-columns: auto auto 1fr; align-items: center; gap: 14px 24px; min-height: 72px; margin-top: 18px; padding: 18px 22px; border: 1px solid var(--line); border-radius: 9px; background: linear-gradient(90deg,rgb(var(--red-deep-rgb) / .12),transparent 45%),var(--surface); }
-.tech-context > span { color: var(--dim); font: 11px var(--mono); text-transform: uppercase; }
-.tech-context strong { color: var(--red-soft); font-size: 14px; }
-.tech-context p { margin: 0; color: var(--muted); font-size: 13px; }
-.tech-context small { grid-column: 2/-1; color: var(--dim); font-size: 12px; line-height: 1.6; }
+.stack-items li { padding: 9px 12px; min-height: 36px; display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: 7px; color: var(--muted); font: 11px var(--mono); }
 .principles { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-top: 35px; padding: 18px 22px; border: 1px solid var(--line); border-radius: 9px; background: var(--surface); }
 .principles span { color: var(--red-soft); font: 11px var(--mono); text-transform: uppercase; }
 .principles p { margin: 0; color: var(--muted); font-size: 13px; }
@@ -426,9 +409,7 @@ html[data-effects="reduced"] .mini-wave { display: none; }
   .mini-stack { display: none; }
   .stack-row { grid-template-columns: 34px 1fr; gap: 15px; padding-block: 28px; }
   .stack-items { grid-column: 2; }
-  .tech-context { grid-template-columns: 1fr; gap: 8px; }
-  .tech-context small { grid-column: 1; }
-  .principles { align-items: flex-start; flex-direction: column; } .principles i { display: none; }
+      .principles { align-items: flex-start; flex-direction: column; } .principles i { display: none; }
   .robotics-note { padding: 20px; }
   .contact { --section-pad: 90px; } .contact-copy h2 { font-size: 52px; }
   .footer .container { align-items: flex-start; flex-direction: column; gap: 14px; } .footer p { margin: 0; }
@@ -454,8 +435,6 @@ html[data-effects="reduced"] .mini-wave { display: none; }
 .mini-project:focus-visible { background: rgba(255,255,255,.03); outline-offset: -2px; }
 
 /* Relações entre seções */
-.tech-context small a, .timeline-links a { color: var(--red-soft); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgb(var(--red-rgb) / .45); transition: color 160ms; }
-.tech-context small a:hover, .timeline-links a:hover { color: var(--text); }
 .timeline-copy .timeline-links { margin-top: 12px; color: var(--muted); }
 
 /* Contato: e-mail visível + copiar com feedback */
