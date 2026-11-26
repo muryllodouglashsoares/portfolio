@@ -42,12 +42,12 @@ export function CopyEmailButton({ email }: { email: string }) {
     }
     setStatus(ok ? "copied" : "error")
     window.clearTimeout(timer.current)
-    timer.current = window.setTimeout(() => setStatus("idle"), 2600)
+    timer.current = window.setTimeout(() => setStatus("idle"), 2200)
   }
 
   const label =
     status === "copied"
-      ? "Copiado"
+      ? "E-mail copiado"
       : status === "error"
         ? "Falhou — copie manualmente"
         : "Copiar"
