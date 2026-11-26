@@ -413,7 +413,7 @@ html[data-converged="true"] .contact::before {
 .contact-links > a > span > svg:first-child, .contact-email > a > span > svg:first-child { transition: transform var(--dur-base) var(--ease-out), color var(--dur-base); }
 .contact-links > a:hover > span > svg:first-child, .contact-links > a:focus-visible > span > svg:first-child,
 .contact-email > a:hover > span > svg:first-child, .contact-email > a:focus-visible > span > svg:first-child { color: var(--text); transform: translateX(calc(3px * var(--mi))); }
-.contact-links > a:focus-visible > svg:last-child, .contact-email > a:focus-visible > svg:last-child { color: var(--red-soft); transform: translate(2px, -2px); }
+.contact-links > a:focus-visible > svg, .contact-email > a:focus-visible > svg { color: var(--red-soft); transform: translate(2px, -2px); }
 
 /* Rodapé: o traço vermelho do título volta a aparecer sobre a linha do rodapé
    quando a convergência acontece, e a linha se dissolve nas pontas, para o
@@ -426,9 +426,107 @@ html[data-converged="true"] .contact::before {
 .footer .container { position: relative; }
 .footer .container::before {
   content: ""; position: absolute; left: 0; top: -28px; width: 220px; height: 1px; background: var(--red);
-  transform: scaleX(0); transform-origin: left; transition: transform var(--dur-cine) var(--ease-io) 600ms;
+  transform: scaleX(0); transform-origin: left; transition: transform var(--dur-cine) var(--ease-io) 150ms;
 }
-html[data-converged="true"] .footer .container::before { transform: scaleX(1); }
+.footer[data-in="true"] .container::before { transform: scaleX(1); }
+
+/* 5.5  Fechamento do título: "relevante" ganha um sublinhado vermelho que se
+   completa depois das palavras; botão e indicador entram em seguida. */
+.contact-copy h2 em { position: relative; display: inline-block; }
+.contact-copy h2 em::after {
+  content: ""; position: absolute; left: 0; right: .06em; bottom: .04em; height: 2px; background: var(--red); opacity: .8; pointer-events: none;
+  transform: scaleX(0); transform-origin: left; transition: transform var(--dur-cine) var(--ease-io) 700ms;
+}
+.contact-copy.is-visible h2 em::after { transform: scaleX(1); }
+.contact-cta > * { transition: opacity var(--dur-slow) var(--ease-out) 560ms; }
+.contact-cta > .contact-status { transition-delay: 700ms; }
+.contact-copy:not(.is-visible) .contact-cta > * { opacity: 0; }
+
+/* 5.6  Disponibilidade: o texto repete o que a frase já diz (estágio ou
+   posição inicial). O ponto pulsa devagar três vezes e para. */
+.contact-status { display: inline-flex; align-items: center; gap: 10px; color: var(--muted); font: 12px/1.4 var(--mono); }
+.contact-status i { position: relative; flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--red); }
+.contact-status i::after {
+  content: ""; position: absolute; inset: 0; border-radius: 50%; border: 1px solid var(--red); opacity: 0;
+}
+.contact-copy.is-visible .contact-status i::after { animation: status-ring 3200ms var(--ease-out) 1400ms 3 both; }
+@keyframes status-ring { 0% { opacity: .7; transform: scale(1); } 100% { opacity: 0; transform: scale(3.2); } }
+
+/* 5.7  Links: brilho vermelho bem leve atrás do item (opacidade) e seta com
+   o mesmo deslocamento do ícone. Só onde há hover real; no toque, nada muda. */
+.contact-links > a::before, .contact-email > a::before {
+  content: ""; position: absolute; inset: 0 -12px; background: linear-gradient(90deg, rgb(var(--red-rgb) / .07), transparent 75%);
+  opacity: 0; transition: opacity var(--dur-base) var(--ease-out); pointer-events: none;
+}
+.contact-links > a:focus-visible::before, .contact-email > a:focus-visible::before { opacity: 1; }
+.contact-links > a > svg, .contact-email > a > svg { transition: transform var(--dur-base) var(--ease-out), color var(--dur-base); }
+@media (hover: hover) {
+  .contact-links > a:hover::before, .contact-email > a:hover::before { opacity: 1; }
+  .contact-links > a:hover > svg, .contact-email > a:hover > svg { transform: translate(calc(3px * var(--mi)), calc(-3px * var(--mi))); }
+}
+
+/* 5.8  Voltar ao topo: a seta sobe um pouco ao passar o mouse. */
+.back-to-top svg { transition: transform var(--dur-base) var(--ease-out); }
+@media (hover: hover) { .back-to-top:hover svg { transform: translateY(calc(-2px * var(--mi))); } }
+
+/* 5.9  Redesenho dos itens do Contato (mesmos elementos, nova resolução)
+   Links: a seta vira um quadro que se acende (borda e fundo) e a seta anda
+   dentro dele; o conteúdo da linha recua 4px. Copiar: um traço vermelho
+   confirma na base do botão e o ícone de confirmação entra sem salto.
+   Rodapé: o traço ocupa a largura do container e se dissolve à direita.
+   Só transform, opacity e cores de borda/fundo; sem blur, sem loops. */
+.contact-links > a > svg, .contact-email > a > svg {
+  box-sizing: border-box; width: 36px; height: 36px; padding: 9px; border: 1px solid var(--line-strong); border-radius: 10px;
+  transition: border-color var(--dur-base) var(--ease-out), background-color var(--dur-base) var(--ease-out), color var(--dur-base);
+}
+.contact-links > a > svg > *, .contact-email > a > svg > * { transition: transform var(--dur-base) var(--ease-out); }
+.contact-links > a > span, .contact-email > a > span { transition: transform var(--dur-base) var(--ease-out); }
+.contact-links > a:focus-visible > svg, .contact-email > a:focus-visible > svg {
+  border-color: var(--red-line); background-color: var(--red-wash); color: var(--red-soft); transform: none;
+}
+.contact-links > a:focus-visible > svg > *, .contact-email > a:focus-visible > svg > * { transform: translate(2px, -2px); }
+@media (hover: hover) {
+  .contact-links > a:hover > svg, .contact-email > a:hover > svg {
+    border-color: var(--red-line); background-color: var(--red-wash); color: var(--red-soft); transform: none;
+  }
+  .contact-links > a:hover > svg > *, .contact-email > a:hover > svg > * { transform: translate(calc(2px * var(--mi)), calc(-2px * var(--mi))); }
+  .contact-links > a:hover > span, .contact-email > a:hover > span { transform: translateX(calc(4px * var(--mi))); }
+}
+/* toque: o quadro acende enquanto o dedo está sobre a linha */
+@media (hover: none) {
+  .contact-links > a:active > svg, .contact-email > a:active > svg { border-color: var(--red-line); background-color: var(--red-wash); color: var(--red-soft); }
+}
+
+.copy-button { position: relative; overflow: hidden; }
+.copy-button::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: var(--red); pointer-events: none;
+  transform: scaleX(0); transform-origin: left; transition: transform var(--dur-slow) var(--ease-out);
+}
+.copy-button[data-status="copied"]::after { transform: scaleX(1); }
+.copy-button[data-status="copied"] { border-color: var(--red-line); background: var(--red-wash); }
+.copy-button[data-status="copied"] svg { color: var(--red-soft); animation: copy-check var(--dur-base) var(--ease-out) 1 both; }
+@keyframes copy-check { from { opacity: 0; transform: scale(.6); } to { opacity: 1; transform: none; } }
+
+.footer .container::before {
+  width: 100%; background: linear-gradient(90deg, var(--red), rgb(var(--red-rgb) / 0) 70%);
+}
+
+.back-to-top { transition: opacity var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out), border-color var(--dur-base), color var(--dur-base), background-color var(--dur-base); }
+.back-to-top:active { transform: scale(.94); }
+.back-to-top:hover { background-color: var(--surface); }
+
+/* Movimento reduzido: tudo do Contato e do rodapé aparece pronto e parado. */
+@media (prefers-reduced-motion: reduce) {
+  .contact-copy h2 em::after, .footer .container::before { transform: scaleX(1); transition: none; }
+  .contact-cta > * { transition: none; }
+  .contact-copy:not(.is-visible) .contact-cta > * { opacity: 1; }
+  .contact-copy.is-visible .contact-status i::after { animation: none; }
+  .copy-button::after { transition: none; }
+  .copy-button[data-status="copied"] svg { animation: none; }
+}
+html[data-effects="reduced"] .contact-copy h2 em::after, html[data-effects="reduced"] .footer .container::before { transform: scaleX(1); transition: none; }
+html[data-effects="reduced"] .contact-copy:not(.is-visible) .contact-cta > * { opacity: 1; }
+html[data-effects="reduced"] .contact-status i::after { animation: none; }
 
 
 /* ═══════════════════════════════════════════════════════════════════════════
