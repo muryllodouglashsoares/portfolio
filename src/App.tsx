@@ -141,6 +141,24 @@ export default function App() {
     return () => observer.disconnect()
   }, [])
 
+  // Rodapé: o traço vermelho se completa uma única vez, ao entrar na tela.
+  useEffect(() => {
+    const footer = document.querySelector<HTMLElement>(".footer")
+    if (!footer) return
+    const show = () => footer.setAttribute("data-in", "true")
+    if (!("IntersectionObserver" in window)) return show()
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return
+        show()
+        observer.disconnect()
+      },
+      { threshold: 0.6 },
+    )
+    observer.observe(footer)
+    return () => observer.disconnect()
+  }, [])
+
   useEffect(() => {
     if (!menuOpen) return
 
@@ -419,7 +437,13 @@ export default function App() {
                 posição inicial. Se o meu trabalho combina com o que você
                 procura, vamos conversar.
               </p>
-              <ContactButton email={email} />
+              <div className="contact-cta">
+                <ContactButton email={email} />
+                <span className="contact-status">
+                  <i aria-hidden="true" />
+                  Aberto a estágio e posição inicial
+                </span>
+              </div>
             </div>
             <div className="contact-links reveal-item">
               <ExternalLink href={github} cursorLabel="Visitar">
